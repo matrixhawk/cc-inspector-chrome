@@ -10,21 +10,25 @@
     "dev-index": "cross-env NODE_ENV=development webpack-dev-server --open http://localhost:8082/index.html --inline  --progress --hot --port 8082",
     "dev-popup": "cross-env NODE_ENV=development webpack-dev-server --open http://localhost:8083/popup.html --inline  --progress --hot --port 8083",
     "dev-inspector": "cross-env NODE_ENV=development webpack-dev-server --open http://localhost:8084/devInspector.html --inline --progress --hot --port 8084",
-    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules",
-    "build-new": "webpack --config ./src/webpack.config.js --hide-modules --progress --watch"
+    "build": "webpack --config ./src/webpack.config.js --progress",
+    "build-watch": "webpack --config ./src/webpack.config.js --hide-modules --progress --watch"
   },
   "dependencies": {
+    "@types/chrome": "0.0.133",
     "fs": "0.0.1-security",
     "fs-extra": "^5.0.0",
     "gulp": "^3.9.1",
     "gulp-shell": "^0.6.5",
     "json-beautifully": "^1.0.3",
-    "node-sass": "^4.7.2",
+    "less": "3.9.0",
+    "less-loader": "5.0.0",
     "path": "^0.12.7",
-    "sass-loader": "^6.0.6",
+    "ts-loader": "^6.2.2",
+    "typescript": "^3.9.9",
     "url-loader": "^0.6.2",
     "vue": "^2.4.4",
-    "vue-awesome": "^2.3.4"
+    "vue-awesome": "^2.3.4",
+    "vue-property-decorator": "^9.1.2"
   },
   "browserslist": [
     "> 1%",
@@ -42,11 +46,12 @@
     "css-loader": "^0.28.7",
     "element-ui": "^2.0.11",
     "file-loader": "^1.1.4",
-    "html-webpack-plugin": "^2.30.1",
+    "html-webpack-plugin": "^3.2.0",
     "style-loader": "^0.19.0",
-    "vue-loader": "^13.0.5",
+    "vue-loader": "^15.9.6",
     "vue-template-compiler": "^2.4.4",
-    "webpack": "^3.6.0",
+    "webpack": "^4.46.0",
+    "webpack-cli": "^4.6.0",
     "webpack-dev-server": "^2.9.1"
   }
 }

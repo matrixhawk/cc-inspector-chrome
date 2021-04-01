@@ -7,7 +7,6 @@ import ui_prop from './ui/ui-prop.vue'
 import NodeBaseProperty from './ccType/NodeBaseProperty.vue'
 import SceneProperty from './ccType/SceneProperty.vue'
 import ComponentsProperty from './ccType/ComponentsProperty'
-import ColorPicker from './ui/colorPicker'
 
 
 Vue.component('ui-prop', ui_prop);

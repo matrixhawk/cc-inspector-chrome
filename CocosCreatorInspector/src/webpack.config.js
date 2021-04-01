@@ -1,18 +1,18 @@
-let path = require('path');
+const Path = require('path');
 let webpack = require('webpack');
 let HtmlWebpackPlugin = require('html-webpack-plugin');
 let CleanWebpackPlugin = require('clean-webpack-plugin');
 let CopyWebpackPlugin = require('copy-webpack-plugin');
-
-let ChromeManifest = require("./core/chrome-manifest");
+const VueLoaderPlugin = require('vue-loader/lib/plugin');
+let ChromeManifest = require('./core/chrome-manifest');
 
 if (process.env.NODE_ENV === 'production') {
 
 }
 
 let resolve = function (dir) {
-  return path.join(__dirname, dir);
-}
+  return Path.join(__dirname, dir);
+};
 
 let htmlPage = function (title, filename, chunks, template) {
   return new HtmlWebpackPlugin({
@@ -21,20 +21,22 @@ let htmlPage = function (title, filename, chunks, template) {
     cache: true,
     inject: 'body',
     filename: './pages/' + filename + '.html',
-    template: template || path.resolve(__dirname, 'core/page.ejs'),
+    template: template || Path.resolve(__dirname, 'core/page.ejs'),
     appMountId: 'app',
     chunks
   });
-}
+};
 
 module.exports = {
+  mode: 'development',
   entry: {
-    popup: resolve("popup"),
-    devtools: resolve("devtools"),
-    devtools_panel:resolve("devtools/panel"),
-    background: resolve("background"),
+    test: resolve('test'),
+    popup: resolve('popup'),
+    devtools: resolve('devtools'),
+    devtools_panel: resolve('devtools/panel'),
+    background: resolve('background'),
     options: resolve('options'),
-    content: resolve("content"),
+    content: resolve('content'),
     inject: resolve('content/inject'),
 
     // devInspector: path.resolve(__dirname, './src/dev/devInspector/main.js'),
@@ -46,11 +48,12 @@ module.exports = {
     // injectScript: path.resolve(__dirname, './src/dev/injectScript.js'),
   },
   output: {
-    path: path.resolve(__dirname, 'build'),
+    path: Path.resolve(__dirname, 'build'),
     publicPath: '/',
     filename: 'js/[name].js'
   },
   plugins: [
+    new VueLoaderPlugin(),
     // new webpack.HotModuleReplacementPlugin(),
     // webpack 执行之前删除dist下的文件
     new CleanWebpackPlugin(['./build/*'], {
@@ -59,14 +62,15 @@ module.exports = {
       dry: false,//启用删除文件
     }),
 
-    htmlPage("popup", 'popup', ['popup']),
-    htmlPage("devtools", 'devtools', ['devtools']),
-    htmlPage("devtools_panel", 'devtools_panel', ['devtools_panel']),
-    htmlPage("options", 'options', ['options']),
+    htmlPage('test', 'test', ['test']),
+    htmlPage('popup', 'popup', ['popup']),
+    htmlPage('devtools', 'devtools', ['devtools']),
+    htmlPage('devtools_panel', 'devtools_panel', ['devtools_panel']),
+    htmlPage('options', 'options', ['options']),
     htmlPage('background', 'background', ['background']),
     new ChromeManifest({
-      outFile: path.join(__dirname, "build/manifest.json"),
-      manifest: path.join(__dirname, "manifest.js")
+      outFile: Path.join(__dirname, 'build/manifest.json'),
+      manifest: Path.join(__dirname, 'manifest.js')
     }),
     //index.html
     // new HtmlWebpackPlugin({
@@ -95,7 +99,7 @@ module.exports = {
 
     // 拷贝静态资源(manifest.json)
     new CopyWebpackPlugin([{
-      from: path.resolve(__dirname, 'icon'),
+      from: Path.resolve(__dirname, 'icon'),
       to: 'icon',
       force: true,
       // ignore: ['.*']
@@ -118,10 +122,16 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.(less|css)$/,
+        test: /\.(css)$/,
         use: [
           'vue-style-loader',
           'css-loader'
+        ],
+      },
+      {
+        test: /\.less$/,
+        use: [
+          'less-loader'
         ],
       },
       {
@@ -131,6 +141,7 @@ module.exports = {
           loaders: {
             scss: 'style-loader!css-loader!sass-loader',
             sass: 'style-loader!css-loader!sass-loader?indentedSyntax',
+            less: 'less-loader'
           }
           // other vue-loader options go here
         }
@@ -138,6 +149,11 @@ module.exports = {
       {
         test: /\.js$/,
         loader: 'babel-loader',
+        exclude: /node_modules/
+      },
+      {
+        test: /\.ts$/,
+        loader: 'ts-loader',
         exclude: /node_modules/
       },
       // {
@@ -169,10 +185,10 @@ module.exports = {
     alias: {
       'vue$': 'vue/dist/vue.esm.js'
     },
-    extensions: ['*', '.js', '.vue', '.json']
+    extensions: ['*', '.js', '.vue', '.json', '.ts', '.tsx']
   },
   devServer: {
-    contentBase: "./dist",//本地服务器所加载的页面所在的目录
+    contentBase: './dist',//本地服务器所加载的页面所在的目录
     historyApiFallback: true,//不跳转
     noInfo: true,
     inline: true,//实时刷新
