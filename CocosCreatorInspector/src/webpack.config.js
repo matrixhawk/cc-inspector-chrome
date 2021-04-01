@@ -30,8 +30,8 @@ let htmlPage = function (title, filename, chunks, template) {
 module.exports = {
   mode: 'development',
   entry: {
-    test: resolve('test'),
-    popup: resolve('popup'),
+    // test: resolve('test'),
+    popup: resolve('popup/index.js'),
     devtools: resolve('devtools'),
     devtools_panel: resolve('devtools/panel'),
     background: resolve('background'),
@@ -62,7 +62,7 @@ module.exports = {
       dry: false,//启用删除文件
     }),
 
-    htmlPage('test', 'test', ['test']),
+    // htmlPage('test', 'test', ['test']),
     htmlPage('popup', 'popup', ['popup']),
     htmlPage('devtools', 'devtools', ['devtools']),
     htmlPage('devtools_panel', 'devtools_panel', ['devtools_panel']),
@@ -185,7 +185,7 @@ module.exports = {
     alias: {
       'vue$': 'vue/dist/vue.esm.js'
     },
-    extensions: ['*', '.js', '.vue', '.json', '.ts', '.tsx']
+    extensions: ['*', '.ts', '.js', '.vue', '.json']
   },
   devServer: {
     contentBase: './dist',//本地服务器所加载的页面所在的目录
