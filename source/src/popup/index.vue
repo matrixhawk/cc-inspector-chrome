@@ -1,11 +1,11 @@
 <template>
   <div id="popup">
     <div style="display: flex;flex-direction: row;align-items: center;">
-      <h3 v-show="false"> title </h3>
+      <h3 v-show="false">title</h3>
       <div style="flex: 1"></div>
-      <el-button size="mini" @click="onClickOptions">设置</el-button>
-      <el-button size="mini" @click="onMsgToBg">To-Bg</el-button>
-      <el-button size="mini" @click="onSendMsg">Msg</el-button>
+      <el-button @click="onClickOptions">设置</el-button>
+      <el-button @click="onMsgToBg">To-Bg</el-button>
+      <el-button @click="onSendMsg">Msg</el-button>
     </div>
     <div style="text-align: center;width: 100%; color: #6d6d6d;">
       <span>支持作者</span>
@@ -21,40 +21,35 @@
       <span style="font-size: 14px;float: left;text-align: center;line-height: 30px;color: #6d6d6d;">联系方式:</span>
       <div style="height: 100%;float: right;margin-right: 10px;">
         <a href="https://github.com/tidys/CocosCreatorPlugins/tree/master/CocosCreatorInspector" target="_blank">
-          <img v-show="false" src="./res/github.png" style="height: 100%;">
+          <img src="./res/github.png" style="height: 100%;">
         </a>
       </div>
       <div style="height: 100%;float: right;margin-right: 10px;">
         <a href="https://jq.qq.com/?_wv=1027&k=5SdPdy2" target="_blank">
-          <img v-show="false" src="./res/qq.png" style="height: 100%;">
+          <img src="./res/qq.png" style="height: 100%;">
         </a>
       </div>
       <div style="height: 100%;float: right;margin-right: 10px;">
         <a href="http://forum.cocos.com/t/chrome-creator/55669" target="_blank">
-          <img v-show="false" src="./res/tiezi.png" style="height: 100%;">
+          <img src="./res/tiezi.png" style="height: 100%;">
         </a>
       </div>
     </div>
   </div>
+
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import 'vue-awesome/icons/flag'
-import 'vue-awesome/icons'
-import Icon from 'vue-awesome/components/Icon'
-import {Component} from 'vue-property-decorator'
-import chrome from 'chrome'
-import {Button} from 'element-ui'
+import {Component, Vue} from "vue-property-decorator";
+import HelloWorld from "./HelloWorld.vue";
 
 @Component({
   components: {
-    Icon,
-    Button,
-  }
+    HelloWorld,
+  },
 })
-export default class Index extends Vue {
-  longConn: chrome.runtime.Port = false
+export default class App extends Vue {
+  longConn: chrome.runtime.Port | null = null
 
   data() {
     return {
@@ -72,20 +67,24 @@ export default class Index extends Vue {
   }
 
   onClickOptions() {
-    chrome.tabs.create({url: 'pages/options.html'})
+    if (chrome && chrome.tabs) {
+      chrome.tabs.create({url: "pages/options.html"})
+    }
   }
 
   _initLongConn() {
     if (!this.longConn) {
       console.log("[popup] 初始化长连接");
-      this.longConn = chrome.runtime.connect({name: "popup"});
-      this.longConn.onMessage.addListener(function (data, sender) {
-        this._onLongConnMsg(data, sender);
-      }.bind(this))
+      if (chrome && chrome.runtime) {
+        this.longConn = chrome.runtime.connect({name: "popup"});
+        this.longConn.onMessage.addListener((data: any, sender: any) => {
+          this._onLongConnMsg(data, sender);
+        })
+      }
     }
   }
 
-  _onLongConnMsg(data, sender) {
+  _onLongConnMsg(data: string, sender: any) {
     // console.log(this.title);
   }
 
@@ -94,24 +93,25 @@ export default class Index extends Vue {
     // chrome.extension.getBackgroundPage();
 
     // 发送消息到background.js
-    chrome.runtime.sendMessage('content msg', function (data) {
-      console.log(data);
-    });
+    if (chrome && chrome.runtime) {
+      chrome.runtime.sendMessage("content msg", function (data: any) {
+        console.log(data);
+      });
+    }
   }
 
   onSendMsg() {
     if (this.longConn) {
       this.longConn.postMessage({send: "hello"});
       //@import "../index.less";
-      //#popup{
-      //  width: auto;
-      //}
+
     }
   }
 }
 </script>
 
-
 <style scoped lang="less">
-
+#popup {
+  width: auto;
+}
 </style>

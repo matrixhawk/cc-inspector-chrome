@@ -5,7 +5,7 @@ module.exports = {
   browser_action: {
     default_title: "CC-Inspector",
     default_icon: "icon/icon48.png",
-    default_popup: "pages/popup.html"
+    default_popup: "popup.html"
   },
   icons: {
     48: "icon/icon48.png"
@@ -14,20 +14,20 @@ module.exports = {
   content_scripts: [
     {
       matches: ["<all_urls>"],
-      js: ["js/content.js"],
+      js: ["content.common.js"],
       run_at: "document_end",
       all_frames: true
     }
   ],
   background: {
-    scripts: ["js/background.js"],
+    scripts: ["background.js"],
     persistent: false,// 需要时开启
   },
   // optionsV1的写法
-  options_page: "pages/options.html",
+  options_page: "options.html",
   // optionsV2的写法
   options_ui: {
-    page: "pages/options.html",
+    page: "options.html",
     // 添加一些默认的样式，推荐使用
     chrome_style: true,
   },
