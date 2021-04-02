@@ -1,28 +1,26 @@
-let PluginMsg = require("../core/plugin-msg");
-// 链接池子
-let ConnPool = {
-  Devtools: null,
-  DevtoolsPanel: null,
-  Content: null,
-};
+import * as  PluginMsg from "./core/plugin-msg"
 
-function shortConnectionLink(request, sender, sendResponse) {
+let Devtools: chrome.runtime.Port | null = null;
+let DevtoolsPanel: chrome.runtime.Port | null = null;
+let Content: chrome.runtime.Port | null = null;
+
+function shortConnectionLink(request: any, sender: any, sendResponse: any) {
   // console.log(`%c[短连接|id:${sender.id}|url:${sender.url}]\n${JSON.stringify(request)}`, 'background:#aaa;color:#BD4E19')
   sendResponse && sendResponse(request);
   if (request.msg === PluginMsg.Msg.Support ||
     request.msg === PluginMsg.Msg.ListInfo ||
     request.msg === PluginMsg.Msg.NodeInfo) {
     // 将消息转发到devtools
-    ConnPool.Devtools && ConnPool.Devtools.postMessage(request);
+    Devtools && Devtools.postMessage(request);
   }
 }
 
-function longConnectionLink(data, sender) {
-  console.log(`%c[长连接:${sender.name}]\n${JSON.stringify(data)}`, 'background:#aaa;color:#bada55')
+function longConnectionLink(data: any, sender: any) {
+  console.log(`%c[长连接:${sender.name}]\n${JSON.stringify(data)}`, "background:#aaa;color:#bada55")
   sender.postMessage(data);
   if (data.msg === PluginMsg.Msg.UrlChange) {
     if (sender.name === PluginMsg.Page.DevToolsPanel) {
-      ConnPool.Content && ConnPool.Content.postMessage({msg: PluginMsg.Msg.UrlChange, data: {}})
+      Content && Content.postMessage({msg: PluginMsg.Msg.UrlChange, data: {}})
     }
   }
   // chrome.tabs.executeScript(message.tabId, {code: message.content});
@@ -31,27 +29,27 @@ function longConnectionLink(data, sender) {
 
 // 长连接
 chrome.runtime.onConnect.addListener(function (port) {
-  console.log(`%c[长连接:${port.name}] 建立链接!`, 'background:#aaa;color:#ff0000');
+  console.log(`%c[长连接:${port.name}] 建立链接!`, "background:#aaa;color:#ff0000");
   port.onMessage.addListener(longConnectionLink);
   port.onDisconnect.addListener(function (port) {
-    console.log(`%c[长连接:${port.name}] 断开链接!`, 'background:#aaa;color:#00ff00');
+    console.log(`%c[长连接:${port.name}] 断开链接!`, "background:#aaa;color:#00ff00");
     port.onMessage.removeListener(longConnectionLink);
     if (port.name === PluginMsg.Page.Devtools) {
-      ConnPool.Devtools = null;
+      Devtools = null;
     } else if (port.name === PluginMsg.Page.Content) {
-      ConnPool.Content = null;
+      Content = null;
     } else if (port.name === PluginMsg.Page.DevToolsPanel) {
-      ConnPool.DevtoolsPanel = null;
+      DevtoolsPanel = null;
     }
   });
 
   // 缓存
   if (port.name === PluginMsg.Page.Devtools) {
-    ConnPool.Devtools = port;
+    Devtools = port;
   } else if (port.name === PluginMsg.Page.Content) {
-    ConnPool.Content = port;
+    Content = port;
   } else if (port.name === PluginMsg.Page.DevToolsPanel) {
-    ConnPool.DevtoolsPanel = port;
+    DevtoolsPanel = port;
   }
 });
 
@@ -62,7 +60,10 @@ chrome.runtime.onMessage.addListener(shortConnectionLink);
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
   if (changeInfo.status === "complete") {
     // 加载新的url
-    ConnPool.Content.postMessage({msg: PluginMsg.Msg.UrlChange, data: {url: tab.favIconUrl}});
+    if (Content) {
+      let data = {msg: PluginMsg.Msg.UrlChange, data: {url: tab.favIconUrl}}
+      Content.postMessage(data);
+    }
   }
 })
 
@@ -74,7 +75,7 @@ function createPluginMenus() {
     title: "测试右键菜单",
     parentId: parent,
     // 上下文环境，可选：["all", "page", "frame", "selection", "link", "editable", "image", "video", "audio"]，默认page
-    contexts: ['page'],
+    contexts: ["page"],
   });
   chrome.contextMenus.create({
     id: "notify",
@@ -84,9 +85,9 @@ function createPluginMenus() {
 
   chrome.contextMenus.onClicked.addListener(function (info, tab) {
     if (info.menuItemId === "test") {
-      alert('您点击了右键菜单！');
+      alert("您点击了右键菜单！");
     } else if (info.menuItemId === "notify") {
-      chrome.notifications.create(null, {
+      chrome.notifications.create("null", {
         type: "basic",
         iconUrl: "icon/icon48.png",
         title: "通知",

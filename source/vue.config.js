@@ -17,7 +17,8 @@ module.exports = {
   configureWebpack: {
     entry: {
       content: Path.join(__dirname, "src/content.ts"),
-      options: Path.join(__dirname, "src/options.ts"),
+      background: Path.join(__dirname, "src/background.ts"),
+      inject: Path.join(__dirname, "src/inject.js"),
     },
     output: {
       filename: "js/[name].js?t=[hash]"

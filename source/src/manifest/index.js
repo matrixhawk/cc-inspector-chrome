@@ -14,7 +14,7 @@ module.exports = {
   content_scripts: [
     {
       matches: ["<all_urls>"],
-      js: ["content.common.js"],
+      js: ["content.js"],
       run_at: "document_end",
       all_frames: true
     }

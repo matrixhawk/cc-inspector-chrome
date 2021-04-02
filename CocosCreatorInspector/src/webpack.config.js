@@ -32,7 +32,6 @@ module.exports = {
   entry: {
     // test: resolve('test'),
     background: resolve('background'),
-    inject: resolve('content/inject'),
 
     // devInspector: path.resolve(__dirname, './src/dev/devInspector/main.js'),
     // dev: path.resolve(__dirname, './src/dev/dev.js'),
@@ -40,7 +39,6 @@ module.exports = {
     // backgroundScripts: path.resolve(__dirname, './src/dev/backgroundScripts.js'),
     // contentScripts: path.resolve(__dirname, './src/dev/contentScripts.js'),
     // util: path.resolve(__dirname, './src/dev/util.js'),
-    // injectScript: path.resolve(__dirname, './src/dev/injectScript.js'),
   },
   output: {
     path: Path.resolve(__dirname, 'build'),
@@ -62,30 +60,6 @@ module.exports = {
       outFile: Path.join(__dirname, 'build/manifest.json'),
       manifest: Path.join(__dirname, 'manifest.js')
     }),
-    //index.html
-    // new HtmlWebpackPlugin({
-    //   template: __dirname + "/src/index/index.html",
-    //   filename: 'index.html',
-    //   inject: 'body',
-    //   chunks: ['index']
-    // }),
-
-
-    //dev.html
-    // new HtmlWebpackPlugin({
-    //   template: __dirname + "/src/dev/dev.html",
-    //   filename: 'dev.html',
-    //   inject: 'body',
-    //   chunks: ['dev']
-    // }),
-
-    //devInspector.html
-    // new HtmlWebpackPlugin({
-    //   template: __dirname + "/src/dev/devInspector/devInspector.html",
-    //   filename: 'devInspector.html',
-    //   inject: 'body',
-    //   chunks: ['devInspector']
-    // }),
 
     // 拷贝静态资源(manifest.json)
     new CopyWebpackPlugin([{

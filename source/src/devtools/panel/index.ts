@@ -1,22 +1,10 @@
-import Vue from 'vue';
-import ElementUI from 'element-ui'
-import 'element-ui/lib/theme-chalk/index.css'
-import index from './index.vue';
-
-import ui_prop from './ui/ui-prop.vue'
-import NodeBaseProperty from './ccType/NodeBaseProperty.vue'
-import SceneProperty from './ccType/SceneProperty.vue'
-import ComponentsProperty from './ccType/ComponentsProperty'
-
-
-Vue.component('ui-prop', ui_prop);
-Vue.component('NodeBaseProperty', NodeBaseProperty);
-Vue.component('SceneProperty', SceneProperty);
-Vue.component('ComponentsProperty', ComponentsProperty);
-Vue.component('ColorPicker', ColorPicker);
+import Vue from "vue";
+import ElementUI from "element-ui"
+import "element-ui/lib/theme-chalk/index.css"
+import index from "./index.vue";
 
 Vue.use(ElementUI);
 new Vue({
-  el: '#app',
+  el: "#app",
   render: h => h(index)
 });

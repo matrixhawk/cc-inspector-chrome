@@ -7,35 +7,33 @@
       </div>
       <div v-show="isShowComp">
         <ui-prop :name="index" track-by="$index" v-for="(comp,index) in components" :key="index">
-          <span>{{comp.type}}</span>
+          <span>{{ comp.type }}</span>
         </ui-prop>
       </div>
     </div>
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from "vue"
+import {Component, Prop} from "vue-property-decorator";
 
-  export default {
-    name: "",
-    data() {
-      return {
-        isShowComp: true,
-      }
-    },
-    methods: {
-      onClickComp() {
-        this.isShowComp = !this.isShowComp;
-      }
-    },
-    props: [
-      'components'
-    ]
+@Component({})
+export default class ComponentsProperty extends Vue {
+  name: string = "";
+  isShowComp: boolean = true;
+
+  onClickComp() {
+    this.isShowComp = !this.isShowComp;
   }
+
+  @Prop()
+  components = ""
+}
 </script>
 
 <style scoped>
-  span {
-    color: #fd942b;
-  }
+span {
+  color: #fd942b;
+}
 </style>

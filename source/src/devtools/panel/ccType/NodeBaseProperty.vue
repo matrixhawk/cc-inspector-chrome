@@ -2,10 +2,10 @@
   <div id="app">
     <div>
       <ui-prop name="uuid">
-        <span> {{itemData.uuid}}</span>
+        <span> {{ itemData.uuid }}</span>
       </ui-prop>
       <ui-prop name="name">
-        <span> {{itemData.name}}</span>
+        <span> {{ itemData.name }}</span>
       </ui-prop>
       <!--坐标-->
       <ui-prop name="Position">
@@ -33,7 +33,7 @@
       <!--旋转-->
       <!--rotationX, rotationY暂时舍弃显示-->
       <ui-prop name="Rotation">
-        <span> {{itemData.rotation}}</span>
+        <span> {{ itemData.rotation }}</span>
         <!--<input class="myInput"-->
         <!--@change="changeRotation"-->
         <!--placeholder="itemData.rotation"-->
@@ -44,10 +44,10 @@
       <ui-prop name="Scale">
         <div style="float: left;width: 100%;">
           <ui-prop name="X" style="width: 50%;float: left;">
-            <span>{{itemData.scaleX}}</span>
+            <span>{{ itemData.scaleX }}</span>
           </ui-prop>
           <ui-prop name="Y" style="width: 50%;float:left;">
-            <span>{{itemData.scaleY}}</span>
+            <span>{{ itemData.scaleY }}</span>
           </ui-prop>
         </div>
       </ui-prop>
@@ -55,10 +55,10 @@
       <ui-prop name="Anchor">
         <div style="float: left;width: 100%;">
           <ui-prop name="X" style="width: 50%;float: left;">
-            <span>{{itemData.anchorX}}</span>
+            <span>{{ itemData.anchorX }}</span>
           </ui-prop>
           <ui-prop name="Y" style="width: 50%;float:left;">
-            <span>{{itemData.anchorY}}</span>
+            <span>{{ itemData.anchorY }}</span>
           </ui-prop>
         </div>
       </ui-prop>
@@ -88,25 +88,25 @@
       </ui-prop>
       <!--透明度-->
       <ui-prop name="Opacity">
-        <span>{{itemData.opacity}}</span>
+        <span>{{ itemData.opacity }}</span>
       </ui-prop>
       <!--斜切-->
       <ui-prop name="Skew">
         <div style="float: left;width: 100%;">
           <ui-prop name="X" style="width: 50%;float: left;">
-            <span>{{itemData.skewX}}</span>
+            <span>{{ itemData.skewX }}</span>
           </ui-prop>
           <ui-prop name="Y" style="width: 50%;float:left;">
-            <span>{{itemData.skewY}}</span>
+            <span>{{ itemData.skewY }}</span>
           </ui-prop>
         </div>
       </ui-prop>
     </div>
     <ui-prop name="zIndex">
-      <span>{{itemData.zIndex}}</span>
+      <span>{{ itemData.zIndex }}</span>
     </ui-prop>
     <ui-prop name="childrenCount">
-      <span>{{itemData.childrenCount}}</span>
+      <span>{{ itemData.childrenCount }}</span>
     </ui-prop>
     <!--节点状态-->
     <ui-prop name="active">
@@ -132,148 +132,173 @@
       <div style="display: flex;flex-direction: row;justify-content: center;">
         <div style="display: flex;flex:1;">
 
-        <el-color-picker v-model="itemData.color" size="mini" style="flex:1;margin: 0;" @change="changeColor"></el-color-picker>
+          <el-color-picker v-model="itemData.color" size="mini" style="flex:1;margin: 0;"
+                           @change="changeColor"></el-color-picker>
         </div>
-        <span style="width: 60px;">{{itemData.color}}</span>
+        <span style="width: 60px;">{{ itemData.color }}</span>
 
       </div>
     </ui-prop>
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from "vue"
+import {Component, Prop} from "vue-property-decorator"
+import  UiProp from './ui-prop'
+@Component({
+  'ui-prop':UiProp
+})
+export default class NodeBaseProperty extends Vue {
+  name: string = "app"
 
+  @Prop()
+  itemData: any = null;
 
-  export default {
-    name: "app",
-    data() {
-      return {}
-    },
-    methods: {
-      changeSizeActionWidth(step) {
-        let w = parseFloat(this.itemData.width);
-        this.itemData.width = w + step;
-        this.changeSize();
-      },
-      changeSizeActionHeight(step) {
-        let h = parseFloat(this.itemData.height);
-        this.itemData.height = h + step;
-        this.changeSize();
-      },
-      changePositionActionX(step) {
-        let x = parseFloat(this.itemData.x);
-        this.itemData.x = x + step;
-        this.changePosition();
-      },
-      changePositionActionY(step) {
-        let y = parseFloat(this.itemData.y);
-        this.itemData.y = y + step;
-        this.changePosition();
-      },
-      changePosition() {
-        // console.log("change changePositionX:" + this.itemData.x);
-        // console.log("change changePositionY:" + this.itemData.y);
-        this._evalCode(
-          "window.ccinspector.pluginSetNodePosition(" +
-          "'" + this.itemData.uuid + "'," +
-          "'" + this.itemData.x + "'," +
-          "'" + this.itemData.y + "'" +
-          ")");
-        this._freshNode();
-      },
-      changeSize() {
-        // console.log("change width:" + this.itemData.width);
-        // console.log("change height:" + this.itemData.height);
-        this._evalCode(
-          "window.ccinspector.pluginSetNodeSize(" +
-          "'" + this.itemData.uuid + "'," +
-          "'" + this.itemData.width + "'," +
-          "'" + this.itemData.height + "'" +
-          ")");
-        this._freshNode();
-      },
-      changeRotation() {
-        console.log("change rotation:" + this.itemData.rotation);
-        this._evalCode(
-          "window.ccinspector.pluginSetNodeRotation('" +
-          this.itemData.uuid + "','" +
-          this.itemData.rotation + "')");
-        this._freshNode();
-      },
-      changeColor() {
-        let color = this.itemData.color;
-        console.log("color:" + color);
-        this._evalCode(
-          "window.ccinspector.pluginSetNodeColor('" +
-          this.itemData.uuid + "','" +
-          color + "');");
-        this._freshNode();
-      },
-      onBtnClickNodeHide() {
-        let uuid = this.itemData.uuid;
-        if (uuid !== undefined) {
-          let code = "window.ccinspector.pluginSetNodeActive('" + uuid + "', 0);";
-          this._evalCode(code);
-          this._freshNode();
-        }
-      },
-      onBtnClickNodeShow() {
-        let uuid = this.itemData.uuid;
-        if (uuid !== undefined) {
-          let code = "window.ccinspector.pluginSetNodeActive('" + uuid + "', 1);";
-          this._evalCode(code);
-          this._freshNode();
-        }
-      },
-      _freshNode() {
-        let uuid = this.itemData.uuid;
-        let code2 = "window.ccinspector.getNodeInfo('" + uuid + "')";
-        this._evalCode(code2);
-      },
-      _evalCode(code) {
-        if (chrome && chrome.devtools) {
-          chrome.devtools.inspectedWindow.eval(code);
-        } else {
-          console.log(code);
-        }
-      },
-    },
-    props: [
-      'itemData'
-    ]
+  changeSizeActionWidth(step:number) {
+    let w = parseFloat(this.itemData.width);
+    this.itemData.width = w + step;
+    this.changeSize();
   }
+
+
+  changeSizeActionHeight(step:number) {
+    let h = parseFloat(this.itemData.height);
+    this.itemData.height = h + step;
+    this.changeSize();
+  }
+
+
+  changePositionActionX(step:number) {
+    let x = parseFloat(this.itemData.x);
+    this.itemData.x = x + step;
+    this.changePosition();
+  }
+
+
+  changePositionActionY(step:number) {
+    let y = parseFloat(this.itemData.y);
+    this.itemData.y = y + step;
+    this.changePosition();
+  }
+
+
+  changePosition() {
+    // console.log("change changePositionX:" + this.itemData.x);
+    // console.log("change changePositionY:" + this.itemData.y);
+    this._evalCode(
+        "window.ccinspector.pluginSetNodePosition(" +
+        "'" + this.itemData.uuid + "'," +
+        "'" + this.itemData.x + "'," +
+        "'" + this.itemData.y + "'" +
+        ")");
+    this._freshNode();
+  }
+
+
+  changeSize() {
+    // console.log("change width:" + this.itemData.width);
+    // console.log("change height:" + this.itemData.height);
+    this._evalCode(
+        "window.ccinspector.pluginSetNodeSize(" +
+        "'" + this.itemData.uuid + "'," +
+        "'" + this.itemData.width + "'," +
+        "'" + this.itemData.height + "'" +
+        ")");
+    this._freshNode();
+  }
+
+
+  changeRotation() {
+    console.log("change rotation:" + this.itemData.rotation);
+    this._evalCode(
+        "window.ccinspector.pluginSetNodeRotation('" +
+        this.itemData.uuid + "','" +
+        this.itemData.rotation + "')");
+    this._freshNode();
+  }
+
+
+  changeColor() {
+    let color = this.itemData.color;
+    console.log("color:" + color);
+    this._evalCode(
+        "window.ccinspector.pluginSetNodeColor('" +
+        this.itemData.uuid + "','" +
+        color + "');");
+    this._freshNode();
+  }
+
+
+  onBtnClickNodeHide() {
+    let uuid = this.itemData.uuid;
+    if (uuid !== undefined) {
+      let code = "window.ccinspector.pluginSetNodeActive('" + uuid + "', 0);";
+      this._evalCode(code);
+      this._freshNode();
+    }
+  }
+
+
+  onBtnClickNodeShow() {
+    let uuid = this.itemData.uuid;
+    if (uuid !== undefined) {
+      let code = "window.ccinspector.pluginSetNodeActive('" + uuid + "', 1);";
+      this._evalCode(code);
+      this._freshNode();
+    }
+  }
+
+
+  _freshNode() {
+    let uuid = this.itemData.uuid;
+    let code2 = "window.ccinspector.getNodeInfo('" + uuid + "')";
+    this._evalCode(code2);
+  }
+
+
+  _evalCode(code:string) {
+    if (chrome && chrome.devtools) {
+      chrome.devtools.inspectedWindow.eval(code);
+    } else {
+      console.log(code);
+    }
+  }
+
+
+}
 </script>
 
 <style scoped>
-  span {
-    color: #fd942b;
-  }
+span {
+  color: #fd942b;
+}
 
-  .btnSize {
-    padding: 5px 10px;
-  }
+.btnSize {
+  padding: 5px 10px;
+}
 
-  .comp {
-    border: 2px solid #a1a1a1;
-    padding: 5px 5px;
-    background: #dddddd;
-    width: 100%;
-    border-radius: 5px;
-    -moz-border-radius: 5px; /* 老的 Firefox */
-  }
+.comp {
+  border: 2px solid #a1a1a1;
+  padding: 5px 5px;
+  background: #dddddd;
+  width: 100%;
+  border-radius: 5px;
+  -moz-border-radius: 5px; /* 老的 Firefox */
+}
 
-  .float-left {
-    float: left;
-  }
+.float-left {
+  float: left;
+}
 
-  .compBorder {
-    border: 1px solid #b3b3b3;
-    background: #ffffff
-  }
+.compBorder {
+  border: 1px solid #b3b3b3;
+  background: #ffffff
+}
 
-  .myInput {
-    width: 90%;
-    border-radius: 5px;
-    color: #fd942b;
-  }
+.myInput {
+  width: 90%;
+  border-radius: 5px;
+  color: #fd942b;
+}
 </style>

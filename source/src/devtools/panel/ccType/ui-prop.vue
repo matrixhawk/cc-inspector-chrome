@@ -17,44 +17,48 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'app',
-  data () {
-    return {
-      clientX: 0,
-    };
-  },
-  methods: {
-    changePositionMouseAction (event) {
-      document.addEventListener('mousemove', this._onMouseMove);
-      document.addEventListener('mouseup', this._onMouseUp);
-      document.addEventListener('onselectstart', this._onSelect);
-    },
-    _onSelect () {
-      return false;
-    },
-    _onMouseMove (event) {
-      let x = event.clientX;
-      let calcStep = parseFloat(this.step) || 1;// 默认值为1
-      if (x > this.clientX) {
-        calcStep = Math.abs(calcStep);
-      } else {
-        calcStep = -Math.abs(calcStep);
-      }
-      this.$emit('movestep', calcStep);
-      this.clientX = x;
-    },
-    _onMouseUp (event) {
-      document.removeEventListener('mousemove', this._onMouseMove);
-      document.removeEventListener('mouseup', this._onMouseUp);
-      document.removeEventListener('onselectstart', this._onSelect);
-    },
-  },
-  props: [
-    'name',
-    'step',
-  ]
+<script lang="ts">
+import Vue from "vue"
+import {Component, Prop} from "vue-property-decorator"
+
+@Component({})
+export default class UiProp extends Vue {
+  @Prop()
+  name = null;
+
+  @Prop()
+  step = null;
+  clientX: number = 0;
+
+  changePositionMouseAction(event) {
+    document.addEventListener("mousemove", this._onMouseMove);
+    document.addEventListener("mouseup", this._onMouseUp);
+    document.addEventListener("onselectstart", this._onSelect);
+  }
+
+  _onSelect() {
+    return false;
+  }
+
+  _onMouseMove(event) {
+    let x = event.clientX;
+    let calcStep = parseFloat(this.step) || 1;// 默认值为1
+    if (x > this.clientX) {
+      calcStep = Math.abs(calcStep);
+    } else {
+      calcStep = -Math.abs(calcStep);
+    }
+    this.$emit("movestep", calcStep);
+    this.clientX = x;
+  }
+
+  _onMouseUp(event) {
+    document.removeEventListener("mousemove", this._onMouseMove);
+    document.removeEventListener("mouseup", this._onMouseUp);
+    document.removeEventListener("onselectstart", this._onSelect);
+  }
+
+
 };
 </script>
 
