@@ -31,12 +31,7 @@ module.exports = {
   mode: 'development',
   entry: {
     // test: resolve('test'),
-    popup: resolve('popup/index.js'),
-    devtools: resolve('devtools'),
-    devtools_panel: resolve('devtools/panel'),
     background: resolve('background'),
-    options: resolve('options'),
-    content: resolve('content'),
     inject: resolve('content/inject'),
 
     // devInspector: path.resolve(__dirname, './src/dev/devInspector/main.js'),
@@ -62,11 +57,6 @@ module.exports = {
       dry: false,//启用删除文件
     }),
 
-    // htmlPage('test', 'test', ['test']),
-    htmlPage('popup', 'popup', ['popup']),
-    htmlPage('devtools', 'devtools', ['devtools']),
-    htmlPage('devtools_panel', 'devtools_panel', ['devtools_panel']),
-    htmlPage('options', 'options', ['options']),
     htmlPage('background', 'background', ['background']),
     new ChromeManifest({
       outFile: Path.join(__dirname, 'build/manifest.json'),
