@@ -1,15 +1,19 @@
 module.exports = {
   root: true,
   env: {
-    webextensions: true
+    node: true,
+    webextensions: true,
   },
-  parser: "vue-eslint-parser",
+  // parser: "vue-eslint-parser",
+  // parserOptions: {
+  //   "parser": "babel-eslint",
+  //   "ecmaVersion": 2020,
+  //   ecmaFeatures: {
+  //     legacyDecorators: true
+  //   }
+  // },
   parserOptions: {
-    "parser": "babel-eslint",
-    "ecmaVersion": 2020,
-    ecmaFeatures: {
-      legacyDecorators: true
-    }
+    parser: "@typescript-eslint/parser"
   },
   extends: [
     "plugin:vue/essential",
@@ -29,5 +33,7 @@ module.exports = {
     "no-undef": "off",
     "no-debugger": "off",
     "no-unreachable": "off",
+    "@typescript-eslint/no-inferrable-types":"off",
+    "@typescript-eslint/ban-types":"off",
   }
 };
