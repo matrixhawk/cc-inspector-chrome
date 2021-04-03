@@ -48,7 +48,7 @@
   // import EvalCode from "./evalCodeString.js";
 
 
-  const PluginMsg = require("../../core/plugin-msg");
+  const PluginMsg = require("../core/plugin-msg");
 
   export default {
     data() {
@@ -329,7 +329,7 @@
       },
       onBtnClickTest3() {
         // chrome.devtools.inspectedWindow.eval(`window.ccinspector.testMsg3()`)
-        let f = require("../../core/event-mgr");
+        let f = require("../core/event-mgr");
         console.log(f.id);
       },
       onMemoryTest() {

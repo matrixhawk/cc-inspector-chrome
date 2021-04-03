@@ -25,7 +25,7 @@
   "icons": {
     "48": "icons/48.png"
   },
-  "devtools_page": "devtools_panel.html",
+  "devtools_page": "devtools.html",
   "background": {
     "scripts": [
       "js/background.js"

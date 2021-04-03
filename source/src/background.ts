@@ -3,7 +3,7 @@ import * as  PluginMsg from "./core/plugin-msg"
 let Devtools: chrome.runtime.Port | null = null;
 let DevtoolsPanel: chrome.runtime.Port | null = null;
 let Content: chrome.runtime.Port | null = null;
-console.error('on background')
+console.log('on background')
 
 function shortConnectionLink(request: any, sender: any, sendResponse: any) {
   // console.log(`%c[短连接|id:${sender.id}|url:${sender.url}]\n${JSON.stringify(request)}`, 'background:#aaa;color:#BD4E19')
@@ -90,7 +90,7 @@ function createPluginMenus() {
     } else if (info.menuItemId === "notify") {
       chrome.notifications.create("null", {
         type: "basic",
-        iconUrl: "icon/icon48.png",
+        iconUrl: "icons/48.png",
         title: "通知",
         message: "测试通知",
       })
