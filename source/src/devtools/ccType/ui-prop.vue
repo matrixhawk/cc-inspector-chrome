@@ -23,11 +23,11 @@ import {Component, Prop} from "vue-property-decorator"
 
 @Component({})
 export default class UiProp extends Vue {
-  @Prop()
-  name: string = '';
+  @Prop({default: ""})
+  name: string | undefined;
 
-  @Prop()
-  step: number = 1;
+  @Prop({default: 1})
+  step: number | undefined;
 
   clientX: number = 0;
 
@@ -43,7 +43,7 @@ export default class UiProp extends Vue {
 
   _onMouseMove(event: MouseEvent) {
     let x = event.clientX;
-    let calcStep = this.step;
+    let calcStep = this.step || 0;
     if (x > this.clientX) {
       calcStep = Math.abs(calcStep);
     } else {

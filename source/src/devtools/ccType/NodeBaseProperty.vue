@@ -1,159 +1,162 @@
 <template>
   <div id="app">
-    <!--    <div>-->
-    <!--      <ui-prop name="uuid">-->
-    <!--        <span> {{ itemData.uuid }}</span>-->
-    <!--      </ui-prop>-->
-    <!--      <ui-prop name="name">-->
-    <!--        <span> {{ itemData.name }}</span>-->
-    <!--      </ui-prop>-->
-    <!--      &lt;!&ndash;坐标&ndash;&gt;-->
-    <!--      <ui-prop name="Position">-->
-    <!--        <div style="float: left;width: 100%;">-->
-    <!--          <ui-prop name="X" style="width: 50%;float: left; cursor: ew-resize;"-->
-    <!--                   @movestep="changePositionActionX"-->
-    <!--                   step="10">-->
-    <!--            &lt;!&ndash;<span>{{itemData.x}}</span>&ndash;&gt;-->
-    <!--            <input class="myInput"-->
-    <!--                   @change="changePosition"-->
-    <!--                   placeholder="itemData.x"-->
-    <!--                   v-model="itemData.x">-->
-    <!--          </ui-prop>-->
-    <!--          <ui-prop name="Y" style="width: 50%;float:left;cursor: ew-resize;"-->
-    <!--                   @movestep="changePositionActionY"-->
-    <!--                   step="10">-->
-    <!--            &lt;!&ndash;<span>{{itemData.y}}</span>&ndash;&gt;-->
-    <!--            <input class="myInput"-->
-    <!--                   @change="changePosition"-->
-    <!--                   placeholder="itemData.y"-->
-    <!--                   v-model="itemData.y">-->
-    <!--          </ui-prop>-->
-    <!--        </div>-->
-    <!--      </ui-prop>-->
-    <!--      &lt;!&ndash;旋转&ndash;&gt;-->
-    <!--      &lt;!&ndash;rotationX, rotationY暂时舍弃显示&ndash;&gt;-->
-    <!--      <ui-prop name="Rotation">-->
-    <!--        <span> {{ itemData.rotation }}</span>-->
-    <!--        &lt;!&ndash;<input class="myInput"&ndash;&gt;-->
-    <!--        &lt;!&ndash;@change="changeRotation"&ndash;&gt;-->
-    <!--        &lt;!&ndash;placeholder="itemData.rotation"&ndash;&gt;-->
-    <!--        &lt;!&ndash;v-model="itemData.rotation"&ndash;&gt;-->
-    <!--        &lt;!&ndash;style="width: 98%">&ndash;&gt;-->
-    <!--      </ui-prop>-->
-    <!--      &lt;!&ndash;缩放&ndash;&gt;-->
-    <!--      <ui-prop name="Scale">-->
-    <!--        <div style="float: left;width: 100%;">-->
-    <!--          <ui-prop name="X" style="width: 50%;float: left;">-->
-    <!--            <span>{{ itemData.scaleX }}</span>-->
-    <!--          </ui-prop>-->
-    <!--          <ui-prop name="Y" style="width: 50%;float:left;">-->
-    <!--            <span>{{ itemData.scaleY }}</span>-->
-    <!--          </ui-prop>-->
-    <!--        </div>-->
-    <!--      </ui-prop>-->
-    <!--      &lt;!&ndash;锚点&ndash;&gt;-->
-    <!--      <ui-prop name="Anchor">-->
-    <!--        <div style="float: left;width: 100%;">-->
-    <!--          <ui-prop name="X" style="width: 50%;float: left;">-->
-    <!--            <span>{{ itemData.anchorX }}</span>-->
-    <!--          </ui-prop>-->
-    <!--          <ui-prop name="Y" style="width: 50%;float:left;">-->
-    <!--            <span>{{ itemData.anchorY }}</span>-->
-    <!--          </ui-prop>-->
-    <!--        </div>-->
-    <!--      </ui-prop>-->
-    <!--      &lt;!&ndash;尺寸&ndash;&gt;-->
-    <!--      <ui-prop name="Size">-->
-    <!--        <div style="float: left;width: 100%;">-->
-    <!--          <ui-prop name="W" style="width: 50%;float: left;cursor: ew-resize;"-->
-    <!--                   @movestep="changeSizeActionWidth"-->
-    <!--                   step="10">-->
-    <!--            &lt;!&ndash;<span>{{itemData.width}}</span>&ndash;&gt;-->
-    <!--            <input class="myInput"-->
-    <!--                   @change="changeSize"-->
-    <!--                   placeholder="itemData.width"-->
-    <!--                   v-model="itemData.width">-->
-    <!--          </ui-prop>-->
-    <!--          <ui-prop name="H" style="width: 50%;float:left;cursor: ew-resize;"-->
-    <!--                   @movestep="changeSizeActionHeight"-->
-    <!--                   step="10">-->
-    <!--            &lt;!&ndash;<span>{{itemData.height}}</span>&ndash;&gt;-->
-    <!--            <input class="myInput"-->
-    <!--                   @change="changeSize"-->
-    <!--                   placeholder="itemData.height"-->
-    <!--                   v-model="itemData.height">-->
-    <!--          </ui-prop>-->
-    <!--        </div>-->
-    <!--      </ui-prop>-->
-    <!--      &lt;!&ndash;透明度&ndash;&gt;-->
-    <!--      <ui-prop name="Opacity">-->
-    <!--        <span>{{ itemData.opacity }}</span>-->
-    <!--      </ui-prop>-->
-    <!--      &lt;!&ndash;斜切&ndash;&gt;-->
-    <!--      <ui-prop name="Skew">-->
-    <!--        <div style="float: left;width: 100%;">-->
-    <!--          <ui-prop name="X" style="width: 50%;float: left;">-->
-    <!--            <span>{{ itemData.skewX }}</span>-->
-    <!--          </ui-prop>-->
-    <!--          <ui-prop name="Y" style="width: 50%;float:left;">-->
-    <!--            <span>{{ itemData.skewY }}</span>-->
-    <!--          </ui-prop>-->
-    <!--        </div>-->
-    <!--      </ui-prop>-->
-    <!--    </div>-->
-    <!--    <ui-prop name="zIndex">-->
-    <!--      <span>{{ itemData.zIndex }}</span>-->
-    <!--    </ui-prop>-->
-    <!--    <ui-prop name="childrenCount">-->
-    <!--      <span>{{ itemData.childrenCount }}</span>-->
-    <!--    </ui-prop>-->
-    <!--    &lt;!&ndash;节点状态&ndash;&gt;-->
-    <!--    <ui-prop name="active">-->
-    <!--      <p v-if="itemData.active" style="margin: 0;display: flex;align-items: center;flex-wrap: wrap;">-->
-    <!--        <input type="checkbox"-->
-    <!--               style="width: 20px;height: 20px;"-->
-    <!--               :checked.sync="itemData.active"-->
-    <!--               @click="onBtnClickNodeHide">-->
-    <!--        隐藏节点-->
-    <!--      </p>-->
+    <div>
+      <ui-prop name="uuid">
+        <span> {{ itemData.uuid }}</span>
+      </ui-prop>
+      <ui-prop name="name">
+        <span> {{ itemData.name }}</span>
+      </ui-prop>
+      <!--坐标-->
+      <ui-prop name="Position">
+        <div style="float: left;width: 100%;">
+          <ui-prop name="X" style="width: 50%;float: left; cursor: ew-resize;"
+                   @movestep="changePositionActionX"
+                   step="10">
+            <!--<span>{{itemData.x}}</span>-->
+            <input class="myInput"
+                   @change="changePosition"
+                   placeholder="itemData.x"
+                   v-model="itemData.x">
+          </ui-prop>
+          <ui-prop name="Y" style="width: 50%;float:left;cursor: ew-resize;"
+                   @movestep="changePositionActionY"
+                   step="10">
+            <!--<span>{{itemData.y}}</span>-->
+            <input class="myInput"
+                   @change="changePosition"
+                   placeholder="itemData.y"
+                   v-model="itemData.y">
+          </ui-prop>
+        </div>
+      </ui-prop>
+      <!--旋转-->
+      <!--rotationX, rotationY暂时舍弃显示-->
+      <ui-prop name="Rotation">
+        <span> {{ itemData.rotation }}</span>
+        <!--<input class="myInput"-->
+        <!--@change="changeRotation"-->
+        <!--placeholder="itemData.rotation"-->
+        <!--v-model="itemData.rotation"-->
+        <!--style="width: 98%">-->
+      </ui-prop>
+      <!--缩放-->
+      <ui-prop name="Scale">
+        <div style="float: left;width: 100%;">
+          <ui-prop name="X" style="width: 50%;float: left;">
+            <span>{{ itemData.scaleX }}</span>
+          </ui-prop>
+          <ui-prop name="Y" style="width: 50%;float:left;">
+            <span>{{ itemData.scaleY }}</span>
+          </ui-prop>
+        </div>
+      </ui-prop>
+      <!--锚点-->
+      <ui-prop name="Anchor">
+        <div style="float: left;width: 100%;">
+          <ui-prop name="X" style="width: 50%;float: left;">
+            <span>{{ itemData.anchorX }}</span>
+          </ui-prop>
+          <ui-prop name="Y" style="width: 50%;float:left;">
+            <span>{{ itemData.anchorY }}</span>
+          </ui-prop>
+        </div>
+      </ui-prop>
+      <!--尺寸-->
+      <ui-prop name="Size">
+        <div style="float: left;width: 100%;">
+          <ui-prop name="W" style="width: 50%;float: left;cursor: ew-resize;"
+                   @movestep="changeSizeActionWidth"
+                   step="10">
+            <!--<span>{{itemData.width}}</span>-->
+            <input class="myInput"
+                   @change="changeSize"
+                   placeholder="itemData.width"
+                   v-model="itemData.width">
+          </ui-prop>
+          <ui-prop name="H" style="width: 50%;float:left;cursor: ew-resize;"
+                   @movestep="changeSizeActionHeight"
+                   step="10">
+            <!--<span>{{itemData.height}}</span>-->
+            <input class="myInput"
+                   @change="changeSize"
+                   placeholder="itemData.height"
+                   v-model="itemData.height">
+          </ui-prop>
+        </div>
+      </ui-prop>
+      <!--透明度-->
+      <ui-prop name="Opacity">
+        <span>{{ itemData.opacity }}</span>
+      </ui-prop>
+      <!--斜切-->
+      <ui-prop name="Skew">
+        <div style="float: left;width: 100%;">
+          <ui-prop name="X" style="width: 50%;float: left;">
+            <span>{{ itemData.skewX }}</span>
+          </ui-prop>
+          <ui-prop name="Y" style="width: 50%;float:left;">
+            <span>{{ itemData.skewY }}</span>
+          </ui-prop>
+        </div>
+      </ui-prop>
+    </div>
+    <ui-prop name="zIndex">
+      <span>{{ itemData.zIndex }}</span>
+    </ui-prop>
+    <ui-prop name="childrenCount">
+      <span>{{ itemData.childrenCount }}</span>
+    </ui-prop>
+    <!--节点状态-->
+    <ui-prop name="active">
+      <p v-if="itemData.active" style="margin: 0;display: flex;align-items: center;flex-wrap: wrap;">
+        <input type="checkbox"
+               style="width: 20px;height: 20px;"
+               :checked.sync="itemData.active"
+               @click="onBtnClickNodeHide">
+        隐藏节点
+      </p>
 
-    <!--      <p v-if="!itemData.active" style="margin: 0;display: flex;align-items: center;flex-wrap: wrap;">-->
-    <!--        <input type="checkbox"-->
-    <!--               style="width: 20px;height: 20px;"-->
-    <!--               :checked="itemData.active"-->
-    <!--               @click="onBtnClickNodeShow"-->
-    <!--        >-->
-    <!--        显示节点-->
-    <!--      </p>-->
-    <!--    </ui-prop>-->
-    <!--    &lt;!&ndash;颜色&ndash;&gt;-->
-    <!--    <ui-prop name="color">-->
-    <!--      <div style="display: flex;flex-direction: row;justify-content: center;">-->
-    <!--        <div style="display: flex;flex:1;">-->
+      <p v-if="!itemData.active" style="margin: 0;display: flex;align-items: center;flex-wrap: wrap;">
+        <input type="checkbox"
+               style="width: 20px;height: 20px;"
+               :checked="itemData.active"
+               @click="onBtnClickNodeShow"
+        >
+        显示节点
+      </p>
+    </ui-prop>
+    <!--颜色-->
+    <ui-prop name="color">
+      <div style="display: flex;flex-direction: row;justify-content: center;">
+        <div style="display: flex;flex:1;">
 
-    <!--          <el-color-picker v-model="itemData.color" size="mini" style="flex:1;margin: 0;"-->
-    <!--                           @change="changeColor"></el-color-picker>-->
-    <!--        </div>-->
-    <!--        <span style="width: 60px;">{{ itemData.color }}</span>-->
+          <el-color-picker v-model="itemData.color" size="mini" style="flex:1;margin: 0;"
+                           @change="changeColor"></el-color-picker>
+        </div>
+        <span style="width: 60px;">{{ itemData.color }}</span>
 
-    <!--      </div>-->
-    <!--    </ui-prop>-->
+      </div>
+    </ui-prop>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue"
 import {Component, Prop, Emit} from "vue-property-decorator"
-import UiProp from './ui-prop.vue'
+import UiProp from "./ui-prop.vue"
 
 @Component({
   components: {UiProp},
 })
 export default class NodeBaseProperty extends Vue {
   name: string = "node-base"
-  label: string = ''
 
-  @Prop() private  data: any = {};
+  @Prop({default: "label"})
+  private label?: string | undefined
+
+  @Prop()
+  private itemData: any;
 
   setup() {
     // computed({
@@ -164,11 +167,7 @@ export default class NodeBaseProperty extends Vue {
   }
 
   created() {
-
-    console.error(JSON.stringify(this.data))
   }
-
-  itemData: any = {};
 
   changeSizeActionWidth(step: number) {
     let w = parseFloat(this.itemData.width);

@@ -29,10 +29,9 @@
       </div>
       <div class="right">
         <div class="  bg-purple-light treeInfo">
-          <NodeBaseProperty data="treeItemData"></NodeBaseProperty>
+          <NodeBaseProperty :item-data="treeItemData"></NodeBaseProperty>
           <SceneProperty v-show="treeItemData.type === 'cc_Scene'"></SceneProperty>
           <ComponentsProperty components.sync="treeItemData.components"></ComponentsProperty>
-          <HelloWorld msg="fsfsfsfsffdqwe"></HelloWorld>
         </div>
       </div>
 
@@ -49,25 +48,22 @@
 // import EvalCode from "./evalCodeString.js";
 
 import Vue from "vue";
-import NodeBaseProperty from './ccType/NodeBaseProperty'
-import ComponentsProperty from './ccType/ComponentsProperty'
-import SceneProperty from './ccType/SceneProperty'
 import {Component, Prop} from "vue-property-decorator";
-import tree from "element-ui/packages/table/src/store/tree";
-import fa from "element-ui/src/locale/lang/fa";
-import HelloWorld from "@/popup/HelloWorld.vue";
+import SceneProperty from "@/devtools/ccType/SceneProperty.vue";
+import ComponentsProperty from "@/devtools/ccType/ComponentsProperty.vue";
+import NodeBaseProperty from "@/devtools/ccType/NodeBaseProperty.vue";
 
 const PluginMsg = require("../core/plugin-msg");
 @Component({
   components: {
-    NodeBaseProperty, ComponentsProperty, SceneProperty, HelloWorld
+    NodeBaseProperty, ComponentsProperty, SceneProperty,
   }
 })
 export default class Index extends Vue {
   private isShowDebug: boolean = true;
-  treeItemData = {a: 1};
-  treeData = []
-  bgConn = null// 与background.js的链接
+  treeItemData: Record<string, any> = {};
+  treeData: Array<Record<string, any>> = []
+  bgConn: chrome.runtime.Port | null = null// 与background.js的链接
 
   // el-tree的渲染key
   defaultProps = {
@@ -80,6 +76,7 @@ export default class Index extends Vue {
     performance: {},
     console: {},
   }
+  timerID: number = 0;
 
   created() {
     this.onTestData();
@@ -124,6 +121,8 @@ export default class Index extends Vue {
     }
 
     this.treeItemData = {
+      "uuid": "11",
+      "name": "name",
       "type": "cc_Node",
       "height": 1080.986301369863,
       "color": "#fff85f",
@@ -143,7 +142,7 @@ export default class Index extends Vue {
     };
   }
 
-  handleNodeClick(data) {
+  handleNodeClick(data: any) {
     // todo 去获取节点信息
     // console.log(data);
     let uuid = data.uuid;
@@ -154,16 +153,16 @@ export default class Index extends Vue {
 
   onChangeWatchState() {
     if (this.watchEveryTime) {
-      this.timerID = setInterval(function () {
+      this.timerID = setInterval(() => {
         this.onBtnClickUpdateTree();
-      }.bind(this), 100);
+      }, 100);
     } else {
       clearInterval(this.timerID);
     }
 
   }
 
-  _updateTreeView(data) {
+  _updateTreeView(data: any) {
     this.treeData = [data.scene];
     return;
     // 构建树形数据
@@ -197,7 +196,7 @@ export default class Index extends Vue {
     }
     this.treeData = treeData;
 
-    function dealChildrenNode(rootData, obj) {
+    function dealChildrenNode(rootData: any, obj: any) {
       obj["data"] = rootData;
       obj["uuid"] = rootData.uuid;
       obj["label"] = rootData.name;
@@ -228,7 +227,7 @@ export default class Index extends Vue {
   }
 
 
-  evalInspectorFunction(funcString, parm) {
+  evalInspectorFunction(funcString: string, parm?: any) {
     if (funcString || funcString.length > 0) {
       let injectCode =
           `if(window.ccinspector){
@@ -306,7 +305,7 @@ export default class Index extends Vue {
     this._update37(this.treeData[0], newData[0]);
   }
 
-  _update37(oldTreeNode, newTreeNode) {
+  _update37(oldTreeNode: any, newTreeNode: any) {
     debugger
     if (!newTreeNode) {
       return;

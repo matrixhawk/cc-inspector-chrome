@@ -28,8 +28,8 @@ export default class ComponentsProperty extends Vue {
   name: string = "components";
   isShowComp: boolean = true;
 
-  // @Prop()
-  components = ""
+  @Prop()
+  components: undefined;
 
   onClickComp() {
     this.isShowComp = !this.isShowComp;

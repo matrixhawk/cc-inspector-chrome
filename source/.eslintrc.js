@@ -33,7 +33,9 @@ module.exports = {
     "no-undef": "off",
     "no-debugger": "off",
     "no-unreachable": "off",
-    "@typescript-eslint/no-inferrable-types":"off",
-    "@typescript-eslint/ban-types":"off",
+    "@typescript-eslint/no-inferrable-types": "off",
+    "@typescript-eslint/ban-types": "off",
+    "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/no-explicit-any": "off",
   }
 };
