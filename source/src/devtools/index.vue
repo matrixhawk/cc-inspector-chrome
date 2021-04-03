@@ -29,9 +29,10 @@
       </div>
       <div class="right">
         <div class="  bg-purple-light treeInfo">
-          <NodeBaseProperty :data="treeItemData"></NodeBaseProperty>
-          <SceneProperty v-show=" treeItemData.type === 'cc_Scene'"></SceneProperty>
-          <ComponentsProperty :components.sync="treeItemData.components"></ComponentsProperty>
+          <NodeBaseProperty data="treeItemData"></NodeBaseProperty>
+          <SceneProperty v-show="treeItemData.type === 'cc_Scene'"></SceneProperty>
+          <ComponentsProperty components.sync="treeItemData.components"></ComponentsProperty>
+          <HelloWorld msg="fsfsfsfsffdqwe"></HelloWorld>
         </div>
       </div>
 
@@ -51,27 +52,34 @@ import Vue from "vue";
 import NodeBaseProperty from './ccType/NodeBaseProperty'
 import ComponentsProperty from './ccType/ComponentsProperty'
 import SceneProperty from './ccType/SceneProperty'
-import {Component} from "vue-property-decorator";
+import {Component, Prop} from "vue-property-decorator";
+import tree from "element-ui/packages/table/src/store/tree";
+import fa from "element-ui/src/locale/lang/fa";
+import HelloWorld from "@/popup/HelloWorld.vue";
 
 const PluginMsg = require("../core/plugin-msg");
-@Component({components: {NodeBaseProperty, ComponentsProperty, SceneProperty}})
+@Component({
+  components: {
+    NodeBaseProperty, ComponentsProperty, SceneProperty, HelloWorld
+  }
+})
 export default class Index extends Vue {
-  isShowDebug: boolean = true;
-  treeItemData: Object = {};
+  private isShowDebug: boolean = true;
+  treeItemData = {a: 1};
   treeData = []
-  treeDataMap = {};
   bgConn = null// 与background.js的链接
 
+  // el-tree的渲染key
   defaultProps = {
     children: "children",
     label: "name"
   };
-  watchEveryTime: boolean = false;// 实时监控节点树
+  private watchEveryTime: boolean = false;// 实时监控节点树
+
   memory = {
     performance: {},
     console: {},
   }
-
 
   created() {
     this.onTestData();

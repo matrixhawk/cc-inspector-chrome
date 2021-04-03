@@ -35,6 +35,7 @@
         </a>
       </div>
     </div>
+    <HelloWorld msg="fsfsf"></HelloWorld>
   </div>
 
 </template>

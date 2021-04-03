@@ -144,21 +144,16 @@
 <script lang="ts">
 import Vue from "vue"
 import {Component, Prop, Emit} from "vue-property-decorator"
-import {} from 'vue-class-component'
 import UiProp from './ui-prop.vue'
-import {setup} from "vue-class-component/dist/vue-class-component";
 
 @Component({
   components: {UiProp},
 })
 export default class NodeBaseProperty extends Vue {
   name: string = "node-base"
+  label: string = ''
 
-  // @Prop({required: false})
-  // label: string = ''
-  //
-  // @Prop({required: false})
-  // data: any = {};
+  @Prop() private  data: any = {};
 
   setup() {
     // computed({
@@ -166,6 +161,11 @@ export default class NodeBaseProperty extends Vue {
     //
     //   }
     // })
+  }
+
+  created() {
+
+    console.error(JSON.stringify(this.data))
   }
 
   itemData: any = {};

@@ -1,5 +1,3 @@
-const ChromeManifest = require("./plugins/chrome-manifest");
-const Path = require("path");
 module.exports = {
   publicPath: "/",
   outputDir: "dist",
