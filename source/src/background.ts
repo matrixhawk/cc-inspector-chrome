@@ -3,6 +3,7 @@ import * as  PluginMsg from "./core/plugin-msg"
 let Devtools: chrome.runtime.Port | null = null;
 let DevtoolsPanel: chrome.runtime.Port | null = null;
 let Content: chrome.runtime.Port | null = null;
+console.error('on background')
 
 function shortConnectionLink(request: any, sender: any, sendResponse: any) {
   // console.log(`%c[短连接|id:${sender.id}|url:${sender.url}]\n${JSON.stringify(request)}`, 'background:#aaa;color:#BD4E19')
@@ -28,7 +29,7 @@ function longConnectionLink(data: any, sender: any) {
 }
 
 // 长连接
-chrome.runtime.onConnect.addListener(function (port) {
+chrome.runtime.onConnect.addListener((port) => {
   console.log(`%c[长连接:${port.name}] 建立链接!`, "background:#aaa;color:#ff0000");
   port.onMessage.addListener(longConnectionLink);
   port.onDisconnect.addListener(function (port) {

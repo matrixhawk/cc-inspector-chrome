@@ -3,7 +3,6 @@
   "version": "1.1.0",
   "name": "Cocos Creator Inspector",
   "description": "Cocos Creator Inspector",
-  "default_locale": "en",
   "permissions": [
     "activeTab",
     "<all_urls>",

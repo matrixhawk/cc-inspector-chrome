@@ -1,4 +1,9 @@
 import * as PluginMsg from '../core/plugin-msg'
+console.log('on devtools')
+debugger
+import Manifest from '../manifest.json'
+Manifest.devtools_page
+
 // 对应的是Elements面板的边栏
 chrome.devtools.panels.elements.createSidebarPane('Cocos', function (sidebar) {
   sidebar.setObject({some_data: "some data to show!"});

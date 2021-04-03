@@ -14,20 +14,44 @@ module.exports = {
     devtools_panel: "src/devtools/panel/index.ts",
     test: "src/test/index.ts",
   },
-  configureWebpack: {
-    entry: {
-      content: Path.join(__dirname, "src/content.ts"),
-      background: Path.join(__dirname, "src/background.ts"),
-      inject: Path.join(__dirname, "src/inject.js"),
-      devtools: Path.join(__dirname, "src/devtools/main.ts"),
-    },
-    output: {
-      filename: "js/[name].js?t=[hash]"
-    },
-    plugins: [
-      new ChromeManifest({
-        manifest: Path.join(__dirname, "src/manifest/index.js")
-      }),
-    ]
-  }
+  pluginOptions: {
+    browserExtension: {
+      components: {
+        background: true,
+        devtools: true,
+        contentScripts: true,
+      },
+      componentOptions: {
+        contentScripts: {
+          entries: {
+            content: "src/content.ts"
+          },
+        },
+        background: {
+          entry: "src/background.ts",
+        },
+        devtools: {
+          entry: "src/devtools/main.ts",
+        }
+      }
+    }
+  },
+  // configureWebpack: {
+  //   mode: "development",
+  //   devtool: "#source-map",
+  //   entry: {
+  //     content: Path.join(__dirname, "src/content.ts"),
+  //     background: Path.join(__dirname, "src/background.ts"),
+  //     inject: Path.join(__dirname, "src/inject.js"),
+  //     devtools: Path.join(__dirname, "src/devtools/main.ts"),
+  //   },
+  //   output: {
+  //     filename: "js/[name].js?t=[hash]"
+  //   },
+  //   plugins: [
+  //     new ChromeManifest({
+  //       manifest: Path.join(__dirname, "src/manifest/index.js")
+  //     }),
+  //   ]
+  // }
 };

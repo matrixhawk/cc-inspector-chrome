@@ -42,6 +42,7 @@
 <script lang="ts">
 import {Component, Vue} from "vue-property-decorator";
 import HelloWorld from "./HelloWorld.vue";
+import Manifest from '../manifest.json'
 
 @Component({
   components: {
@@ -68,9 +69,9 @@ export default class App extends Vue {
 
   onClickOptions() {
     if (chrome && chrome.tabs) {
-      const manifest = require('../manifest/index')
-      if (manifest.options_page) {
-        chrome.tabs.create({url: manifest.options_page})
+      let {page} = Manifest.options_ui;
+      if (page) {
+        chrome.tabs.create({url: page})
       }
     }
   }
