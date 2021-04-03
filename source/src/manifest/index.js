@@ -10,17 +10,17 @@ module.exports = {
   icons: {
     48: "icon/icon48.png"
   },
-  devtools_page: "pages/devtools.html",
+  devtools_page: "devtools_panel.html",
   content_scripts: [
     {
       matches: ["<all_urls>"],
-      js: ["content.js"],
+      js: ["js/content.js"],
       run_at: "document_end",
       all_frames: true
     }
   ],
   background: {
-    scripts: ["background.js"],
+    scripts: ["js/background.js"],
     persistent: false,// 需要时开启
   },
   // optionsV1的写法

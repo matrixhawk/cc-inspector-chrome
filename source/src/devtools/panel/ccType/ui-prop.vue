@@ -24,13 +24,14 @@ import {Component, Prop} from "vue-property-decorator"
 @Component({})
 export default class UiProp extends Vue {
   @Prop()
-  name = null;
+  name: string = '';
 
   @Prop()
-  step = null;
+  step: number = 1;
+
   clientX: number = 0;
 
-  changePositionMouseAction(event) {
+  changePositionMouseAction(event: MouseEvent) {
     document.addEventListener("mousemove", this._onMouseMove);
     document.addEventListener("mouseup", this._onMouseUp);
     document.addEventListener("onselectstart", this._onSelect);
@@ -40,9 +41,9 @@ export default class UiProp extends Vue {
     return false;
   }
 
-  _onMouseMove(event) {
+  _onMouseMove(event: MouseEvent) {
     let x = event.clientX;
-    let calcStep = parseFloat(this.step) || 1;// 默认值为1
+    let calcStep = this.step;
     if (x > this.clientX) {
       calcStep = Math.abs(calcStep);
     } else {
@@ -52,7 +53,7 @@ export default class UiProp extends Vue {
     this.clientX = x;
   }
 
-  _onMouseUp(event) {
+  _onMouseUp(event: MouseEvent) {
     document.removeEventListener("mousemove", this._onMouseMove);
     document.removeEventListener("mouseup", this._onMouseUp);
     document.removeEventListener("onselectstart", this._onSelect);

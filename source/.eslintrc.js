@@ -21,6 +21,13 @@ module.exports = {
 
   rules: {
     "@typescript-eslint/explicit-module-boundary-types": "off",
-    "@typescript-eslint/no-unused-vars": "off"
+    "@typescript-eslint/no-unused-vars": "off",
+    "prettier/prettier": "off",
+    "no-empty": "off",
+    "prefer-const": "off",
+    "@typescript-eslint/no-var-requires": "off",
+    "no-undef": "off",
+    "no-debugger": "off",
+    "no-unreachable": "off",
   }
 };

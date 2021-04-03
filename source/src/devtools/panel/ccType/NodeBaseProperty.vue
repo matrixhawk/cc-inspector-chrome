@@ -145,9 +145,10 @@
 <script lang="ts">
 import Vue from "vue"
 import {Component, Prop} from "vue-property-decorator"
-import  UiProp from './ui-prop'
+import UiProp from './ui-prop.vue'
+
 @Component({
-  'ui-prop':UiProp
+  components: {UiProp},
 })
 export default class NodeBaseProperty extends Vue {
   name: string = "app"
@@ -155,28 +156,28 @@ export default class NodeBaseProperty extends Vue {
   @Prop()
   itemData: any = null;
 
-  changeSizeActionWidth(step:number) {
+  changeSizeActionWidth(step: number) {
     let w = parseFloat(this.itemData.width);
     this.itemData.width = w + step;
     this.changeSize();
   }
 
 
-  changeSizeActionHeight(step:number) {
+  changeSizeActionHeight(step: number) {
     let h = parseFloat(this.itemData.height);
     this.itemData.height = h + step;
     this.changeSize();
   }
 
 
-  changePositionActionX(step:number) {
+  changePositionActionX(step: number) {
     let x = parseFloat(this.itemData.x);
     this.itemData.x = x + step;
     this.changePosition();
   }
 
 
-  changePositionActionY(step:number) {
+  changePositionActionY(step: number) {
     let y = parseFloat(this.itemData.y);
     this.itemData.y = y + step;
     this.changePosition();
@@ -257,7 +258,7 @@ export default class NodeBaseProperty extends Vue {
   }
 
 
-  _evalCode(code:string) {
+  _evalCode(code: string) {
     if (chrome && chrome.devtools) {
       chrome.devtools.inspectedWindow.eval(code);
     } else {

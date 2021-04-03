@@ -1,5 +1,5 @@
 // eval 注入脚本的代码,变量尽量使用var,后来发现在import之后,let会自动变为var
-const PluginMsg = require("../core/plugin-msg");
+const PluginMsg = require("./core/plugin-msg");
 
 let cc_inspector = {
   inspectorGameMemoryStorage: {},

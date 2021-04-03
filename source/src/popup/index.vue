@@ -1,9 +1,9 @@
 <template>
   <div id="popup">
     <div style="display: flex;flex-direction: row;align-items: center;">
-      <h3 v-show="false">title</h3>
+      <h3>{{ title }}</h3>
       <div style="flex: 1"></div>
-      <el-button @click="onClickOptions">设置</el-button>
+      <el-button class="el-icon-setting" @click="onClickOptions"></el-button>
       <el-button @click="onMsgToBg">To-Bg</el-button>
       <el-button @click="onSendMsg">Msg</el-button>
     </div>
@@ -68,7 +68,10 @@ export default class App extends Vue {
 
   onClickOptions() {
     if (chrome && chrome.tabs) {
-      chrome.tabs.create({url: "pages/options.html"})
+      const manifest = require('../manifest/index')
+      if (manifest.options_page) {
+        chrome.tabs.create({url: manifest.options_page})
+      }
     }
   }
 
@@ -103,7 +106,6 @@ export default class App extends Vue {
   onSendMsg() {
     if (this.longConn) {
       this.longConn.postMessage({send: "hello"});
-      //@import "../index.less";
 
     }
   }
@@ -111,6 +113,8 @@ export default class App extends Vue {
 </script>
 
 <style scoped lang="less">
+@import "../index.less";
+
 #popup {
   width: auto;
 }

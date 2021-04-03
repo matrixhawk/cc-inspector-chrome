@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "vue-cli-service build --watch",
     "lint": "vue-cli-service lint",
     "prepare1": "vue-cli-service build --target lib --name content src/content.ts"
   },
   "dependencies": {
     "@types/fs-extra": "^9.0.9",
+    "@types/node": "^14.14.37",
     "babel-eslint": "^10.1.0",
     "core-js": "^3.6.5",
     "element-ui": "^2.15.1",
