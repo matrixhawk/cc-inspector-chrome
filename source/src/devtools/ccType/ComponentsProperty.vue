@@ -17,18 +17,24 @@
 <script lang="ts">
 import Vue from "vue"
 import {Component, Prop} from "vue-property-decorator";
+import UiProp from "@/devtools/ccType/ui-prop.vue"
 
-@Component({})
+@Component({
+  components: {
+    UiProp
+  }
+})
 export default class ComponentsProperty extends Vue {
-  name: string = "";
+  name: string = "components";
   isShowComp: boolean = true;
+
+  // @Prop()
+  components = ""
 
   onClickComp() {
     this.isShowComp = !this.isShowComp;
   }
 
-  @Prop()
-  components = ""
 }
 </script>
 
