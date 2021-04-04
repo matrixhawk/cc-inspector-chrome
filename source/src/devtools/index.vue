@@ -55,7 +55,7 @@ const PluginMsg = require("../core/plugin-msg");
   }
 })
 export default class Index extends Vue {
-  private isShowDebug: boolean = true;
+  private isShowDebug: boolean = false;
   treeItemData: Record<string, any> = {};
   treeData: Array<Record<string, any>> = []
   bgConn: chrome.runtime.Port | null = null// 与background.js的链接
@@ -342,8 +342,6 @@ export default class Index extends Vue {
 
   onBtnClickTest3() {
     // chrome.devtools.inspectedWindow.eval(`window.ccinspector.testMsg3()`)
-    let f = require("../core/event-mgr");
-    console.log(f.id);
   }
 
   onMemoryTest() {

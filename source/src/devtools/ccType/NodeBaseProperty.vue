@@ -30,8 +30,10 @@ export default class NodeBaseProperty extends Vue {
   @Prop({default: () => testData,})
   allGroup: Array<Record<string, any>> | undefined;
 
-  onClickHeader(group) {
-    group.fold = !group.fold;
+  onClickHeader(group: any) {
+    if (group && group.hasOwnProperty('fold')) {
+      group.fold = !group.fold;
+    }
   }
 
   @Prop({default: "label"})
@@ -44,9 +46,11 @@ export default class NodeBaseProperty extends Vue {
   }
 
   created() {
-    this.allGroup.forEach(item => {
-      this.$set(item, 'fold', false);
-    })
+    if (this.allGroup) {
+      this.allGroup.forEach(item => {
+        this.$set(item, 'fold', false);
+      })
+    }
   }
 
   changeSizeActionWidth(step: number) {

@@ -1,3 +1,4 @@
+const Copy = require("./plugins/copy");
 module.exports = {
   publicPath: "/",
   outputDir: "dist",
@@ -8,6 +9,9 @@ module.exports = {
   },
   pluginOptions: {
     browserExtension: {
+      extensionReloaderOptions: {
+        reloadPage: false,
+      },
       components: {
         background: true,
         contentScripts: true,
@@ -15,7 +19,8 @@ module.exports = {
       componentOptions: {
         contentScripts: {
           entries: {
-            content: "src/content.ts"
+            content: "src/content.ts",
+            inject: "src/inject.js"
           },
         },
         background: {
@@ -24,4 +29,9 @@ module.exports = {
       }
     }
   },
+  configureWebpack: {
+    plugins: [
+      // new Copy([{src: "src/inject.js", dest: "js/inject.js"}]),
+    ]
+  }
 };
