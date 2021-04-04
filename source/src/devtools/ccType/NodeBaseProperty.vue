@@ -1,156 +1,38 @@
 <template>
-  <div id="app">
-    <div>
-      <ui-prop name="uuid">
-        <span> {{ itemData.uuid }}</span>
-      </ui-prop>
-      <ui-prop name="name">
-        <span> {{ itemData.name }}</span>
-      </ui-prop>
-      <!--坐标-->
-      <ui-prop name="Position">
-        <div style="float: left;width: 100%;">
-          <ui-prop name="X" style="width: 50%;float: left; cursor: ew-resize;"
-                   @movestep="changePositionActionX"
-                   step="10">
-            <!--<span>{{itemData.x}}</span>-->
-            <input class="myInput"
-                   @change="changePosition"
-                   placeholder="itemData.x"
-                   v-model="itemData.x">
-          </ui-prop>
-          <ui-prop name="Y" style="width: 50%;float:left;cursor: ew-resize;"
-                   @movestep="changePositionActionY"
-                   step="10">
-            <!--<span>{{itemData.y}}</span>-->
-            <input class="myInput"
-                   @change="changePosition"
-                   placeholder="itemData.y"
-                   v-model="itemData.y">
-          </ui-prop>
-        </div>
-      </ui-prop>
-      <!--旋转-->
-      <!--rotationX, rotationY暂时舍弃显示-->
-      <ui-prop name="Rotation">
-        <span> {{ itemData.rotation }}</span>
-        <!--<input class="myInput"-->
-        <!--@change="changeRotation"-->
-        <!--placeholder="itemData.rotation"-->
-        <!--v-model="itemData.rotation"-->
-        <!--style="width: 98%">-->
-      </ui-prop>
-      <!--缩放-->
-      <ui-prop name="Scale">
-        <div style="float: left;width: 100%;">
-          <ui-prop name="X" style="width: 50%;float: left;">
-            <span>{{ itemData.scaleX }}</span>
-          </ui-prop>
-          <ui-prop name="Y" style="width: 50%;float:left;">
-            <span>{{ itemData.scaleY }}</span>
-          </ui-prop>
-        </div>
-      </ui-prop>
-      <!--锚点-->
-      <ui-prop name="Anchor">
-        <div style="float: left;width: 100%;">
-          <ui-prop name="X" style="width: 50%;float: left;">
-            <span>{{ itemData.anchorX }}</span>
-          </ui-prop>
-          <ui-prop name="Y" style="width: 50%;float:left;">
-            <span>{{ itemData.anchorY }}</span>
-          </ui-prop>
-        </div>
-      </ui-prop>
-      <!--尺寸-->
-      <ui-prop name="Size">
-        <div style="float: left;width: 100%;">
-          <ui-prop name="W" style="width: 50%;float: left;cursor: ew-resize;"
-                   @movestep="changeSizeActionWidth"
-                   step="10">
-            <!--<span>{{itemData.width}}</span>-->
-            <input class="myInput"
-                   @change="changeSize"
-                   placeholder="itemData.width"
-                   v-model="itemData.width">
-          </ui-prop>
-          <ui-prop name="H" style="width: 50%;float:left;cursor: ew-resize;"
-                   @movestep="changeSizeActionHeight"
-                   step="10">
-            <!--<span>{{itemData.height}}</span>-->
-            <input class="myInput"
-                   @change="changeSize"
-                   placeholder="itemData.height"
-                   v-model="itemData.height">
-          </ui-prop>
-        </div>
-      </ui-prop>
-      <!--透明度-->
-      <ui-prop name="Opacity">
-        <span>{{ itemData.opacity }}</span>
-      </ui-prop>
-      <!--斜切-->
-      <ui-prop name="Skew">
-        <div style="float: left;width: 100%;">
-          <ui-prop name="X" style="width: 50%;float: left;">
-            <span>{{ itemData.skewX }}</span>
-          </ui-prop>
-          <ui-prop name="Y" style="width: 50%;float:left;">
-            <span>{{ itemData.skewY }}</span>
-          </ui-prop>
-        </div>
-      </ui-prop>
-    </div>
-    <ui-prop name="zIndex">
-      <span>{{ itemData.zIndex }}</span>
-    </ui-prop>
-    <ui-prop name="childrenCount">
-      <span>{{ itemData.childrenCount }}</span>
-    </ui-prop>
-    <!--节点状态-->
-    <ui-prop name="active">
-      <p v-if="itemData.active" style="margin: 0;display: flex;align-items: center;flex-wrap: wrap;">
-        <input type="checkbox"
-               style="width: 20px;height: 20px;"
-               :checked.sync="itemData.active"
-               @click="onBtnClickNodeHide">
-        隐藏节点
-      </p>
-
-      <p v-if="!itemData.active" style="margin: 0;display: flex;align-items: center;flex-wrap: wrap;">
-        <input type="checkbox"
-               style="width: 20px;height: 20px;"
-               :checked="itemData.active"
-               @click="onBtnClickNodeShow"
-        >
-        显示节点
-      </p>
-    </ui-prop>
-    <!--颜色-->
-    <ui-prop name="color">
-      <div style="display: flex;flex-direction: row;justify-content: center;">
-        <div style="display: flex;flex:1;">
-
-          <el-color-picker v-model="itemData.color" size="mini" style="flex:1;margin: 0;"
-                           @change="changeColor"></el-color-picker>
-        </div>
-        <span style="width: 60px;">{{ itemData.color }}</span>
-
+  <div id="prop">
+    <div v-for="(group, index) in allGroup" :key="index" class="group">
+      <div class="header" @click="onClickHeader(group)">
+        <i v-if="group.fold" class="el-icon-caret-right"></i>
+        <i v-if="!group.fold" class="el-icon-caret-bottom"></i>
+        {{ group.name }}
       </div>
-    </ui-prop>
+      <div class="content" v-show="!group.fold">
+        <ui-prop v-for="(item, index) in group.data" :key="index"
+                 :name="item.name" :value="item.value">
+        </ui-prop>
+      </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue"
-import {Component, Prop, Emit} from "vue-property-decorator"
+import {Component, Prop} from "vue-property-decorator"
 import UiProp from "./ui-prop.vue"
+import {DataType} from "../data";
 
 @Component({
   components: {UiProp},
 })
 export default class NodeBaseProperty extends Vue {
   name: string = "node-base"
+
+  @Prop()
+  allGroup: Array<Record<string, any>> | undefined;
+
+  onClickHeader(group) {
+    group.fold = !group.fold;
+  }
 
   @Prop({default: "label"})
   private label?: string | undefined
@@ -159,14 +41,84 @@ export default class NodeBaseProperty extends Vue {
   private itemData: any;
 
   setup() {
-    // computed({
-    //   get: () => {
-    //
-    //   }
-    // })
   }
 
   created() {
+    this.setTestData()
+    this.allGroup.forEach(item => {
+      this.$set(item, 'fold', false);
+    })
+  }
+
+  setTestData() {
+    this.allGroup = [
+      {
+        name: "group1",
+        data: [
+          {name: "uuid", value: {type: DataType.String, data: 'abc'}},
+          {name: "opacity", value: {type: DataType.Number, data: 100}},
+
+          {
+            name: "size",
+            value: {
+              type: DataType.Vec2,
+              data: [
+                {name: "X", value: {type: DataType.Number, data: 100}},
+                {name: "Y", value: {type: DataType.Number, data: 200}},
+              ]
+            }
+          },
+          {
+            name: "position",
+            value: {
+              type: DataType.Vec3,
+              data: [
+                {name: "X", value: {type: DataType.Number, data: 100}},
+                {name: "Y", value: {type: DataType.Number, data: 200}},
+                {name: "Z", value: {type: DataType.Number, data: 300}},
+              ]
+            }
+          },
+          {
+            name: "layout",
+            value: {
+              type: DataType.Enum,
+              data: 1,
+              values: [
+                {name: "horizontal", value: 1},
+                {name: "vertical", value: 2},
+              ]
+            }
+          },
+          {
+            name: "text",
+            value: {
+              type: DataType.Text,
+              data: 'aaaaaaaaafsf',
+            }
+          }
+        ]
+      },
+      {
+        name: "group2",
+        data: [
+          {
+            name: "bool", value: {
+              type: DataType.Bool,
+              data: true,
+            }
+          },
+          {
+            name: 'color',
+            value: {
+              type: DataType.Color,
+              data: '#ff0000'
+            }
+          }
+        ]
+      },
+    ];
+
   }
 
   changeSizeActionWidth(step: number) {
@@ -198,8 +150,6 @@ export default class NodeBaseProperty extends Vue {
 
 
   changePosition() {
-    // console.log("change changePositionX:" + this.itemData.x);
-    // console.log("change changePositionY:" + this.itemData.y);
     this._evalCode(
         "window.ccinspector.pluginSetNodePosition(" +
         "'" + this.itemData.uuid + "'," +
@@ -211,8 +161,6 @@ export default class NodeBaseProperty extends Vue {
 
 
   changeSize() {
-    // console.log("change width:" + this.itemData.width);
-    // console.log("change height:" + this.itemData.height);
     this._evalCode(
         "window.ccinspector.pluginSetNodeSize(" +
         "'" + this.itemData.uuid + "'," +
@@ -283,36 +231,26 @@ export default class NodeBaseProperty extends Vue {
 }
 </script>
 
-<style scoped>
-span {
-  color: #fd942b;
-}
+<style scoped lang="less">
+#prop {
+  .group {
+    .header {
+      height: 40px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      user-select: none;
+      cursor: pointer;
+      border-bottom: 1px #6d6d6d solid;
+    }
 
-.btnSize {
-  padding: 5px 10px;
-}
+    .header:hover {
+      color: #6d6d6d;
+    }
 
-.comp {
-  border: 2px solid #a1a1a1;
-  padding: 5px 5px;
-  background: #dddddd;
-  width: 100%;
-  border-radius: 5px;
-  -moz-border-radius: 5px; /* 老的 Firefox */
-}
-
-.float-left {
-  float: left;
-}
-
-.compBorder {
-  border: 1px solid #b3b3b3;
-  background: #ffffff
-}
-
-.myInput {
-  width: 90%;
-  border-radius: 5px;
-  color: #fd942b;
+    .content {
+      padding: 0 5px;
+    }
+  }
 }
 </style>
