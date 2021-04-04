@@ -34,7 +34,11 @@
                    :value="opt.value">
         </el-option>
       </el-select>
-
+      <el-checkbox v-model="value.data" v-if="isBool()"></el-checkbox>
+      <div class="color" v-if="isColor()">
+        <el-color-picker style="position: absolute;" v-model="value.data"></el-color-picker>
+        <div class="hex" :style="{color:colorReverse(value.data)}">{{ value.data }}</div>
+      </div>
       <div class="slot">
         <slot></slot>
       </div>
@@ -43,10 +47,14 @@
 </template>
 
 <script lang="ts">
+
 import Vue from "vue"
 import {Component, Prop} from "vue-property-decorator"
+import {DataType} from '../data'
 
-@Component({})
+@Component({
+  components: {}
+})
 export default class UiProp extends Vue {
   @Prop({default: ""})
   name: string | undefined;
@@ -56,27 +64,35 @@ export default class UiProp extends Vue {
   value: Record<string, any> | undefined | any;
 
   isString() {
-    return this.value && (this.value.type === 'string');
+    return this.value && (this.value.type === DataType.String);
   }
 
   isText() {
-    return this.value && (this.value.type === 'text');
+    return this.value && (this.value.type === DataType.Text);
   }
 
   isNumber() {
-    return this.value && (this.value.type === 'number');
+    return this.value && (this.value.type === DataType.Number);
   }
 
   isVec2() {
-    return this.value && (this.value.type === 'vec2');
+    return this.value && (this.value.type === DataType.Vec2);
   }
 
   isVec3() {
-    return this.value && (this.value.type === 'vec3');
+    return this.value && (this.value.type === DataType.Vec3);
   }
 
   isEnum() {
-    return this.value && (this.value.type === 'enum');
+    return this.value && (this.value.type === DataType.Enum);
+  }
+
+  isBool() {
+    return this.value && (this.value.type === DataType.Bool);
+  }
+
+  isColor() {
+    return this.value && (this.value.type === DataType.Color);
   }
 
   created() {
@@ -92,6 +108,12 @@ export default class UiProp extends Vue {
     document.addEventListener("mousemove", this._onMouseMove);
     document.addEventListener("mouseup", this._onMouseUp);
     document.addEventListener("onselectstart", this._onSelect);
+  }
+
+  colorReverse(OldColorValue) {
+    OldColorValue = "0x" + OldColorValue.replace(/#/g, "");
+    var str = "000000" + (0xFFFFFF - OldColorValue).toString(16);
+    return '#' + str.substring(str.length - 6, str.length);
   }
 
   _onSelect() {
@@ -150,11 +172,26 @@ export default class UiProp extends Vue {
   .value {
     flex: 3;
     text-align: left;
+    height: 100%;
+
+    .color {
+      position: relative;
+      height: 30px;
+
+      .hex {
+        line-height: 30px;
+        position: relative;
+        text-align: center;
+        user-select: none;
+        pointer-events: none;
+      }
+    }
 
     .vec {
       width: 100%;
       display: flex;
       flex-direction: row;
+      align-items: center;
 
       #ui-prop {
         margin-top: 0;
