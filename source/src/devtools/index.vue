@@ -28,13 +28,8 @@
         </div>
       </div>
       <div class="right">
-        <div class="  bg-purple-light treeInfo">
-          <NodeBaseProperty :item-data="treeItemData"></NodeBaseProperty>
-          <SceneProperty v-show="treeItemData.type === 'cc_Scene'"></SceneProperty>
-          <ComponentsProperty components.sync="treeItemData.components"></ComponentsProperty>
-        </div>
+        <NodeBaseProperty :item-data="treeItemData"></NodeBaseProperty>
       </div>
-
     </div>
     <div v-show="!isShowDebug" class="no-find">
       <span>未发现cocos creator的游戏!</span>
@@ -421,21 +416,9 @@ export default class Index extends Vue {
 
     .right {
       flex: 2;
+      background: #e5e9f2;
+      overflow: scroll;
     }
   }
-}
-
-
-.treeInfo {
-  height: 100%
-}
-
-.bg-purple {
-  background: #d3dce6;
-}
-
-
-.bg-purple-light {
-  background: #e5e9f2;
 }
 </style>

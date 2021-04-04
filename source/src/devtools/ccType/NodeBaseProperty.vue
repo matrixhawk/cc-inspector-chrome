@@ -19,7 +19,7 @@
 import Vue from "vue"
 import {Component, Prop} from "vue-property-decorator"
 import UiProp from "./ui-prop.vue"
-import {DataType} from "../data";
+import {DataType, testData} from "../data";
 
 @Component({
   components: {UiProp},
@@ -27,7 +27,7 @@ import {DataType} from "../data";
 export default class NodeBaseProperty extends Vue {
   name: string = "node-base"
 
-  @Prop()
+  @Prop({default: () => testData,})
   allGroup: Array<Record<string, any>> | undefined;
 
   onClickHeader(group) {
@@ -44,81 +44,9 @@ export default class NodeBaseProperty extends Vue {
   }
 
   created() {
-    this.setTestData()
     this.allGroup.forEach(item => {
       this.$set(item, 'fold', false);
     })
-  }
-
-  setTestData() {
-    this.allGroup = [
-      {
-        name: "group1",
-        data: [
-          {name: "uuid", value: {type: DataType.String, data: 'abc'}},
-          {name: "opacity", value: {type: DataType.Number, data: 100}},
-
-          {
-            name: "size",
-            value: {
-              type: DataType.Vec2,
-              data: [
-                {name: "X", value: {type: DataType.Number, data: 100}},
-                {name: "Y", value: {type: DataType.Number, data: 200}},
-              ]
-            }
-          },
-          {
-            name: "position",
-            value: {
-              type: DataType.Vec3,
-              data: [
-                {name: "X", value: {type: DataType.Number, data: 100}},
-                {name: "Y", value: {type: DataType.Number, data: 200}},
-                {name: "Z", value: {type: DataType.Number, data: 300}},
-              ]
-            }
-          },
-          {
-            name: "layout",
-            value: {
-              type: DataType.Enum,
-              data: 1,
-              values: [
-                {name: "horizontal", value: 1},
-                {name: "vertical", value: 2},
-              ]
-            }
-          },
-          {
-            name: "text",
-            value: {
-              type: DataType.Text,
-              data: 'aaaaaaaaafsf',
-            }
-          }
-        ]
-      },
-      {
-        name: "group2",
-        data: [
-          {
-            name: "bool", value: {
-              type: DataType.Bool,
-              data: true,
-            }
-          },
-          {
-            name: 'color',
-            value: {
-              type: DataType.Color,
-              data: '#ff0000'
-            }
-          }
-        ]
-      },
-    ];
-
   }
 
   changeSizeActionWidth(step: number) {
