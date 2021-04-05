@@ -1,3 +1,5 @@
+const Path = require("path");
+
 module.exports = {
   publicPath: "/",
   outputDir: "dist",
@@ -24,4 +26,11 @@ module.exports = {
       }
     }
   },
+  configureWebpack: {
+    mode: "development",
+    devtool: "#source-map",
+    entry: {
+      inject: Path.join(__dirname, "src/inject.js"),
+    }
+  }
 };
