@@ -32,7 +32,7 @@ module.exports = {
     devtool: "#source-map",
     entry: {
       inject: Path.join(__dirname, "src/inject.js"),
-    }
+    },
     plugins: [
       // new Copy([{src: "src/inject.js", dest: "js/inject.js"}]),
     ]
