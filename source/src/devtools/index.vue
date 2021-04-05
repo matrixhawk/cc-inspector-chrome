@@ -28,13 +28,8 @@
         </div>
       </div>
       <div class="right">
-        <div class="  bg-purple-light treeInfo">
-          <NodeBaseProperty :item-data="treeItemData"></NodeBaseProperty>
-          <SceneProperty v-show="treeItemData.type === 'cc_Scene'"></SceneProperty>
-          <ComponentsProperty components.sync="treeItemData.components"></ComponentsProperty>
-        </div>
+        <NodeBaseProperty :item-data="treeItemData"></NodeBaseProperty>
       </div>
-
     </div>
     <div v-show="!isShowDebug" class="no-find">
       <span>未发现cocos creator的游戏!</span>
@@ -60,7 +55,7 @@ const PluginMsg = require("../core/plugin-msg");
   }
 })
 export default class Index extends Vue {
-  private isShowDebug: boolean = true;
+  private isShowDebug: boolean = false;
   treeItemData: Record<string, any> = {};
   treeData: Array<Record<string, any>> = []
   bgConn: chrome.runtime.Port | null = null// 与background.js的链接
@@ -347,8 +342,6 @@ export default class Index extends Vue {
 
   onBtnClickTest3() {
     // chrome.devtools.inspectedWindow.eval(`window.ccinspector.testMsg3()`)
-    let f = require("../core/event-mgr");
-    console.log(f.id);
   }
 
   onMemoryTest() {
@@ -421,21 +414,9 @@ export default class Index extends Vue {
 
     .right {
       flex: 2;
+      background: #e5e9f2;
+      overflow: scroll;
     }
   }
-}
-
-
-.treeInfo {
-  height: 100%
-}
-
-.bg-purple {
-  background: #d3dce6;
-}
-
-
-.bg-purple-light {
-  background: #e5e9f2;
 }
 </style>

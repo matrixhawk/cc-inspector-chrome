@@ -1,5 +1,5 @@
+const Copy = require("./plugins/copy");
 const Path = require("path");
-
 module.exports = {
   publicPath: "/",
   outputDir: "dist",
@@ -17,7 +17,8 @@ module.exports = {
       componentOptions: {
         contentScripts: {
           entries: {
-            content: "src/content.ts"
+            content: "src/content.ts",
+            inject: "src/inject.js"
           },
         },
         background: {
@@ -32,5 +33,8 @@ module.exports = {
     entry: {
       inject: Path.join(__dirname, "src/inject.js"),
     }
+    plugins: [
+      // new Copy([{src: "src/inject.js", dest: "js/inject.js"}]),
+    ]
   }
 };
