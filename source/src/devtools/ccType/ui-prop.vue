@@ -112,7 +112,7 @@ export default class UiProp extends Vue {
 
   colorReverse(OldColorValue: string) {
     OldColorValue = "0x" + OldColorValue.replace(/#/g, "");
-    var str = "000000" + (0xFFFFFF - OldColorValue).toString(16);
+    var str = "000000" + (0xFFFFFF - parseInt(OldColorValue)).toString(16);
     return '#' + str.substring(str.length - 6, str.length);
   }
 
