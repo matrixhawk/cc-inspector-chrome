@@ -7,6 +7,9 @@ export enum DataType {
   Enum,
   Bool,
   Color,
+  NullOrUndefined,
+  Array, // 暂时在控制台打印下
+  Object,
 }
 
 class Info {
@@ -18,6 +21,28 @@ export class TextData extends Info {
   constructor() {
     super();
     this.type = DataType.Text;
+  }
+}
+
+export class ArrayData extends Info {
+  constructor() {
+    super();
+    this.type = DataType.Array;
+  }
+}
+
+export class ObjectData extends Info {
+  constructor() {
+    super();
+    this.type = DataType.Object;
+  }
+}
+
+export class NullOrUndefinedData extends Info {
+  constructor() {
+    super();
+    this.type = DataType.NullOrUndefined;
+
   }
 }
 

@@ -11,6 +11,9 @@ if (chrome && chrome.devtools) {
   chrome.devtools.panels.create("Cocos", "icons/48.png", Manifest.devtools_page, (panel: chrome.devtools.panels.ExtensionPanel) => {
       console.log("[CC-Inspector] Dev Panel Created!");
       let conn = chrome.runtime.connect({name: PluginMsg.Page.DevToolsPanel});
+      conn.onDisconnect.addListener(() => {
+        console.log(`%c[Connect-Dis]`, 'color:red;')
+      })
       conn.onMessage.addListener((event, sender) => {
         console.log(`[Message] ${JSON.stringify(event)}`);
       });

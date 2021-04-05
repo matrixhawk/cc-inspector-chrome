@@ -1,14 +1,20 @@
 // eval 注入脚本的代码,变量尽量使用var,后来发现在import之后,let会自动变为var
 const PluginMsg = require("./core/plugin-msg");
-import {BoolData, ColorData, Group, NumberData, Property, StringData, Vec2Data, Vec3Data} from "./devtools/data";
+import {
+  ArrayData,
+  BoolData,
+  ColorData,
+  Group,
+  NullOrUndefinedData,
+  NumberData, ObjectData,
+  Property,
+  StringData,
+  Vec2Data,
+  Vec3Data
+} from "./devtools/data";
 
 let cc_inspector = {
   inspectorGameMemoryStorage: {},
-  msgType: {
-    nodeInfo: 2,//节点信息
-    nodeListInfo: 1,// 节点列表信息
-    notSupport: 0,// 不支持的游戏
-  },
   postData: {
     scene: {
       name: "",
@@ -45,12 +51,26 @@ let cc_inspector = {
           let node = sceneChildren[i];
           this.getNodeChildren(node, sendData.children);
         }
-        // console.log(postData);
         this.sendMsgToDevTools(PluginMsg.Msg.ListInfo, sendData);
       } else {
         this.sendMsgToDevTools(PluginMsg.Msg.Support, {support: false, msg: "未发现游戏场景,不支持调试游戏!"});
       }
     }
+  },
+  // 收集节点信息
+  getNodeChildren(node, data) {
+    let nodeData = {
+      uuid: node.uuid,
+      name: node.name,
+      children: [],
+    };
+    this.inspectorGameMemoryStorage[node.uuid] = node;
+    let nodeChildren = node.getChildren();
+    for (let i = 0; i < nodeChildren.length; i++) {
+      let childItem = nodeChildren[i];
+      this.getNodeChildren(childItem, nodeData.children);
+    }
+    data.push(nodeData);
   },
   // 检测是否包含cc变量
   checkIsGamePage() {
@@ -58,53 +78,6 @@ let cc_inspector = {
     this.sendMsgToDevTools(PluginMsg.Msg.Support, {support: isCocosGame});
     return isCocosGame;
   },
-
-  testMsg2() {
-    chrome.runtime.connect({name: "inject"});
-  },
-  // 收集组件信息
-  getNodeComponentsInfo(node) {
-    let ret = [];
-    let nodeComp = node._components;
-    for (let i = 0; i < nodeComp.length; i++) {
-      let itemComp = nodeComp[i];
-      this.inspectorGameMemoryStorage[itemComp.uuid] = itemComp;
-      ret.push({
-        uuid: itemComp.uuid,
-        type: itemComp.constructor.name,
-        name: itemComp.name,
-      });
-    }
-    return ret;
-  },
-
-  pluginSetNodeColor(uuid, colorHex) {
-    let node = this.inspectorGameMemoryStorage[uuid];
-    if (node) {
-      node.color = cc.hexToColor(colorHex);
-    }
-  },
-  pluginSetNodeRotation(uuid, rotation) {
-    let node = this.inspectorGameMemoryStorage[uuid];
-    if (node) {
-      node.rotation = rotation;
-    }
-  },
-  pluginSetNodePosition(uuid, x, y) {
-    let node = this.inspectorGameMemoryStorage[uuid];
-    if (node) {
-      node.x = x;
-      node.y = y;
-    }
-  },
-  pluginSetNodeSize(uuid, width, height) {
-    let node = this.inspectorGameMemoryStorage[uuid];
-    if (node) {
-      node.width = width;
-      node.height = height;
-    }
-  },
-  // 设置节点是否可视
   pluginSetNodeActive(uuid, isActive) {
     let node = this.inspectorGameMemoryStorage[uuid];
     if (node) {
@@ -117,7 +90,7 @@ let cc_inspector = {
   },
   _getNodeKeys(node) {
     let keys = [];
-    let excludeProperty = ["children", "quat"];
+    let excludeProperty = ["children", "quat", "node"];
     for (let key in node) {
       if (!key.startsWith("_") &&
           !excludeProperty.includes(key) &&
@@ -134,7 +107,7 @@ let cc_inspector = {
       size: ["width", "height"],
       position: ["x", "y", "z"],
       scale: ["scaleX", "scaleY", "scaleZ"],
-
+      designResolution: ["width", "height"], // 这个比较特殊，在key下边，其他的都不是在key下
     };
     for (let value in pairProperty) {
       let pair = pairProperty[value];
@@ -157,8 +130,12 @@ let cc_inspector = {
         info = new StringData(propertyValue);
         break;
       default:
-        if (Array.isArray(propertyValue)) {
-
+        if (propertyValue == null || typeof propertyValue === "undefined") {
+          info = new NullOrUndefinedData();
+        } else if (Array.isArray(propertyValue)) {
+          info = new ArrayData();
+        } else if (propertyValue instanceof Object) {
+          info = new ObjectData();
         } else if (propertyValue instanceof cc.Color) {
           let hex = propertyValue.toHEX();
           info = new ColorData(`#${hex}`);
@@ -171,85 +148,76 @@ let cc_inspector = {
     }
     return info;
   },
+  _getGroupData(node) {
+    let nodeGroup = new Group(node.constructor.name);
+    let keys = this._getNodeKeys(node);
+    for (let i = 0; i < keys.length; i++) {
+      let key = keys[i];
+      let propertyValue = node[key];
+      let pair = this._getPairProperty(key);
+      if (pair) {
+        // 把这个成对的属性剔除掉
+        pair.values.forEach(item => {
+          let index = keys.findIndex(el => el === item);
+          if (index !== -1) {
+            keys.splice(index, 1);
+          }
+        });
+        // 序列化成对的属性
+        let info = null;
+        let pairValues = pair.values;
+        if (pairValues.length === 2) {
+          info = new Vec2Data();
+        } else if (pairValues.length === 3) {
+          info = new Vec3Data();
+        }
+        pairValues.forEach(el => {
+          if (el in node) {
+            let vecData = this._genInfoData(node[el]);
+            if (vecData) {
+              info.add(new Property(el, vecData));
+            }
+          } else {
+            console.warn(`属性异常，节点丢失属性: ${el}，请检查 pairProperty的设置`);
+          }
+        });
+        if (info) {
+          let property = new Property(pair.key, info);
+          nodeGroup.addProperty(property);
+        }
+      } else {
+        let info = this._genInfoData(propertyValue);
+        if (info) {
+          nodeGroup.addProperty(new Property(key, info));
+        }
+      }
+    }
+    return nodeGroup;
+  },
   // 获取节点信息
   getNodeInfo(uuid) {
     debugger
     let node = this.inspectorGameMemoryStorage[uuid];
     if (node) {
-      let nodeGroup = new Group("Node");
-      let keys = this._getNodeKeys(node);
-      for (let i = 0; i < keys.length; i++) {
-        let key = keys[i];
-        let propertyValue = node[key];
-        let pair = this._getPairProperty(key);
-        if (pair) {
-          // 把这个成对的属性剔除掉
-          pair.values.forEach(item => {
-            let index = keys.findIndex(el => el === item);
-            if (index !== -1) {
-              keys.splice(index, 1);
-            }
-          });
-          // 序列化成对的属性
-          let info = null;
-          let pairValues = pair.values;
-          if (pairValues.length === 2) {
-            info = new Vec2Data();
-          } else if (pairValues.length === 3) {
-            info = new Vec3Data();
-          }
-          pairValues.forEach(el => {
-            if (el in node) {
-              let vecData = this._genInfoData(node[el]);
-              if (vecData) {
-                info.add(new Property(el, vecData));
-              }
-            } else {
-              console.warn(`属性异常，节点丢失属性: ${el}，请检查 pairProperty的设置`);
-            }
-          });
-          if (info) {
-            let property = new Property(pair.key, info);
-            nodeGroup.addProperty(property);
-          }
-        } else {
-          let info = this._genInfoData(propertyValue);
-          if (info) {
-            nodeGroup.addProperty(new Property(key, info));
-          }
-        }
+      let groupData = [];
+      // 收集节点信息
+      let nodeGroup = this._getGroupData(node);
+      groupData.push(nodeGroup);
+      // 收集组件信息
+      let nodeComp = node._components;
+      for (let i = 0; i < nodeComp.length; i++) {
+        let itemComp = nodeComp[i];
+        this.inspectorGameMemoryStorage[itemComp.uuid] = itemComp;
+        let compGroup = this._getGroupData(itemComp);
+        groupData.push(compGroup);
       }
-
-
-      let nodeComp = this.getNodeComponentsInfo(node);
-      let nodeData = {
-        type: node.constructor.name,
-        components: nodeComp
-      };
-      this.sendMsgToDevTools(PluginMsg.Msg.NodeInfo, nodeGroup);
+      this.sendMsgToDevTools(PluginMsg.Msg.NodeInfo, groupData);
     } else {
       // 未获取到节点数据
       console.log("未获取到节点数据");
     }
   },
 
-  // 收集节点信息
-  getNodeChildren(node, data) {
-    // console.log("nodeName: " + node.name);
-    let nodeData = {
-      uuid: node.uuid,
-      name: node.name,
-      children: [],
-    };
-    this.inspectorGameMemoryStorage[node.uuid] = node;
-    let nodeChildren = node.getChildren();
-    for (let i = 0; i < nodeChildren.length; i++) {
-      let childItem = nodeChildren[i];
-      // console.log("childName: " + childItem.name);
-      this.getNodeChildren(childItem, nodeData.children);
-    }
-    data.push(nodeData);
-  },
   sendMsgToDevTools(msg, data) {
     // 发送给content.js处理
     window.postMessage({msg: msg, data: data}, "*");

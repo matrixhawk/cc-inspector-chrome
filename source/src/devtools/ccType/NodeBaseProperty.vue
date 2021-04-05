@@ -50,65 +50,6 @@ export default class NodeBaseProperty extends Vue {
     }
   }
 
-  changeSizeActionWidth(step: number) {
-    let w = parseFloat(this.itemData.width);
-    // this.itemData.width = w + step;
-    this.changeSize();
-  }
-
-
-  changeSizeActionHeight(step: number) {
-    let h = parseFloat(this.itemData.height);
-    // this.itemData.height = h + step;
-    this.changeSize();
-  }
-
-
-  changePositionActionX(step: number) {
-    let x = parseFloat(this.itemData.x);
-    // this.itemData.x = x + step;
-    this.changePosition();
-  }
-
-
-  changePositionActionY(step: number) {
-    let y = parseFloat(this.itemData.y);
-    // this.itemData.y = y + step;
-    this.changePosition();
-  }
-
-
-  changePosition() {
-    this._evalCode(
-        "window.ccinspector.pluginSetNodePosition(" +
-        "'" + this.itemData.uuid + "'," +
-        "'" + this.itemData.x + "'," +
-        "'" + this.itemData.y + "'" +
-        ")");
-    this._freshNode();
-  }
-
-
-  changeSize() {
-    this._evalCode(
-        "window.ccinspector.pluginSetNodeSize(" +
-        "'" + this.itemData.uuid + "'," +
-        "'" + this.itemData.width + "'," +
-        "'" + this.itemData.height + "'" +
-        ")");
-    this._freshNode();
-  }
-
-
-  changeRotation() {
-    console.log("change rotation:" + this.itemData.rotation);
-    this._evalCode(
-        "window.ccinspector.pluginSetNodeRotation('" +
-        this.itemData.uuid + "','" +
-        this.itemData.rotation + "')");
-    this._freshNode();
-  }
-
 
   changeColor() {
     let color = this.itemData.color;
@@ -119,27 +60,6 @@ export default class NodeBaseProperty extends Vue {
         color + "');");
     this._freshNode();
   }
-
-
-  onBtnClickNodeHide() {
-    let uuid = this.itemData.uuid;
-    if (uuid !== undefined) {
-      let code = "window.ccinspector.pluginSetNodeActive('" + uuid + "', 0);";
-      this._evalCode(code);
-      this._freshNode();
-    }
-  }
-
-
-  onBtnClickNodeShow() {
-    let uuid = this.itemData.uuid;
-    if (uuid !== undefined) {
-      let code = "window.ccinspector.pluginSetNodeActive('" + uuid + "', 1);";
-      this._evalCode(code);
-      this._freshNode();
-    }
-  }
-
 
   _freshNode() {
     let uuid = this.itemData.uuid;
@@ -155,8 +75,6 @@ export default class NodeBaseProperty extends Vue {
       console.log(code);
     }
   }
-
-
 }
 </script>
 
