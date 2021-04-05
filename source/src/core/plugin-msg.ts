@@ -1,10 +1,10 @@
 export const Page = {
-  Inject: "inject.js",
-  Devtools: "devtools.js",
+  Inject: "Inject",
+  Devtools: "Devtools",
   DevToolsPanel: "DevToolsPanel",
-  Content: "content.js",
-  Popup: "popup.js",
-  Options: "options.js",
+  Content: "Content",
+  Popup: "Popup",
+  Options: "Options",
 }
 export const Msg = {
   NodeInfo: "node_info",// 具体的节点信息

@@ -39,9 +39,6 @@ export default class NodeBaseProperty extends Vue {
   @Prop({default: "label"})
   private label?: string | undefined
 
-  @Prop()
-  private itemData: any;
-
   setup() {
   }
 

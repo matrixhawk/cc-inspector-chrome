@@ -2,8 +2,6 @@
   <div id="devtools">
     <div v-show="isShowDebug" class="find">
       <div v-if="false">
-        <el-button type="success" @click="onBtnClickTest1">Test1</el-button>
-        <el-button type="success" @click="onBtnClickTest2">Test2</el-button>
         <el-button type="success" @click="onMemoryTest">内存测试</el-button>
       </div>
       <div v-if="false">
@@ -28,7 +26,7 @@
         </div>
       </div>
       <div class="right">
-        <NodeBaseProperty :item-data="treeItemData"></NodeBaseProperty>
+        <NodeBaseProperty :all-group="treeItemData"></NodeBaseProperty>
       </div>
     </div>
     <div v-show="!isShowDebug" class="no-find">
@@ -56,7 +54,7 @@ const PluginMsg = require("../core/plugin-msg");
 })
 export default class Index extends Vue {
   private isShowDebug: boolean = false;
-  treeItemData: Record<string, any> = {};
+  treeItemData: Array<Record<string, any>> = [];
   treeData: Array<Record<string, any>> = []
   bgConn: chrome.runtime.Port | null = null// 与background.js的链接
 
@@ -97,11 +95,17 @@ export default class Index extends Vue {
       let eventMsg = data.msg;
       if (eventMsg === PluginMsg.Msg.ListInfo) {
         this.isShowDebug = true;
-        this._updateTreeView(eventData);
+        if (!Array.isArray(eventData)) {
+          eventData = [eventData]
+        }
+        this.treeData = eventData;
       } else if (eventMsg === PluginMsg.Msg.Support) {
         this.isShowDebug = eventData.support;
       } else if (eventMsg === PluginMsg.Msg.NodeInfo) {
         this.isShowDebug = true;
+        if (!Array.isArray(eventData)) {
+          eventData = [eventData]
+        }
         this.treeItemData = eventData;
       } else if (eventMsg === PluginMsg.Msg.MemoryInfo) {
         this.memory = eventData;
@@ -114,27 +118,6 @@ export default class Index extends Vue {
     for (let i = 0; i < 40; i++) {
       this.treeData.push({name: `node${i}`, children: [{name: `children11111111111111111111111111111111111111${i}`}]})
     }
-
-    this.treeItemData = {
-      "uuid": "11",
-      "name": "name",
-      "type": "cc_Node",
-      "height": 1080.986301369863,
-      "color": "#fff85f",
-      "opacity": 255,
-      "components": [
-        {
-          "uuid": "Comp.931",
-          "type": "cc_Canvas",
-          "name": "Canvas<Canvas>"
-        },
-        {
-          "uuid": "Comp.932",
-          "type": "HotUpdateScene",
-          "name": "Canvas<HotUpdateScene>"
-        }],
-      "active": true
-    };
   }
 
   handleNodeClick(data: any) {
@@ -157,191 +140,44 @@ export default class Index extends Vue {
 
   }
 
-  _updateTreeView(data: any) {
-    this.treeData = [data.scene];
-    return;
-    // 构建树形数据
-    if (this.treeData.length === 0) {// 第一次赋值
-
-
-    } else {
-
+  evalInspectorFunction(func: string, para?: string = '') {
+    if (!func || func.length < 0) {
+      console.log("缺失执行函数名!");
+      return;
     }
 
-
-    let treeData = [];
-    debugger
-    let sceneData = data.scene;
-    if (sceneData) {
-      // scene info
-      let dataRoot = {
-        type: sceneData.type, uuid: sceneData.uuid,
-        label: sceneData.name, children: []
-      };
-      treeData.push(dataRoot);
-      this.handleNodeClick(dataRoot);
-      // scene children info
-      for (let k in sceneData.children) {
-        let itemSceneData = sceneData.children[k];
-        // let sceneItem = {uuid: itemSceneData.uuid, label: itemSceneData.name, children: []};
-        let sceneItem = {};
-        dealChildrenNode(itemSceneData, sceneItem);
-        treeData[0].children.push(sceneItem);
-      }
+    if (!chrome || !chrome.devtools) {
+      console.log("环境异常，无法执行函数");
+      return;
     }
-    this.treeData = treeData;
 
-    function dealChildrenNode(rootData: any, obj: any) {
-      obj["data"] = rootData;
-      obj["uuid"] = rootData.uuid;
-      obj["label"] = rootData.name;
-      obj["type"] = rootData.type;
-      obj["children"] = [];
-      let rootChildren = rootData.children;
-      for (let k in rootChildren) {
-        let itemData = rootChildren[k];
-        let item = {};
-        dealChildrenNode(itemData, item);
-        obj.children.push(item);
-      }
-    }
-  }
-
-  _getInjectScriptString() {
-    let injectScript = "";
-    let code = injectScript.toString();
-    let array = code.split("\n");
-    array.splice(0, 1);// 删除开头
-    array.splice(-1, 1);// 删除结尾
-    let evalCode = "";
-    for (let i = 0; i < array.length; i++) {
-      evalCode += array[i] + "\n";
-    }
-    // console.log(evalCode);
-    return evalCode;
-  }
-
-
-  evalInspectorFunction(funcString: string, parm?: any) {
-    if (funcString || funcString.length > 0) {
-      let injectCode =
-          `if(window.ccinspector){
-              let func = window.ccinspector.${funcString};
+    let injectCode =
+        `if(window.ccinspector){
+              let func = window.ccinspector.${func};
               if(func){
-                console.log("执行${funcString}成功");
-                func.apply(window.ccinspector,[${parm}]);
+                console.log("执行${func}成功");
+                func.apply(window.ccinspector,[${para}]);
               }else{
-                console.log("未发现${funcString}函数");
+                console.log("未发现${func}函数");
               }
-            }else{
-              console.log("可能脚本没有注入");
-            }`;
-      console.log(injectCode);
-      if (chrome && chrome.devtools) {
-        let ret = chrome.devtools.inspectedWindow.eval(injectCode, function (result, info) {
-          if (info && info.isException) {
-            console.log(info.value);
-          }
-
-        });
-        console.log(`ret:${ret}`);
+         }else{
+              console.log("脚本inject.js未注入");
+         }`;
+    chrome.devtools.inspectedWindow.eval(injectCode, (result, isException) => {
+      if (isException) {
+        console.error(isException);
+      } else {
+        console.log(`执行结果：${result}`)
       }
-    } else {
-      console.log("执行失败!");
-    }
+    });
   }
 
   onBtnClickUpdateTree() {
     this.evalInspectorFunction("updateTreeInfo");
-
   }
 
   onBtnClickUpdatePage() {
     this.evalInspectorFunction("checkIsGamePage", "true");
-    // let code = this._getInjectScriptString();
-    // chrome.devtools.inspectedWindow.eval(code, function () {
-    //   console.log("刷新成功!");
-    // });
-  }
-
-  onBtnClickTest1() {
-    chrome.devtools.inspectedWindow.eval(`window.ccinspector.testMsg1()`);
-  }
-
-  _getTime() {
-    return new Date().getTime().toString();
-  }
-
-  onBtnClickTest2() {
-    // chrome.devtools.inspectedWindow.eval(`window.ccinspector.testMsg2()`)
-
-
-    let newData = [
-      {
-        name: this._getTime(),
-        children: [
-          {
-            name: this._getTime(),
-            children: [
-              {
-                name: this._getTime(),
-              }
-            ]
-          },
-          {
-            name: this._getTime(),
-          }
-        ]
-      }
-
-    ];
-
-    // this.treeData = newData;
-    this._update37(this.treeData[0], newData[0]);
-  }
-
-  _update37(oldTreeNode: any, newTreeNode: any) {
-    debugger
-    if (!newTreeNode) {
-      return;
-    }
-    if (!oldTreeNode) {
-      oldTreeNode = {name: "", children: []};
-    }
-    if (oldTreeNode.name !== newTreeNode.name) {
-      oldTreeNode.name = newTreeNode.name;
-    }
-
-    let oldChildren = oldTreeNode.children;
-    let newChildren = newTreeNode.children;
-
-    if (oldChildren.length === 0) {
-      oldChildren = newChildren;
-    } else {
-      // 比较2个数据: treeData, newTreeData
-      // 比较该层级的数据
-      for (let i = 0; i < newChildren.length; i++) {
-        let itemNew = newChildren[i];
-        let itemOld = oldChildren[i];
-        if (itemOld === undefined) {
-          // 老节点中没有
-          oldChildren.push(itemNew);
-        } else if (itemNew.name !== itemOld.name) {
-          // 替换
-          oldChildren.splice(i, 1, itemNew);
-        } else {
-          this._update37(itemOld, itemNew);
-        }
-      }
-      // 多余的删除了
-      if (oldChildren.length > newChildren.length) {
-        oldChildren.splice(newChildren.length, oldChildren.length - newChildren.length);
-      }
-    }
-  }
-
-  onBtnClickTest3() {
-    // chrome.devtools.inspectedWindow.eval(`window.ccinspector.testMsg3()`)
   }
 
   onMemoryTest() {

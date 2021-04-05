@@ -55,6 +55,7 @@ import {DataType} from '../data'
 @Component({
   components: {}
 })
+// todo 支持array
 export default class UiProp extends Vue {
   @Prop({default: ""})
   name: string | undefined;

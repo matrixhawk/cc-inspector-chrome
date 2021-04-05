@@ -1,37 +1,32 @@
-console.log('content code')
-// 具有操作dom的能力
-// 加载其他脚本
-// content.js 和原始界面共享DOM,但是不共享js,要想访问页面js,只能通过注入的方式
+// content.js 和原始界面共享DOM，具有操作dom的能力
+// 但是不共享js,要想访问页面js,只能通过注入的方式
 import * as PluginMsg from './core/plugin-msg'
 
-function injectScriptToPage(url) {
+function injectScriptToPage(url: string) {
   let content = chrome.extension.getURL(url)
   console.log(`[cc-inspector]注入脚本:${content}`);
   let script = document.createElement('script')
   script.setAttribute('type', 'text/javascript')
   script.setAttribute('src', content)
   script.onload = function () {
-    // 注入脚本执行完后移除掉
-    this.parentNode.removeChild(this);
+    document.body.removeChild(script);
   }
   document.body.appendChild(script)
 }
-debugger
+
 injectScriptToPage("js/inject.js");
 
 // 和background.js保持长连接通讯
 let conn = chrome.runtime.connect({name: PluginMsg.Page.Content})
-// conn.postMessage('test');
 conn.onMessage.addListener(function (data) {
   // 将background.js的消息返回到injection.js
+  console.log(`%c[Connect-Message] ${JSON.stringify(data)}`, "color:green;")
   window.postMessage(data, "*");
 })
 // 接受来自inject.js的消息数据,然后中转到background.js
 window.addEventListener('message', function (event) {
   let data = event.data;
-  if (data.data.log) {
-  }
-  console.log(`%c[content] ${JSON.stringify(data)}`, "color:#BD4E19");
+  console.log(`%c[Window-Message] ${JSON.stringify(data)}`, "color:green;");
   chrome.runtime.sendMessage(data);
 }, false);
 

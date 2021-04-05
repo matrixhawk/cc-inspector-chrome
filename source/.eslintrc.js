@@ -1,5 +1,8 @@
 module.exports = {
   root: true,
+  globals: {
+    chrome: true,
+  },
   env: {
     node: true,
     webextensions: true,
@@ -37,5 +40,7 @@ module.exports = {
     "@typescript-eslint/ban-types": "off",
     "@typescript-eslint/no-empty-function": "off",
     "@typescript-eslint/no-explicit-any": "off",
+    "no-prototype-builtins": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
   }
 };

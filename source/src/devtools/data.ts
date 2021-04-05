@@ -11,6 +11,7 @@ export enum DataType {
 
 class Info {
   public type: DataType = DataType.Number;
+  public data: any;
 }
 
 export class TextData extends Info {
@@ -20,10 +21,19 @@ export class TextData extends Info {
   }
 }
 
+export class ColorData extends Info {
+  constructor(color: string) {
+    super();
+    this.type = DataType.Color;
+    this.data = color;
+  }
+}
+
 export class StringData extends Info {
-  constructor() {
+  constructor(data: string) {
     super();
     this.type = DataType.String;
+    this.data = data;
   }
 }
 
@@ -31,33 +41,44 @@ export class NumberData extends Info {
   constructor() {
     super();
     this.type = DataType.Number;
+    this.data = 1;
   }
+}
 
+export class BoolData extends Info {
+  constructor(bol: boolean) {
+    super();
+    this.type = DataType.Bool;
+    this.data = bol;
+  }
 }
 
 export class Vec2Data extends Info {
-  public v1: number = 0;
-  public v2: number = 0;
-
-  constructor(v1: number, v2: number) {
+  constructor() {
     super();
     this.type = DataType.Vec2
-    this.v1 = v1;
-    this.v2 = v2;
+    this.data = [];
+    return this;
+  }
+
+  add(info: Property) {
+    this.data.push(info);
+    return this;
   }
 }
 
 export class Vec3Data extends Info {
-  public v1: number = 0;
-  public v2: number = 0;
-  public v3: number = 0;
 
-  constructor(v1: number, v2: number, v3: number) {
+  constructor() {
     super();
-    this.type = DataType.Vec3
-    this.v1 = v1;
-    this.v2 = v2;
-    this.v3 = v3;
+    this.type = DataType.Vec3;
+    this.data = [];
+    return this;
+  }
+
+  add(info: Property) {
+    this.data.push(info);
+    return this;
   }
 }
 
@@ -67,6 +88,29 @@ export class EnumData extends Info {
     this.type = DataType.Enum;
   }
 
+}
+
+export class Property {
+  public name: string = 'property';
+  public value: Info = new Info();
+
+  constructor(name: string, info: Info) {
+    this.name = name;
+    this.value = info;
+  }
+}
+
+export class Group {
+  public name: string = 'group';
+  public data: Array<Property> = [];
+
+  constructor(name: string) {
+    this.name = name;
+  }
+
+  addProperty(property: Property) {
+    this.data.push(property)
+  }
 }
 
 class NodeInfo {
