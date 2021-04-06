@@ -17,7 +17,8 @@
 
 <script lang="ts">
 import Vue from "vue"
-import {Component, Prop} from "vue-property-decorator"
+
+import {Component, Prop, Watch} from "vue-property-decorator"
 import UiProp from "./ui-prop.vue"
 import {DataType, testData} from "../data";
 
@@ -40,16 +41,25 @@ export default class NodeBaseProperty extends Vue {
   private label?: string | undefined
 
   setup() {
+
+  }
+
+  @Watch('allGroup')
+  watchAllGroup() {
+    this._initValue();
   }
 
   created() {
+    this._initValue();
+  }
+
+  _initValue() {
     if (this.allGroup) {
       this.allGroup.forEach(item => {
         this.$set(item, 'fold', false);
       })
     }
   }
-
 
   changeColor() {
     let color = this.itemData.color;
