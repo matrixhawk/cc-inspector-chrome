@@ -45,6 +45,7 @@ import {Component, Prop} from "vue-property-decorator";
 import SceneProperty from "@/devtools/ccType/SceneProperty.vue";
 import ComponentsProperty from "@/devtools/ccType/ComponentsProperty.vue";
 import NodeBaseProperty from "@/devtools/ccType/NodeBaseProperty.vue";
+import {DataType, testData} from "./data"
 
 const PluginMsg = require("../core/plugin-msg");
 @Component({
@@ -53,7 +54,7 @@ const PluginMsg = require("../core/plugin-msg");
   }
 })
 export default class Index extends Vue {
-  private isShowDebug: boolean = false;
+  private isShowDebug: boolean = true;
   treeItemData: Array<Record<string, any>> = [];
   treeData: Array<Record<string, any>> = []
   bgConn: chrome.runtime.Port | null = null// 与background.js的链接
@@ -118,6 +119,7 @@ export default class Index extends Vue {
     for (let i = 0; i < 40; i++) {
       this.treeData.push({name: `node${i}`, children: [{name: `children11111111111111111111111111111111111111${i}`}]})
     }
+    this.treeItemData = testData;
   }
 
   handleNodeClick(data: any) {
@@ -214,7 +216,6 @@ export default class Index extends Vue {
 
     .left {
       display: flex;
-      flex: 1;
       flex-direction: column;
 
       .tool-btn {
@@ -226,7 +227,6 @@ export default class Index extends Vue {
 
       .treeList {
         margin-top: 3px;
-        flex: 1;
         height: 100%;
         border-radius: 4px;
         min-height: 20px;
@@ -249,7 +249,7 @@ export default class Index extends Vue {
     }
 
     .right {
-      flex: 2;
+      flex: 1;
       background: #e5e9f2;
       overflow: scroll;
     }
