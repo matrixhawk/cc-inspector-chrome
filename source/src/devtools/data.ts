@@ -211,6 +211,19 @@ export const testData = [
           type: DataType.Color,
           data: '#ff0000'
         }
+      },
+      {
+        name: 'array',
+        value: {
+          type: DataType.Array,
+          data: [1, 2, 3, 4]
+        }
+      }, {
+        name: 'object',
+        value: {
+          type: DataType.Object,
+          data: {a: '11111111111111111111111111111111111111111111111111111111111', b: 2, c: 3}
+        }
       }
     ]
   },

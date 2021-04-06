@@ -39,6 +39,12 @@
         <el-color-picker style="position: absolute;" v-model="value.data"></el-color-picker>
         <div class="hex" :style="{color:colorReverse(value.data)}">{{ value.data }}</div>
       </div>
+      <div v-if="isArrayOrObject()" class="array-object">
+        <div class="text">
+          {{ valueString() }}
+        </div>
+        <el-button @click="onShowValueInConsole"> 点击在控制台打印显示</el-button>
+      </div>
       <div class="slot">
         <slot></slot>
       </div>
@@ -96,7 +102,23 @@ export default class UiProp extends Vue {
     return this.value && (this.value.type === DataType.Color);
   }
 
+  isArrayOrObject() {
+    return this.value && (this.value.type === DataType.Array || this.value.type === DataType.Object)
+  }
+
   created() {
+  }
+
+  valueString() {
+    try {
+      return JSON.stringify(this.value.data)
+    } catch (e) {
+      return ''
+    }
+  }
+
+  onShowValueInConsole() {
+    console.log(this.value.data)
   }
 
   @Prop({default: 1})
@@ -174,6 +196,7 @@ export default class UiProp extends Vue {
     flex: 3;
     text-align: left;
     height: 100%;
+    overflow: hidden;
 
     .color {
       position: relative;
@@ -202,6 +225,22 @@ export default class UiProp extends Vue {
 
       #ui-prop:last-child {
         margin-right: 0;
+      }
+    }
+
+    .array-object {
+      flex:1;
+      max-width: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      .text {
+        flex:1;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
       }
     }
 
