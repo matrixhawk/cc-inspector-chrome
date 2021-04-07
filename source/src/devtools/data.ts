@@ -15,6 +15,7 @@ export enum DataType {
 class Info {
   public type: DataType = DataType.Number;
   public data: any;
+  public path: Array<string> = [];// 属性对应的路径
 }
 
 export class TextData extends Info {
@@ -151,8 +152,9 @@ class CompInfo {
 export const testData = [
   {
     name: "group1",
+    uuid: 'node/comp uuid',
     data: [
-      {name: "uuid", value: {type: DataType.String, data: 'abc'}},
+      {name: "uuid", value: {type: DataType.String, data: 'abc', path: 'uuid'}},
       {name: "opacity", value: {type: DataType.Number, data: 100}},
 
       {

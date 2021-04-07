@@ -20,7 +20,6 @@ import Vue from "vue"
 
 import {Component, Prop, Watch} from "vue-property-decorator"
 import UiProp from "./ui-prop.vue"
-import {DataType, testData} from "../data";
 
 @Component({
   components: {UiProp},
@@ -28,7 +27,7 @@ import {DataType, testData} from "../data";
 export default class NodeBaseProperty extends Vue {
   name: string = "node-base"
 
-  @Prop({default: () => testData,})
+  @Prop({default: () => [],})
   allGroup: Array<Record<string, any>> | undefined;
 
   onClickHeader(group: any) {

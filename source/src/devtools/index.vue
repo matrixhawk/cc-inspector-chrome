@@ -37,9 +37,6 @@
 </template>
 
 <script lang="ts">
-// import injectScript from '../injectScript.js'
-// import EvalCode from "./evalCodeString.js";
-
 import Vue from "vue";
 import {Component, Prop} from "vue-property-decorator";
 import SceneProperty from "@/devtools/ccType/SceneProperty.vue";
@@ -54,7 +51,7 @@ const PluginMsg = require("../core/plugin-msg");
   }
 })
 export default class Index extends Vue {
-  private isShowDebug: boolean = true;
+  private isShowDebug: boolean = false;
   treeItemData: Array<Record<string, any>> = [];
   treeData: Array<Record<string, any>> = []
   bgConn: chrome.runtime.Port | null = null// 与background.js的链接
@@ -213,6 +210,7 @@ export default class Index extends Vue {
     display: flex;
     flex: 1;
     flex-direction: row;
+    overflow: hidden;
 
     .left {
       display: flex;
@@ -230,7 +228,7 @@ export default class Index extends Vue {
         height: 100%;
         border-radius: 4px;
         min-height: 20px;
-        overflow: scroll;
+        overflow: auto;
         width: 300px;
 
 
@@ -251,7 +249,19 @@ export default class Index extends Vue {
     .right {
       flex: 1;
       background: #e5e9f2;
-      overflow: scroll;
+      overflow-x: hidden;
+      overflow-y: auto;
+
+      &::-webkit-scrollbar {
+        width: 0;
+        background: #999;
+        border-radius: 2px;
+        height: 6px;
+      }
+      &::-webkit-scrollbar-thumb {
+        background-color: #333;
+        border-radius: 2px;
+      }
     }
   }
 }

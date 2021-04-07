@@ -90,7 +90,11 @@ let cc_inspector = {
   },
   _getNodeKeys(node) {
     let keys = [];
-    let excludeProperty = ["children", "quat", "node"];
+    let excludeProperty = [
+      "children", "quat", "node",
+      // 生命周期函数
+      "onFocusInEditor", "onRestore", "start", "lateUpdate", "update", "resetInEditor", "onLostFocusInEditor",
+    ];
     for (let key in node) {
       if (!key.startsWith("_") &&
           !excludeProperty.includes(key) &&
@@ -117,7 +121,7 @@ let cc_inspector = {
     }
     return null;
   },
-  _genInfoData(propertyValue) {
+  _genInfoData(propertyValue, path) {
     let info = null;
     switch (typeof propertyValue) {
       case "boolean":
@@ -132,19 +136,22 @@ let cc_inspector = {
       default:
         if (propertyValue == null || typeof propertyValue === "undefined") {
           info = new NullOrUndefinedData();
+        } else if (propertyValue instanceof cc.Color) {
+          let hex = propertyValue.toHEX();
+          info = new ColorData(`#${hex}`);
         } else if (Array.isArray(propertyValue)) {
           info = new ArrayData();
         } else if (propertyValue instanceof Object) {
           info = new ObjectData();
-        } else if (propertyValue instanceof cc.Color) {
-          let hex = propertyValue.toHEX();
-          info = new ColorData(`#${hex}`);
         } else {
         }
         break;
     }
-    if (!info) {
+    if (info) {
+      info.path = path;
+    } else {
       console.error(`暂不支持的属性值`, propertyValue);
+
     }
     return info;
   },
@@ -173,7 +180,8 @@ let cc_inspector = {
         }
         pairValues.forEach(el => {
           if (el in node) {
-            let vecData = this._genInfoData(node[el]);
+            let propertyPath = [node.uuid, el];
+            let vecData = this._genInfoData(node[el], propertyPath);
             if (vecData) {
               info.add(new Property(el, vecData));
             }
@@ -186,7 +194,8 @@ let cc_inspector = {
           nodeGroup.addProperty(property);
         }
       } else {
-        let info = this._genInfoData(propertyValue);
+        let propertyPath = [node.uuid, key];
+        let info = this._genInfoData(propertyValue, propertyPath);
         if (info) {
           nodeGroup.addProperty(new Property(key, info));
         }
@@ -196,7 +205,6 @@ let cc_inspector = {
   },
   // 获取节点信息
   getNodeInfo(uuid) {
-    debugger
     let node = this.inspectorGameMemoryStorage[uuid];
     if (node) {
       let groupData = [];
@@ -217,7 +225,18 @@ let cc_inspector = {
       console.log("未获取到节点数据");
     }
   },
-
+  logValue(uuid, key) {
+    let nodeOrComp = this.inspectorGameMemoryStorage[uuid];
+    if (nodeOrComp) {
+      console.log(nodeOrComp[key]);
+    }
+  },
+  setValue(uuid, key, value) {
+    let nodeOrComp = this.inspectorGameMemoryStorage[uuid];
+    if (nodeOrComp && key in nodeOrComp) {
+      nodeOrComp[key] = value;
+    }
+  },
   sendMsgToDevTools(msg, data) {
     // 发送给content.js处理
     window.postMessage({msg: msg, data: data}, "*");
@@ -238,6 +257,9 @@ let cc_inspector = {
     });
   }
 };
+window.addEventListener("message", (a, b, c) => {
+  console.log(a, b, c);
+});
 window.ccinspector = window.ccinspector || cc_inspector;
 window.ccinspector.init && window.ccinspector.init();// 执行初始化函数
 

@@ -4,7 +4,7 @@
       <div class="text">{{ name }}</div>
     </div>
     <div class="value">
-      <el-input v-if="isString()" v-model="value.data"></el-input>
+      <el-input v-if="isString()" v-model="value.data" @change="onChangeValue"></el-input>
       <el-input v-if="isText()"
                 type="textarea"
                 :autosize="{minRows:3,maxRows:5}"
@@ -118,7 +118,42 @@ export default class UiProp extends Vue {
   }
 
   onShowValueInConsole() {
-    console.log(this.value.data)
+    if (Array.isArray(this.value.path)) {
+      let uuid = this.value.path[0];
+      let key = this.value.path[1]; // todo 暂时只支持一级key
+      if (uuid && key) {
+        chrome.devtools.inspectedWindow.eval(`window.ccinspector.logValue('${uuid}','${key}')`)
+      }
+    }
+  }
+
+  onChangeValue() {
+    window.postMessage({a: 1, b: 2}, '*')
+    return
+    if (Array.isArray(this.value.path)) {
+      let uuid = this.value.path[0];
+      let key = this.value.path[1]; // todo 暂时只支持一级key
+      if (uuid && key && this.value.hasOwnProperty('data')) {
+        let cmd = null;
+        let data = this.value.data;
+        switch (this.value.type) {
+          case DataType.Number:
+            cmd = `window.ccinspector.setValue('${uuid}','${key}', ${data})`;
+            break
+          case DataType.Bool:
+            cmd = `window.ccinspector.setValue('${uuid}','${key}', ${data})`;
+            break;
+          case DataType.String:
+          case DataType.Text:
+            cmd = `window.ccinspector.setValue('${uuid}','${key}', '${data}')`;
+            break
+        }
+        if (cmd) {
+          chrome.devtools.inspectedWindow.eval(cmd)
+        } else {
+        }
+      }
+    }
   }
 
   @Prop({default: 1})
@@ -183,6 +218,7 @@ export default class UiProp extends Vue {
     display: flex;
     flex-direction: row;
     align-items: center;
+    min-width: 90px;
 
     .text {
       user-select: none;
@@ -197,6 +233,7 @@ export default class UiProp extends Vue {
     text-align: left;
     height: 100%;
     overflow: hidden;
+    min-width: 400px;
 
     .color {
       position: relative;
@@ -221,6 +258,14 @@ export default class UiProp extends Vue {
         margin-top: 0;
         margin-bottom: 0;
         margin-right: 20px;
+
+        .value {
+          min-width: 100px;
+        }
+
+        .key {
+          min-width: 20px;
+        }
       }
 
       #ui-prop:last-child {
@@ -229,7 +274,7 @@ export default class UiProp extends Vue {
     }
 
     .array-object {
-      flex:1;
+      flex: 1;
       max-width: 100%;
       overflow: hidden;
       display: flex;
@@ -237,7 +282,7 @@ export default class UiProp extends Vue {
       align-items: center;
 
       .text {
-        flex:1;
+        flex: 1;
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
