@@ -17,11 +17,16 @@
         </div>
         <div class="treeList">
           <el-tree :data="treeData"
+                   ref="tree"
                    style="display: inline-block;"
                    :props="defaultProps"
                    :highlight-current="true"
                    :default-expand-all="false"
-                   :expand-on-click-node="true"
+                   :default-expanded-keys="expandedKeys"
+                   :expand-on-click-node="false"
+                   node-key="uuid"
+                   @node-expand="onNodeExpand"
+                   @node-collapse="onNodeCollapse"
                    @node-click="handleNodeClick"></el-tree>
         </div>
       </div>
@@ -43,6 +48,7 @@ import SceneProperty from "@/devtools/ccType/SceneProperty.vue";
 import ComponentsProperty from "@/devtools/ccType/ComponentsProperty.vue";
 import NodeBaseProperty from "@/devtools/ccType/NodeBaseProperty.vue";
 import {DataType, testData} from "./data"
+import {NodeData} from "@/devtools/type";
 
 const PluginMsg = require("../core/plugin-msg");
 @Component({
@@ -53,8 +59,10 @@ const PluginMsg = require("../core/plugin-msg");
 export default class Index extends Vue {
   private isShowDebug: boolean = false;
   treeItemData: Array<Record<string, any>> = [];
-  treeData: Array<Record<string, any>> = []
+  treeData: Array<NodeData> = []
   bgConn: chrome.runtime.Port | null = null// 与background.js的链接
+  expandedKeys: Array<string> = [];
+  selectedUUID: string | null = null;
 
   // el-tree的渲染key
   defaultProps = {
@@ -89,7 +97,7 @@ export default class Index extends Vue {
       if (!data) {
         return;
       }
-      let eventData = data.data;
+      let eventData: Array<NodeData> = data.data;
       let eventMsg = data.msg;
       if (eventMsg === PluginMsg.Msg.ListInfo) {
         this.isShowDebug = true;
@@ -97,6 +105,12 @@ export default class Index extends Vue {
           eventData = [eventData]
         }
         this.treeData = eventData;
+        if (this.selectedUUID) {
+          this.$nextTick(() => {
+            this.$refs.tree.setCurrentKey(this.selectedUUID);
+            // todo 需要重新获取下node的数据
+          })
+        }
       } else if (eventMsg === PluginMsg.Msg.Support) {
         this.isShowDebug = eventData.support;
       } else if (eventMsg === PluginMsg.Msg.NodeInfo) {
@@ -119,7 +133,8 @@ export default class Index extends Vue {
     this.treeItemData = testData;
   }
 
-  handleNodeClick(data: any) {
+  handleNodeClick(data: NodeData) {
+    this.selectedUUID = data.uuid;
     // todo 去获取节点信息
     // console.log(data);
     let uuid = data.uuid;
@@ -183,6 +198,20 @@ export default class Index extends Vue {
     this.evalInspectorFunction("onMemoryInfo");
   }
 
+  onNodeExpand(data: NodeData, a, b) {
+    if (data.hasOwnProperty('uuid')) {
+      this.expandedKeys.push(data.uuid)
+    }
+  }
+
+  onNodeCollapse(data: NodeData) {
+    if (data.hasOwnProperty('uuid')) {
+      let index = this.expandedKeys.findIndex(el => el === data.uuid);
+      if (index !== -1) {
+        this.expandedKeys.splice(index, 1)
+      }
+    }
+  }
 }
 </script>
 
@@ -258,6 +287,7 @@ export default class Index extends Vue {
         border-radius: 2px;
         height: 6px;
       }
+
       &::-webkit-scrollbar-thumb {
         background-color: #333;
         border-radius: 2px;
