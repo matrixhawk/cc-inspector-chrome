@@ -24,8 +24,8 @@ import UiProp from "./ui-prop.vue"
 @Component({
   components: {UiProp},
 })
-export default class NodeBaseProperty extends Vue {
-  name: string = "node-base"
+export default class properties extends Vue {
+  name: string = "properties"
 
   @Prop({default: () => [],})
   allGroup: Array<Record<string, any>> | undefined;
@@ -53,6 +53,7 @@ export default class NodeBaseProperty extends Vue {
   }
 
   _initValue() {
+    debugger
     if (this.allGroup) {
       this.allGroup.forEach(item => {
         this.$set(item, 'fold', false);

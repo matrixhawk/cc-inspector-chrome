@@ -31,7 +31,7 @@
         </div>
       </div>
       <div class="right">
-        <NodeBaseProperty :all-group="treeItemData"></NodeBaseProperty>
+        <properties :all-group="treeItemData"></properties>
       </div>
     </div>
     <div v-show="!isShowDebug" class="no-find">
@@ -44,16 +44,14 @@
 <script lang="ts">
 import Vue from "vue";
 import {Component, Prop} from "vue-property-decorator";
-import SceneProperty from "@/devtools/ccType/SceneProperty.vue";
-import ComponentsProperty from "@/devtools/ccType/ComponentsProperty.vue";
-import NodeBaseProperty from "@/devtools/ccType/NodeBaseProperty.vue";
+import properties from "./propertys.vue";
 import {DataType, testData} from "./data"
 import {NodeData} from "@/devtools/type";
 
 const PluginMsg = require("../core/plugin-msg");
 @Component({
   components: {
-    NodeBaseProperty, ComponentsProperty, SceneProperty,
+    properties,
   }
 })
 export default class Index extends Vue {

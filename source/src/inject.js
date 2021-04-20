@@ -94,6 +94,7 @@ let cc_inspector = {
       "children", "quat", "node",
       // 生命周期函数
       "onFocusInEditor", "onRestore", "start", "lateUpdate", "update", "resetInEditor", "onLostFocusInEditor",
+      "onEnable", "onDisable", "onDestroy", "onLoad",
     ];
     for (let key in node) {
       if (!key.startsWith("_") &&
