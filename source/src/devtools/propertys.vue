@@ -53,31 +53,12 @@ export default class properties extends Vue {
   }
 
   _initValue() {
-    debugger
     if (this.allGroup) {
       this.allGroup.forEach(item => {
         this.$set(item, 'fold', false);
       })
     }
   }
-
-  changeColor() {
-    let color = this.itemData.color;
-    console.log("color:" + color);
-    this._evalCode(
-        "window.ccinspector.pluginSetNodeColor('" +
-        this.itemData.uuid + "','" +
-        color + "');");
-    this._freshNode();
-  }
-
-  _freshNode() {
-    let uuid = this.itemData.uuid;
-    let code2 = "window.ccinspector.getNodeInfo('" + uuid + "')";
-    this._evalCode(code2);
-  }
-
-
   _evalCode(code: string) {
     if (chrome && chrome.devtools) {
       chrome.devtools.inspectedWindow.eval(code);

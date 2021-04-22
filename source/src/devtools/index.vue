@@ -43,10 +43,9 @@
 
 <script lang="ts">
 import Vue from "vue";
-import {Component, Prop} from "vue-property-decorator";
+import {Component} from "vue-property-decorator";
 import properties from "./propertys.vue";
-import {DataType, testData} from "./data"
-import {NodeData} from "@/devtools/type";
+import {DataSupport, ExecutePara, ExecuteParaType, NodeData} from "@/devtools/type";
 
 const PluginMsg = require("../core/plugin-msg");
 @Component({
@@ -76,7 +75,6 @@ export default class Index extends Vue {
   timerID: number = 0;
 
   created() {
-    this.onTestData();
     if (chrome && chrome.runtime) {
       this._initChromeRuntimeConnect();
     }
@@ -87,6 +85,47 @@ export default class Index extends Vue {
     }, false);
   }
 
+  _onMsgListInfo(eventData: Array<NodeData>) {
+    this.isShowDebug = true;
+    if (!Array.isArray(eventData)) {
+      eventData = [eventData]
+    }
+    this.treeData = eventData;
+    if (this.selectedUUID) {
+      this.$nextTick(() => {
+        //@ts-ignore
+        this.$refs.tree.setCurrentKey(this.selectedUUID);
+        // todo 需要重新获取下node的数据
+      })
+    }
+  }
+
+  _onMsgNodeInfo(eventData: any) {
+    this.isShowDebug = true;
+    if (!Array.isArray(eventData)) {
+      eventData = [eventData]
+    }
+    this.treeItemData = eventData;
+  }
+
+  _onMsgMemory(eventData: any) {
+    this.memory = eventData;
+  }
+
+  _onMsgSupport(data: DataSupport) {
+    this.isShowDebug = data.support;
+    if (data.support) {
+      this.onBtnClickUpdateTree();
+    } else {
+      this._reset();
+    }
+  }
+
+  _reset() {
+    this.treeData = [];
+    this.treeItemData = [];
+  }
+
   _initChromeRuntimeConnect() {
     // chrome.devtools.inspectedWindow.tabId
     // 接收来自background.js的消息数据
@@ -95,40 +134,28 @@ export default class Index extends Vue {
       if (!data) {
         return;
       }
-      let eventData: Array<NodeData> = data.data;
-      let eventMsg = data.msg;
-      if (eventMsg === PluginMsg.Msg.ListInfo) {
-        this.isShowDebug = true;
-        if (!Array.isArray(eventData)) {
-          eventData = [eventData]
+
+      let eventData: any = data.data;
+      console.log(data)
+      switch (data.msg) {
+        case PluginMsg.Msg.ListInfo: {
+          this._onMsgListInfo(eventData as Array<NodeData>);
+          break;
         }
-        this.treeData = eventData;
-        if (this.selectedUUID) {
-          this.$nextTick(() => {
-            this.$refs.tree.setCurrentKey(this.selectedUUID);
-            // todo 需要重新获取下node的数据
-          })
+        case PluginMsg.Msg.Support: {
+          this._onMsgSupport(eventData as DataSupport)
+          break;
         }
-      } else if (eventMsg === PluginMsg.Msg.Support) {
-        this.isShowDebug = eventData.support;
-      } else if (eventMsg === PluginMsg.Msg.NodeInfo) {
-        this.isShowDebug = true;
-        if (!Array.isArray(eventData)) {
-          eventData = [eventData]
+        case PluginMsg.Msg.NodeInfo: {
+          this._onMsgNodeInfo(eventData);
+          break;
         }
-        this.treeItemData = eventData;
-      } else if (eventMsg === PluginMsg.Msg.MemoryInfo) {
-        this.memory = eventData;
+        case  PluginMsg.Msg.MemoryInfo: {
+          this._onMsgMemory(eventData)
+          break;
+        }
       }
     });
-  }
-
-
-  onTestData() {
-    for (let i = 0; i < 40; i++) {
-      this.treeData.push({name: `node${i}`, children: [{name: `children11111111111111111111111111111111111111${i}`}]})
-    }
-    this.treeItemData = testData;
   }
 
   handleNodeClick(data: NodeData) {
@@ -137,7 +164,7 @@ export default class Index extends Vue {
     // console.log(data);
     let uuid = data.uuid;
     if (uuid !== undefined) {
-      this.evalInspectorFunction("getNodeInfo", `"${uuid}"`);
+      this.runToContentScript(ExecuteParaType.GetNodeInfo, uuid);
     }
   }
 
@@ -152,29 +179,21 @@ export default class Index extends Vue {
 
   }
 
-  evalInspectorFunction(func: string, para?: string = '') {
-    if (!func || func.length < 0) {
-      console.log("缺失执行函数名!");
-      return;
-    }
-
+  runToContentScript(type: ExecuteParaType, data?: any) {
     if (!chrome || !chrome.devtools) {
       console.log("环境异常，无法执行函数");
       return;
     }
+    let para: ExecutePara = new ExecutePara(type, data);
+    //@ts-ignore
+    chrome.tabs.executeScript(null, {code: `var CCInspectorPara='${JSON.stringify(para)}';`}, () => {
+      //@ts-ignore
+      chrome.tabs.executeScript(null, {file: "js/execute.js"})
+    });
+  }
 
-    let injectCode =
-        `if(window.ccinspector){
-              let func = window.ccinspector.${func};
-              if(func){
-                console.log("执行${func}成功");
-                func.apply(window.ccinspector,[${para}]);
-              }else{
-                console.log("未发现${func}函数");
-              }
-         }else{
-              console.log("脚本inject.js未注入");
-         }`;
+  _inspectedCode() {
+    let injectCode = '';
     chrome.devtools.inspectedWindow.eval(injectCode, (result, isException) => {
       if (isException) {
         console.error(isException);
@@ -185,19 +204,19 @@ export default class Index extends Vue {
   }
 
   onBtnClickUpdateTree() {
-    this.evalInspectorFunction("updateTreeInfo");
+    this.runToContentScript(ExecuteParaType.UpdateTreeInfo);
   }
 
   onBtnClickUpdatePage() {
-    this.evalInspectorFunction("checkIsGamePage", "true");
+    this.runToContentScript(ExecuteParaType.CheckGamePage, true);
   }
 
   onMemoryTest() {
-    this.evalInspectorFunction("onMemoryInfo");
+    this.runToContentScript(ExecuteParaType.MemoryInfo);
   }
 
-  onNodeExpand(data: NodeData, a, b) {
-    if (data.hasOwnProperty('uuid')) {
+  onNodeExpand(data: NodeData) {
+    if (data.hasOwnProperty('uuid') && data.uuid) {
       this.expandedKeys.push(data.uuid)
     }
   }

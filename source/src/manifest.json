@@ -38,7 +38,8 @@
         "<all_urls>"
       ],
       "js": [
-        "js/content.js"
+        "js/content.js",
+        "js/execute.js"
       ],
       "run_at": "document_end",
       "all_frames": true

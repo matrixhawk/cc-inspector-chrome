@@ -56,7 +56,7 @@
 
 import Vue from "vue"
 import {Component, Prop} from "vue-property-decorator"
-import {DataType} from '../data'
+import {DataType} from './data'
 
 @Component({
   components: {}

@@ -64,10 +64,10 @@ export class StringData extends Info {
 }
 
 export class NumberData extends Info {
-  constructor() {
+  constructor(data: number) {
     super();
     this.type = DataType.Number;
-    this.data = 1;
+    this.data = data;
   }
 }
 

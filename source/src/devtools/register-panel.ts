@@ -7,26 +7,43 @@ if (chrome && chrome.devtools) {
   chrome.devtools.panels.elements.createSidebarPane('Cocos', function (sidebar) {
     sidebar.setObject({some_data: "some data to show!"});
   });
+
+  // 和background建立连接
+  let connect: chrome.runtime.Port | null = null;
+  if (chrome && chrome.runtime) {
+    connect = chrome.runtime.connect({name: PluginMsg.Page.DevToolsPanel});
+  }
+
+
 // 创建devtools-panel
   chrome.devtools.panels.create("Cocos", "icons/48.png", Manifest.devtools_page, (panel: chrome.devtools.panels.ExtensionPanel) => {
       console.log("[CC-Inspector] Dev Panel Created!");
-      let conn = chrome.runtime.connect({name: PluginMsg.Page.DevToolsPanel});
-      conn.onDisconnect.addListener(() => {
+      if (!connect) {
+        return;
+      }
+      connect.onDisconnect.addListener(() => {
         console.log(`%c[Connect-Dis]`, 'color:red;')
       })
-      conn.onMessage.addListener((event, sender) => {
+      connect.onMessage.addListener((event, sender) => {
         console.log(`[Message] ${JSON.stringify(event)}`);
       });
 
       panel.onShown.addListener((window) => {
+        // 面板显示，查询是否是cocos游戏
         console.log("panel show");
-        conn.postMessage({msg: PluginMsg.Msg.UrlChange, data: {}})
+        if (connect) {
+          connect.postMessage({msg: PluginMsg.Msg.UrlChange, data: {}})
+        }
       });
       panel.onHidden.addListener(() => {
+        // 面板隐藏
         console.log("panel hide");
       });
       panel.onSearch.addListener(function (action, query) {
-        console.log("panel search!");
+        // ctrl+f 查找触发
+        if (connect) {
+          console.log("panel search!");
+        }
       });
     }
   );

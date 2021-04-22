@@ -18,7 +18,8 @@ module.exports = {
         contentScripts: {
           entries: {
             content: "src/content.ts",
-            inject: "src/inject.js"
+            execute: "src/devtools/execute.ts",
+            inject: "src/devtools/inject.ts",
           },
         },
         background: {
