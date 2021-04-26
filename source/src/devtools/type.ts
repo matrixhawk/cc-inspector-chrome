@@ -9,23 +9,13 @@ export class DataSupport {
   msg?: string;
 }
 
-export enum ExecuteParaType {
-  None,
-  UpdateTreeInfo,
-  CheckGamePage,
-  MemoryInfo,
-  SetProperty,
-  GetNodeInfo,
-}
 
-export class ExecutePara {
-  static Type = ExecuteParaType;
+export class PluginEvent {
+  msg: string = '';
+  data: any = null;
 
-  type: ExecuteParaType = ExecuteParaType.None;
-  data: any;
-
-  constructor(type: ExecuteParaType, data?: any) {
-    this.type = type;
-    this.data = data;
+  constructor(msg: string, data?: any) {
+    this.msg = msg;
+    this.data = data || null;
   }
 }

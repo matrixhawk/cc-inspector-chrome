@@ -1,54 +1,62 @@
 import * as  PluginMsg from "./core/plugin-msg"
+import {PluginEvent} from "@/devtools/type";
+import {MsgInclude} from "./core/plugin-msg";
 
 let Devtools: chrome.runtime.Port | null = null;
-let DevtoolsPanel: chrome.runtime.Port | null = null;
 let Content: chrome.runtime.Port | null = null;
 console.log('on background')
 
 chrome.runtime.onConnect.addListener((port: chrome.runtime.Port) => {
-  console.log(`%c[Connect] ${port.name}`, "color:blue;");
-  port.onMessage.addListener((data: any, sender: any) => {
-    console.log(`%c[Connect-Message] ${sender.name}\n${JSON.stringify(data)}`, "color:green;")
-    sender.postMessage(data);
-    if (data.msg === PluginMsg.Msg.UrlChange) {
-      if (sender.name === PluginMsg.Page.DevToolsPanel) {
-        Content && Content.postMessage({msg: PluginMsg.Msg.UrlChange, data: {}})
-      }
+  switch (port.name) {
+    case PluginMsg.Page.Devtools: {
+      Devtools = port;
+      onPortConnect(port,
+        (data: PluginEvent) => {
+          // 从devtools过来的消息统一派发到Content中
+          if (MsgInclude(data.msg)) {
+            Content && Content.postMessage(data)
+          }
+        },
+        () => {
+          Devtools = null;
+        })
+      break;
     }
-    // chrome.tabs.executeScript(message.tabId, {code: message.content});
-    // port.postMessage(message);
-  });
-  port.onDisconnect.addListener(function (port: chrome.runtime.Port) {
-    console.log(`%c[Connect-Dis] ${port.name}`, "color:red");
-    // port.onMessage.removeListener(longConnectionLink);
-    if (port.name === PluginMsg.Page.Devtools) {
-      Devtools = null;
-    } else if (port.name === PluginMsg.Page.Content) {
-      Content = null;
-    } else if (port.name === PluginMsg.Page.DevToolsPanel) {
-      DevtoolsPanel = null;
-    }
-  });
+    case PluginMsg.Page.Content: {
+      Content = port;
+      onPortConnect(port,
+        () => {
 
-  // 缓存
-  if (port.name === PluginMsg.Page.Devtools) {
-    Devtools = port;
-  } else if (port.name === PluginMsg.Page.Content) {
-    Content = port;
-  } else if (port.name === PluginMsg.Page.DevToolsPanel) {
-    DevtoolsPanel = port;
+        },
+        () => {
+          Content = null;
+
+        })
+      break
+    }
   }
 });
 
+function onPortConnect(port: chrome.runtime.Port, onMsg: Function, onDisconnect: Function) {
+  console.log(`%c[Connect] ${port.name}`, "color:blue;");
+  port.onMessage.addListener((data: any, sender: any) => {
+    console.log(`%c[Connect-Message] ${sender.name}\n${JSON.stringify(data)}`, "color:green;")
+    // sender.postMessage(data);
+    onMsg && onMsg(data);
+  });
+  port.onDisconnect.addListener((port: chrome.runtime.Port) => {
+    console.log(`%c[Connect-Dis] ${port.name}`, "color:red");
+    onDisconnect && onDisconnect()
+  });
+}
+
+
 // background.js 更像是一个主进程,负责整个插件的调度,生命周期和chrome保持一致
-//  监听来自content.js发来的事件
+//  监听来自content.js发来的事件，将消息转发到devtools
 chrome.runtime.onMessage.addListener((request: any, sender: any, sendResponse: any) => {
     console.log(`%c[Message]url:${sender.url}]\n${JSON.stringify(request)}`, 'color:green')
     sendResponse && sendResponse(request);
-    if (request.msg === PluginMsg.Msg.Support ||
-      request.msg === PluginMsg.Msg.ListInfo ||
-      request.msg === PluginMsg.Msg.NodeInfo) {
-      // 将消息转发到devtools
+    if (MsgInclude(request.msg)) {
       Devtools && Devtools.postMessage(request);
     }
   }
@@ -58,8 +66,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
   if (changeInfo.status === "complete") {
     // 加载新的url
     if (Content) {
-      let data = {msg: PluginMsg.Msg.UrlChange, data: {url: tab.favIconUrl}}
-      Content.postMessage(data);
+      Content.postMessage(new PluginEvent(PluginMsg.Msg.UrlChange, {url: tab.favIconUrl}));
     }
   }
 })

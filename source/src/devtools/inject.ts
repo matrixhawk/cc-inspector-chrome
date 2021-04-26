@@ -13,12 +13,13 @@ import {
   Vec3Data
 } from "./data";
 
-import {ExecutePara, ExecuteParaType} from './type'
+import {PluginEvent} from './type'
 
-class CCInspector implements ICCInspector {
+class CCInspector {
   inspectorGameMemoryStorage: Record<string, any> = {}
 
   init() {
+    console.log('cc-inspector init ~~~');
     setInterval(() => {
       // this.checkIsGamePage(true);
       // if (this.stop) {
@@ -27,36 +28,56 @@ class CCInspector implements ICCInspector {
     }, 1000);
     // 注册cc_after_render事件
     window.addEventListener("message", (event: any) => {
-      if (event.data.msg === PluginMsg.Msg.UrlChange) {
-        let isCocosGame = this._isCocosGame();
-        this.sendMsgToDevTools(PluginMsg.Msg.Support, {support: isCocosGame});
+      // 接受来自background的事件，有可能也会受到其他插件的
+      if (!event || !event.data) {
+        return
+      }
+      let pluginEvent: PluginEvent = event.data;
+      switch (pluginEvent.msg) {
+        case PluginMsg.Msg.UrlChange:
+        case PluginMsg.Msg.Support: {
+          let isCocosGame = this._isCocosGame();
+          this.sendMsgToContent(PluginMsg.Msg.Support, {support: isCocosGame});
+          break;
+        }
+        case PluginMsg.Msg.TreeInfo: {
+
+          debugger
+          break;
+        }
+        case PluginMsg.Msg.NodeInfo: {
+          debugger
+          break;
+        }
+        case PluginMsg.Msg.SetProperty: {
+          debugger;
+          break;
+        }
       }
     });
   }
 
   devPageCallEntry(str: string) {
-    let para: ExecutePara = JSON.parse(str);
+    let para: PluginEvent = JSON.parse(str);
     debugger
     if (this._isCocosGame()) {
-      switch (para.type) {
-        case ExecuteParaType.None:
-          break;
-        case ExecuteParaType.UpdateTreeInfo:
+      switch (para.msg) {
+        case PluginMsg.Msg.TreeInfo:
           this.updateTreeInfo();
           break;
-        case ExecuteParaType.CheckGamePage:
+        case PluginMsg.Msg.Support:
 
           break;
-        case ExecuteParaType.MemoryInfo:
+        case PluginMsg.Msg.MemoryInfo:
           break;
-        case ExecuteParaType.SetProperty:
+        case PluginMsg.Msg.SetProperty:
           break;
-        case ExecuteParaType.GetNodeInfo:
+        case PluginMsg.Msg.NodeInfo:
           this.getNodeInfo(para.data as string);
           break;
       }
     } else {
-      this.sendMsgToDevTools(PluginMsg.Msg.Support, {support: false});
+      this.sendMsgToContent(PluginMsg.Msg.Support, {support: false});
     }
   }
 
@@ -77,9 +98,9 @@ class CCInspector implements ICCInspector {
           let node = sceneChildren[i];
           this.getNodeChildren(node, sendData.children);
         }
-        this.sendMsgToDevTools(PluginMsg.Msg.ListInfo, sendData);
+        this.sendMsgToContent(PluginMsg.Msg.TreeInfo, sendData);
       } else {
-        this.sendMsgToDevTools(PluginMsg.Msg.Support, {support: false, msg: "未发现游戏场景,不支持调试游戏!"});
+        this.sendMsgToContent(PluginMsg.Msg.Support, {support: false, msg: "未发现游戏场景,不支持调试游戏!"});
       }
     }
   }
@@ -255,7 +276,7 @@ class CCInspector implements ICCInspector {
         let compGroup = this._getGroupData(itemComp);
         groupData.push(compGroup);
       }
-      this.sendMsgToDevTools(PluginMsg.Msg.NodeInfo, groupData);
+      this.sendMsgToContent(PluginMsg.Msg.NodeInfo, groupData);
     } else {
       // 未获取到节点数据
       console.log("未获取到节点数据");
@@ -276,13 +297,13 @@ class CCInspector implements ICCInspector {
     }
   }
 
-  sendMsgToDevTools(msg: string, data: any) {
+  sendMsgToContent(msg: string, data: any) {
     // 发送给content.js处理
-    window.postMessage({msg: msg, data: data}, "*");
+    window.postMessage(new PluginEvent(msg, data), "*");
   }
 
   onMemoryInfo() {
-    this.sendMsgToDevTools(PluginMsg.Msg.MemoryInfo, {
+    this.sendMsgToContent(PluginMsg.Msg.MemoryInfo, {
       performance: {
         // @ts-ignore
         jsHeapSizeLimit: window.performance.memory.jsHeapSizeLimit,
@@ -300,11 +321,9 @@ class CCInspector implements ICCInspector {
   }
 }
 
-window.addEventListener("message", (a: any) => {
-  console.log(a);
-});
 let inspector = new CCInspector();
 inspector.init();
+//@ts-ignore
 window.CCInspector = inspector;
 
 

@@ -3,7 +3,9 @@ import ElementUI from "element-ui"
 import "element-ui/lib/theme-chalk/index.css"
 import "./global.less"
 import index from "./index.vue";
-import './register-panel';
+import {init} from './register-panel';
+
+init();
 
 Vue.use(ElementUI, {size: "mini"});
 new Vue({

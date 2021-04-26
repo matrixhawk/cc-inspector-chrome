@@ -45,7 +45,8 @@
 import Vue from "vue";
 import {Component} from "vue-property-decorator";
 import properties from "./propertys.vue";
-import {DataSupport, ExecutePara, ExecuteParaType, NodeData} from "@/devtools/type";
+import {DataSupport, PluginEvent, NodeData} from "@/devtools/type";
+import {connectBackground} from "@/devtools/connectBackground";
 
 const PluginMsg = require("../core/plugin-msg");
 @Component({
@@ -57,7 +58,6 @@ export default class Index extends Vue {
   private isShowDebug: boolean = false;
   treeItemData: Array<Record<string, any>> = [];
   treeData: Array<NodeData> = []
-  bgConn: chrome.runtime.Port | null = null// 与background.js的链接
   expandedKeys: Array<string> = [];
   selectedUUID: string | null = null;
 
@@ -115,7 +115,10 @@ export default class Index extends Vue {
   _onMsgSupport(data: DataSupport) {
     this.isShowDebug = data.support;
     if (data.support) {
-      this.onBtnClickUpdateTree();
+      // 如果节点树为空，就刷新一次
+      if (this.treeData.length === 0) {
+        this.onBtnClickUpdateTree();
+      }
     } else {
       this._reset();
     }
@@ -127,10 +130,8 @@ export default class Index extends Vue {
   }
 
   _initChromeRuntimeConnect() {
-    // chrome.devtools.inspectedWindow.tabId
     // 接收来自background.js的消息数据
-    this.bgConn = chrome.runtime.connect({name: PluginMsg.Page.Devtools});
-    this.bgConn.onMessage.addListener((data, sender) => {
+    connectBackground.onBackgroundMessage((data: any, sender: any) => {
       if (!data) {
         return;
       }
@@ -138,7 +139,10 @@ export default class Index extends Vue {
       let eventData: any = data.data;
       console.log(data)
       switch (data.msg) {
-        case PluginMsg.Msg.ListInfo: {
+        case PluginMsg.Msg.UrlChange: {
+          break;
+        }
+        case PluginMsg.Msg.TreeInfo: {
           this._onMsgListInfo(eventData as Array<NodeData>);
           break;
         }
@@ -154,6 +158,10 @@ export default class Index extends Vue {
           this._onMsgMemory(eventData)
           break;
         }
+        case PluginMsg.Msg.TabsInfo: {
+          debugger
+          break
+        }
       }
     });
   }
@@ -164,7 +172,8 @@ export default class Index extends Vue {
     // console.log(data);
     let uuid = data.uuid;
     if (uuid !== undefined) {
-      this.runToContentScript(ExecuteParaType.GetNodeInfo, uuid);
+      PluginMsg.Msg.TabsInfo;
+      this.runToContentScript(PluginMsg.Msg.NodeInfo, uuid);
     }
   }
 
@@ -179,16 +188,23 @@ export default class Index extends Vue {
 
   }
 
-  runToContentScript(type: ExecuteParaType, data?: any) {
+  runToContentScript(msg: string, data?: any) {
     if (!chrome || !chrome.devtools) {
       console.log("环境异常，无法执行函数");
       return;
     }
-    let para: ExecutePara = new ExecutePara(type, data);
+    debugger
+    let sendData = new PluginEvent(msg, data)
+    connectBackground.postMessage(sendData);
+  }
+
+  // 问题：没有上下文的权限，只能操作DOM
+  _executeScript(para: Object) {
+    let tabID = chrome.devtools.inspectedWindow.tabId;
     //@ts-ignore
-    chrome.tabs.executeScript(null, {code: `var CCInspectorPara='${JSON.stringify(para)}';`}, () => {
+    chrome.tabs.executeScript(tabID, {code: `var CCInspectorPara='${JSON.stringify(para)}';`}, () => {
       //@ts-ignore
-      chrome.tabs.executeScript(null, {file: "js/execute.js"})
+      chrome.tabs.executeScript(tabID, {file: "js/execute.js"})
     });
   }
 
@@ -204,15 +220,15 @@ export default class Index extends Vue {
   }
 
   onBtnClickUpdateTree() {
-    this.runToContentScript(ExecuteParaType.UpdateTreeInfo);
+    this.runToContentScript(PluginMsg.Msg.TreeInfo);
   }
 
   onBtnClickUpdatePage() {
-    this.runToContentScript(ExecuteParaType.CheckGamePage, true);
+    this.runToContentScript(PluginMsg.Msg.Support);
   }
 
   onMemoryTest() {
-    this.runToContentScript(ExecuteParaType.MemoryInfo);
+    this.runToContentScript(PluginMsg.Msg.MemoryInfo);
   }
 
   onNodeExpand(data: NodeData) {
