@@ -16,7 +16,6 @@ class ConnectBackground {
   onBackgroundMessage(cb: Function) {
     if (this.connect) {
       this.connect.onMessage.addListener((event, sender) => {
-        console.log(`[Message] ${JSON.stringify(event)}`);
         cb && cb(event, sender)
       });
     }

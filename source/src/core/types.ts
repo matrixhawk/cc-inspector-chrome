@@ -20,10 +20,28 @@ export enum Msg {
 export class PluginEvent {
   msg: Msg | null = null;
   data: any = null;
+
+  source: Page | null = null; // 事件发送的源头
   target: Page | null = null; // 事件要发送的目标
 
-  constructor(target: Page, msg: Msg, data?: any) {
+  static check(event: PluginEvent, source: Page, target: Page) {
+    return event && source && target && event.source === source && event.target === target;
+  }
+
+  static reset(event: PluginEvent, source: Page | null, target: Page | null) {
+    if (event && source && target) {
+      event.source = source;
+      event.target = target;
+    }
+  }
+
+  static finish(event: PluginEvent) {
+    event.source = event.target = null;
+  }
+
+  constructor(source: Page, target: Page, msg: Msg, data?: any) {
     if (PageInclude(target)) {
+      this.source = source;
       this.target = target;
       this.msg = msg;
       this.data = data || null;

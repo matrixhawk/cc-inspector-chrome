@@ -1,7 +1,7 @@
 // content.js 和原始界面共享DOM，具有操作dom的能力
 // 但是不共享js,要想访问页面js,只能通过注入的方式
 import {injectScript} from "@/core/util";
-import {PluginEvent, Page, Msg} from "@/core/types";
+import {Msg, Page, PluginEvent} from "@/core/types";
 
 injectScript("js/inject.js");
 
@@ -9,9 +9,9 @@ injectScript("js/inject.js");
 let conn = chrome.runtime.connect({name: Page.Content})
 conn.onMessage.addListener((data: PluginEvent, sender) => {
   // 将background.js的消息返回到injection.js
-  console.log(`%c[Connect-Message] ${JSON.stringify(data)}`, "color:green;")
-  if (data.target === Page.Content) {
-    data.target = Page.Inject;
+  if (PluginEvent.check(data, Page.Background, Page.Content)) {
+    console.log(`%c[Connect-Message] ${JSON.stringify(data)}`, "color:green;")
+    PluginEvent.reset(data, Page.Content, Page.Inject)
     window.postMessage(data, "*");
   }
 })
@@ -19,9 +19,9 @@ conn.onMessage.addListener((data: PluginEvent, sender) => {
 // 接受来自inject.js的消息数据,然后中转到background.js
 window.addEventListener('message', function (event) {
   let data: PluginEvent = event.data;
-  console.log(`%c[Window-Message] ${JSON.stringify(data)}`, "color:green;");
-  if (data.target === Page.Inject) {
-    data.target = Page.Background;
+  if (PluginEvent.check(data, Page.Inject, Page.Content)) {
+    console.log(`%c[Window-Message] ${JSON.stringify(data)}`, "color:green;");
+    PluginEvent.reset(data, Page.Content, Page.Background)
     chrome.runtime.sendMessage(data);
   }
 }, false);
@@ -29,7 +29,7 @@ window.addEventListener('message', function (event) {
 
 let gameCanvas = document.querySelector("#GameCanvas");
 if (!gameCanvas) {
-  let sendData = new PluginEvent(Page.Background, Msg.Support, {
+  let sendData = new PluginEvent(Page.Content, Page.Background, Msg.Support, {
     support: false,
     msg: "未发现GameCanvas,不支持调试游戏!"
   })

@@ -1,4 +1,4 @@
-import {PluginEvent, Page, Msg} from "@/core/types";
+import {Page, PluginEvent} from "@/core/types";
 
 let Devtools: chrome.runtime.Port | null = null;
 let Content: chrome.runtime.Port | null = null;
@@ -11,8 +11,8 @@ chrome.runtime.onConnect.addListener((port: chrome.runtime.Port) => {
       onPortConnect(port,
         (data: PluginEvent) => {
           // 从devtools过来的消息统一派发到Content中
-          if (data.target === Page.Background) {
-            data.target = Page.Content;
+          if (PluginEvent.check(data, Page.Devtools, Page.Background)) {
+            PluginEvent.reset(data, Page.Background, Page.Content);
             Content && Content.postMessage(data)
           }
         },
@@ -54,8 +54,8 @@ function onPortConnect(port: chrome.runtime.Port, onMsg: Function, onDisconnect:
 // background.js 更像是一个主进程,负责整个插件的调度,生命周期和chrome保持一致
 //  监听来自content.js发来的事件，将消息转发到devtools
 chrome.runtime.onMessage.addListener((request: PluginEvent, sender: any, sendResponse: any) => {
-    if (request.target === Page.Background) {
-      request.target = Page.Devtools;
+    if (PluginEvent.check(request, Page.Content, Page.Background)) {
+      PluginEvent.reset(request, Page.Background, Page.Devtools)
       console.log(`%c[Message]url:${sender.url}]\n${JSON.stringify(request)}`, 'color:green')
       sendResponse && sendResponse(request);
       Devtools && Devtools.postMessage(request);

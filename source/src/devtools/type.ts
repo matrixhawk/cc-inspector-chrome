@@ -4,10 +4,7 @@ export class NodeData {
   children: Array<NodeData> = []
 }
 
-export class DataSupport {
-  support: boolean = false;
-  msg?: string;
-}
+
 
 
 

@@ -32,21 +32,25 @@ class CCInspector {
         return
       }
       let pluginEvent: PluginEvent = event.data;
-      if (pluginEvent.target === Page.Inject) {
+      if (PluginEvent.check(pluginEvent, Page.Content, Page.Inject)) {
+        console.log(`[Inject] ${JSON.stringify(pluginEvent)}`, 'color:green;');
+        PluginEvent.finish(pluginEvent)
         switch (pluginEvent.msg) {
           case Msg.UrlChange:
           case Msg.Support: {
             let isCocosGame = this._isCocosGame();
-            this.sendMsgToContent(Msg.Support, {support: isCocosGame});
+            this.notifySupportGame(isCocosGame)
             break;
           }
           case Msg.TreeInfo: {
-
             debugger
+            this.updateTreeInfo();
             break;
           }
           case Msg.NodeInfo: {
             debugger
+            let nodeUUID = pluginEvent.data;
+            this.getNodeInfo(nodeUUID);
             break;
           }
           case Msg.SetProperty: {
@@ -60,31 +64,11 @@ class CCInspector {
 
   sendMsgToContent(msg: Msg, data: any) {
     // 发送给content.js处理，也会导致发送给了自身，死循环
-    window.postMessage(new PluginEvent(Page.Inject, msg, data), "*");
+    window.postMessage(new PluginEvent(Page.Inject, Page.Content, msg, data), "*");
   }
 
-  devPageCallEntry(str: string) {
-    let para: PluginEvent = JSON.parse(str);
-    debugger
-    if (this._isCocosGame()) {
-      switch (para.msg) {
-        case Msg.TreeInfo:
-          this.updateTreeInfo();
-          break;
-        case Msg.Support:
-
-          break;
-        case Msg.MemoryInfo:
-          break;
-        case Msg.SetProperty:
-          break;
-        case Msg.NodeInfo:
-          this.getNodeInfo(para.data as string);
-          break;
-      }
-    } else {
-      this.sendMsgToContent(Msg.Support, {support: false});
-    }
+  notifySupportGame(b: boolean) {
+    this.sendMsgToContent(Msg.Support, b);
   }
 
   updateTreeInfo() {
@@ -108,6 +92,8 @@ class CCInspector {
       } else {
         this.sendMsgToContent(Msg.Support, {support: false, msg: "未发现游戏场景,不支持调试游戏!"});
       }
+    } else {
+      this.notifySupportGame(false)
     }
   }
 

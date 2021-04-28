@@ -45,8 +45,8 @@
 import Vue from "vue";
 import {Component} from "vue-property-decorator";
 import properties from "./propertys.vue";
-import {DataSupport, NodeData} from "@/devtools/type";
-import {PluginEvent, Page, Msg} from '@/core/types'
+import { NodeData} from "@/devtools/type";
+import {Msg, Page, PluginEvent} from '@/core/types'
 import {connectBackground} from "@/devtools/connectBackground";
 
 @Component({
@@ -80,7 +80,6 @@ export default class Index extends Vue {
     }
 
     window.addEventListener("message", function (event) {
-      console.log("on vue:" + JSON.stringify(event.data));
       console.log("on vue:" + JSON.stringify(event));
     }, false);
   }
@@ -112,9 +111,9 @@ export default class Index extends Vue {
     this.memory = eventData;
   }
 
-  _onMsgSupport(data: DataSupport) {
-    this.isShowDebug = data.support;
-    if (data.support) {
+  _onMsgSupport(data:boolean) {
+    this.isShowDebug = data;
+    if (data) {
       // 如果节点树为空，就刷新一次
       if (this.treeData.length === 0) {
         // this.onBtnClickUpdateTree();
@@ -135,9 +134,10 @@ export default class Index extends Vue {
       if (!data) {
         return;
       }
-      if (data.target === Page.Background) {
+      if (PluginEvent.check(data, Page.Background, Page.Devtools)) {
+        console.log(`[Devtools] ${JSON.stringify(data)}`);
+        PluginEvent.finish(data);
         let eventData: any = data.data;
-        console.log(data)
         switch (data.msg) {
           case Msg.UrlChange: {
             break;
@@ -147,7 +147,7 @@ export default class Index extends Vue {
             break;
           }
           case Msg.Support: {
-            this._onMsgSupport(eventData as DataSupport)
+            this._onMsgSupport(!!eventData)
             break;
           }
           case Msg.NodeInfo: {
@@ -194,8 +194,7 @@ export default class Index extends Vue {
       console.log("环境异常，无法执行函数");
       return;
     }
-    debugger
-    let sendData = new PluginEvent(Page.Background, msg, data)
+    let sendData = new PluginEvent(Page.Devtools, Page.Background, msg, data)
     connectBackground.postMessageToBackground(sendData);
   }
 
