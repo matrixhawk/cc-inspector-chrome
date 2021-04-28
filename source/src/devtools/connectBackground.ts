@@ -1,12 +1,11 @@
-import * as PluginMsg from "@/core/plugin-msg";
-import {PluginEvent} from "@/devtools/type";
+import {PluginEvent, Page} from "@/core/types";
 
 class ConnectBackground {
   connect: chrome.runtime.Port | null = null;
 
   constructor() {
     if (chrome && chrome.runtime) {
-      this.connect = chrome.runtime.connect({name: PluginMsg.Page.Devtools});
+      this.connect = chrome.runtime.connect({name: Page.Devtools});
       this.connect.onDisconnect.addListener(() => {
         console.log(`%c[Connect-Dis]`, 'color:red;')
         this.connect = null;
@@ -23,7 +22,7 @@ class ConnectBackground {
     }
   }
 
-  postMessage(data: PluginEvent) {
+  postMessageToBackground(data: PluginEvent) {
     if (this.connect) {
       this.connect.postMessage(data)
     } else {

@@ -1,5 +1,4 @@
 // eval 注入脚本的代码,变量尽量使用var,后来发现在import之后,let会自动变为var
-import * as PluginMsg from '../core/plugin-msg'
 import {
   ArrayData,
   BoolData,
@@ -13,7 +12,7 @@ import {
   Vec3Data
 } from "./data";
 
-import {PluginEvent} from './type'
+import {PluginEvent, Page, Msg} from '@/core/types'
 
 class CCInspector {
   inspectorGameMemoryStorage: Record<string, any> = {}
@@ -27,34 +26,41 @@ class CCInspector {
       // }
     }, 1000);
     // 注册cc_after_render事件
-    window.addEventListener("message", (event: any) => {
-      // 接受来自background的事件，有可能也会受到其他插件的
+    window.addEventListener("message", (event) => {
+      // 接受来自content的事件，有可能也会受到其他插件的
       if (!event || !event.data) {
         return
       }
       let pluginEvent: PluginEvent = event.data;
-      switch (pluginEvent.msg) {
-        case PluginMsg.Msg.UrlChange:
-        case PluginMsg.Msg.Support: {
-          let isCocosGame = this._isCocosGame();
-          this.sendMsgToContent(PluginMsg.Msg.Support, {support: isCocosGame});
-          break;
-        }
-        case PluginMsg.Msg.TreeInfo: {
+      if (pluginEvent.target === Page.Inject) {
+        switch (pluginEvent.msg) {
+          case Msg.UrlChange:
+          case Msg.Support: {
+            let isCocosGame = this._isCocosGame();
+            this.sendMsgToContent(Msg.Support, {support: isCocosGame});
+            break;
+          }
+          case Msg.TreeInfo: {
 
-          debugger
-          break;
-        }
-        case PluginMsg.Msg.NodeInfo: {
-          debugger
-          break;
-        }
-        case PluginMsg.Msg.SetProperty: {
-          debugger;
-          break;
+            debugger
+            break;
+          }
+          case Msg.NodeInfo: {
+            debugger
+            break;
+          }
+          case Msg.SetProperty: {
+            debugger;
+            break;
+          }
         }
       }
     });
+  }
+
+  sendMsgToContent(msg: Msg, data: any) {
+    // 发送给content.js处理，也会导致发送给了自身，死循环
+    window.postMessage(new PluginEvent(Page.Inject, msg, data), "*");
   }
 
   devPageCallEntry(str: string) {
@@ -62,22 +68,22 @@ class CCInspector {
     debugger
     if (this._isCocosGame()) {
       switch (para.msg) {
-        case PluginMsg.Msg.TreeInfo:
+        case Msg.TreeInfo:
           this.updateTreeInfo();
           break;
-        case PluginMsg.Msg.Support:
+        case Msg.Support:
 
           break;
-        case PluginMsg.Msg.MemoryInfo:
+        case Msg.MemoryInfo:
           break;
-        case PluginMsg.Msg.SetProperty:
+        case Msg.SetProperty:
           break;
-        case PluginMsg.Msg.NodeInfo:
+        case Msg.NodeInfo:
           this.getNodeInfo(para.data as string);
           break;
       }
     } else {
-      this.sendMsgToContent(PluginMsg.Msg.Support, {support: false});
+      this.sendMsgToContent(Msg.Support, {support: false});
     }
   }
 
@@ -98,9 +104,9 @@ class CCInspector {
           let node = sceneChildren[i];
           this.getNodeChildren(node, sendData.children);
         }
-        this.sendMsgToContent(PluginMsg.Msg.TreeInfo, sendData);
+        this.sendMsgToContent(Msg.TreeInfo, sendData);
       } else {
-        this.sendMsgToContent(PluginMsg.Msg.Support, {support: false, msg: "未发现游戏场景,不支持调试游戏!"});
+        this.sendMsgToContent(Msg.Support, {support: false, msg: "未发现游戏场景,不支持调试游戏!"});
       }
     }
   }
@@ -276,7 +282,7 @@ class CCInspector {
         let compGroup = this._getGroupData(itemComp);
         groupData.push(compGroup);
       }
-      this.sendMsgToContent(PluginMsg.Msg.NodeInfo, groupData);
+      this.sendMsgToContent(Msg.NodeInfo, groupData);
     } else {
       // 未获取到节点数据
       console.log("未获取到节点数据");
@@ -297,13 +303,9 @@ class CCInspector {
     }
   }
 
-  sendMsgToContent(msg: string, data: any) {
-    // 发送给content.js处理
-    window.postMessage(new PluginEvent(msg, data), "*");
-  }
 
   onMemoryInfo() {
-    this.sendMsgToContent(PluginMsg.Msg.MemoryInfo, {
+    this.sendMsgToContent(Msg.MemoryInfo, {
       performance: {
         // @ts-ignore
         jsHeapSizeLimit: window.performance.memory.jsHeapSizeLimit,

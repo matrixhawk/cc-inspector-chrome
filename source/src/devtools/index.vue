@@ -45,10 +45,10 @@
 import Vue from "vue";
 import {Component} from "vue-property-decorator";
 import properties from "./propertys.vue";
-import {DataSupport, PluginEvent, NodeData} from "@/devtools/type";
+import {DataSupport, NodeData} from "@/devtools/type";
+import {PluginEvent, Page, Msg} from '@/core/types'
 import {connectBackground} from "@/devtools/connectBackground";
 
-const PluginMsg = require("../core/plugin-msg");
 @Component({
   components: {
     properties,
@@ -117,7 +117,7 @@ export default class Index extends Vue {
     if (data.support) {
       // 如果节点树为空，就刷新一次
       if (this.treeData.length === 0) {
-        this.onBtnClickUpdateTree();
+        // this.onBtnClickUpdateTree();
       }
     } else {
       this._reset();
@@ -131,39 +131,41 @@ export default class Index extends Vue {
 
   _initChromeRuntimeConnect() {
     // 接收来自background.js的消息数据
-    connectBackground.onBackgroundMessage((data: any, sender: any) => {
+    connectBackground.onBackgroundMessage((data: PluginEvent, sender: any) => {
       if (!data) {
         return;
       }
-
-      let eventData: any = data.data;
-      console.log(data)
-      switch (data.msg) {
-        case PluginMsg.Msg.UrlChange: {
-          break;
-        }
-        case PluginMsg.Msg.TreeInfo: {
-          this._onMsgListInfo(eventData as Array<NodeData>);
-          break;
-        }
-        case PluginMsg.Msg.Support: {
-          this._onMsgSupport(eventData as DataSupport)
-          break;
-        }
-        case PluginMsg.Msg.NodeInfo: {
-          this._onMsgNodeInfo(eventData);
-          break;
-        }
-        case  PluginMsg.Msg.MemoryInfo: {
-          this._onMsgMemory(eventData)
-          break;
-        }
-        case PluginMsg.Msg.TabsInfo: {
-          debugger
-          break
+      if (data.target === Page.Background) {
+        let eventData: any = data.data;
+        console.log(data)
+        switch (data.msg) {
+          case Msg.UrlChange: {
+            break;
+          }
+          case Msg.TreeInfo: {
+            this._onMsgListInfo(eventData as Array<NodeData>);
+            break;
+          }
+          case Msg.Support: {
+            this._onMsgSupport(eventData as DataSupport)
+            break;
+          }
+          case Msg.NodeInfo: {
+            this._onMsgNodeInfo(eventData);
+            break;
+          }
+          case  Msg.MemoryInfo: {
+            this._onMsgMemory(eventData)
+            break;
+          }
+          case Msg.TabsInfo: {
+            debugger
+            break
+          }
         }
       }
     });
+
   }
 
   handleNodeClick(data: NodeData) {
@@ -172,8 +174,7 @@ export default class Index extends Vue {
     // console.log(data);
     let uuid = data.uuid;
     if (uuid !== undefined) {
-      PluginMsg.Msg.TabsInfo;
-      this.runToContentScript(PluginMsg.Msg.NodeInfo, uuid);
+      this.runToContentScript(Msg.NodeInfo, uuid);
     }
   }
 
@@ -188,14 +189,14 @@ export default class Index extends Vue {
 
   }
 
-  runToContentScript(msg: string, data?: any) {
+  runToContentScript(msg: Msg, data?: any) {
     if (!chrome || !chrome.devtools) {
       console.log("环境异常，无法执行函数");
       return;
     }
     debugger
-    let sendData = new PluginEvent(msg, data)
-    connectBackground.postMessage(sendData);
+    let sendData = new PluginEvent(Page.Background, msg, data)
+    connectBackground.postMessageToBackground(sendData);
   }
 
   // 问题：没有上下文的权限，只能操作DOM
@@ -220,15 +221,15 @@ export default class Index extends Vue {
   }
 
   onBtnClickUpdateTree() {
-    this.runToContentScript(PluginMsg.Msg.TreeInfo);
+    this.runToContentScript(Msg.TreeInfo);
   }
 
   onBtnClickUpdatePage() {
-    this.runToContentScript(PluginMsg.Msg.Support);
+    this.runToContentScript(Msg.Support);
   }
 
   onMemoryTest() {
-    this.runToContentScript(PluginMsg.Msg.MemoryInfo);
+    this.runToContentScript(Msg.MemoryInfo);
   }
 
   onNodeExpand(data: NodeData) {

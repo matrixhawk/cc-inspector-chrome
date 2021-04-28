@@ -1,6 +1,4 @@
-import * as PluginMsg from '../core/plugin-msg'
 import Manifest from '../manifest.json'
-import {PluginEvent} from "@/devtools/type";
 import {connectBackground} from "@/devtools/connectBackground";
 
 export function init() {

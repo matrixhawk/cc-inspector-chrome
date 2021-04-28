@@ -10,12 +10,4 @@ export class DataSupport {
 }
 
 
-export class PluginEvent {
-  msg: string = '';
-  data: any = null;
 
-  constructor(msg: string, data?: any) {
-    this.msg = msg;
-    this.data = data || null;
-  }
-}

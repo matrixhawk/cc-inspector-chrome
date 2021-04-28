@@ -1,6 +1,4 @@
-import * as  PluginMsg from "./core/plugin-msg"
-import {PluginEvent} from "@/devtools/type";
-import {MsgInclude} from "./core/plugin-msg";
+import {PluginEvent, Page, Msg} from "@/core/types";
 
 let Devtools: chrome.runtime.Port | null = null;
 let Content: chrome.runtime.Port | null = null;
@@ -8,12 +6,13 @@ console.log('on background')
 
 chrome.runtime.onConnect.addListener((port: chrome.runtime.Port) => {
   switch (port.name) {
-    case PluginMsg.Page.Devtools: {
+    case Page.Devtools: {
       Devtools = port;
       onPortConnect(port,
         (data: PluginEvent) => {
           // 从devtools过来的消息统一派发到Content中
-          if (MsgInclude(data.msg)) {
+          if (data.target === Page.Background) {
+            data.target = Page.Content;
             Content && Content.postMessage(data)
           }
         },
@@ -22,7 +21,7 @@ chrome.runtime.onConnect.addListener((port: chrome.runtime.Port) => {
         })
       break;
     }
-    case PluginMsg.Page.Content: {
+    case Page.Content: {
       Content = port;
       onPortConnect(port,
         () => {
@@ -41,6 +40,7 @@ function onPortConnect(port: chrome.runtime.Port, onMsg: Function, onDisconnect:
   console.log(`%c[Connect] ${port.name}`, "color:blue;");
   port.onMessage.addListener((data: any, sender: any) => {
     console.log(`%c[Connect-Message] ${sender.name}\n${JSON.stringify(data)}`, "color:green;")
+    // 如果多个页面都监听 onMessage 事件，对于某一次事件只有第一次调用 sendResponse() 能成功发出回应，所有其他回应将被忽略。
     // sender.postMessage(data);
     onMsg && onMsg(data);
   });
@@ -53,10 +53,11 @@ function onPortConnect(port: chrome.runtime.Port, onMsg: Function, onDisconnect:
 
 // background.js 更像是一个主进程,负责整个插件的调度,生命周期和chrome保持一致
 //  监听来自content.js发来的事件，将消息转发到devtools
-chrome.runtime.onMessage.addListener((request: any, sender: any, sendResponse: any) => {
-    console.log(`%c[Message]url:${sender.url}]\n${JSON.stringify(request)}`, 'color:green')
-    sendResponse && sendResponse(request);
-    if (MsgInclude(request.msg)) {
+chrome.runtime.onMessage.addListener((request: PluginEvent, sender: any, sendResponse: any) => {
+    if (request.target === Page.Background) {
+      request.target = Page.Devtools;
+      console.log(`%c[Message]url:${sender.url}]\n${JSON.stringify(request)}`, 'color:green')
+      sendResponse && sendResponse(request);
       Devtools && Devtools.postMessage(request);
     }
   }
@@ -65,9 +66,9 @@ chrome.runtime.onMessage.addListener((request: any, sender: any, sendResponse: a
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
   if (changeInfo.status === "complete") {
     // 加载新的url
-    if (Content) {
-      Content.postMessage(new PluginEvent(PluginMsg.Msg.UrlChange, {url: tab.favIconUrl}));
-    }
+    // if (Content) {
+    //   Content.postMessage(new PluginEvent(Msg.UrlChange, {url: tab.favIconUrl}));
+    // }
   }
 })
 
