@@ -4,11 +4,15 @@
       <div class="text">{{ name }}</div>
     </div>
     <div class="value">
-      <el-input v-if="isString()" v-model="value.data" @change="onChangeValue"></el-input>
+      <el-input v-if="isString()" v-model="value.data"
+                :disabled="value.readonly"
+                @change="onChangeValue">
+      </el-input>
       <el-input v-if="isText()"
                 type="textarea"
                 :autosize="{minRows:3,maxRows:5}"
                 placeholder="请输入内容"
+                :disabled="value.readonly"
                 @change="onChangeValue"
                 v-model="value.data">
       </el-input>
@@ -16,6 +20,7 @@
                        style="width: 100%;text-align: left"
                        v-model="value.data"
                        :step="step"
+                       :disabled="value.readonly"
                        @change="onChangeValue"
                        controls-position="right"
       ></el-input-number>
@@ -28,16 +33,26 @@
 
         </ui-prop>
       </div>
-      <el-select v-model="value.data" v-if="isEnum()" style="width: 100%;" @change="onChangeValue">
+      <el-select v-model="value.data"
+                 :disabled="value.readonly"
+                 v-if="isEnum()" style="width: 100%;"
+                 @change="onChangeValue">
         <el-option v-for="(opt, index) in value.values"
                    :key="index"
                    :label="opt.name"
                    :value="opt.value">
         </el-option>
       </el-select>
-      <el-checkbox v-model="value.data" v-if="isBool()" @change="onChangeValue"></el-checkbox>
+      <el-checkbox v-model="value.data"
+                   v-if="isBool()"
+                   :disabled="value.readonly"
+                   @change="onChangeValue">
+      </el-checkbox>
       <div class="color" v-if="isColor()">
-        <el-color-picker style="position: absolute;" v-model="value.data" @change="onChangeValue"></el-color-picker>
+        <el-color-picker style="position: absolute;"
+                         :disabled="value.readonly"
+                         v-model="value.data" @change="onChangeValue">
+        </el-color-picker>
         <div class="hex" :style="{color:colorReverse(value.data)}">{{ value.data }}</div>
       </div>
       <div v-if="isArrayOrObject()" class="array-object">
@@ -131,7 +146,9 @@ export default class UiProp extends Vue {
   }
 
   onChangeValue() {
-    connectBackground.postMessageToBackground(Msg.SetProperty, this.value);
+    if (!this.value.readonly) {
+      connectBackground.postMessageToBackground(Msg.SetProperty, this.value);
+    }
   }
 
   @Prop({default: 1})

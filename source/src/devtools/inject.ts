@@ -192,7 +192,8 @@ class CCInspector {
     return null;
   }
 
-  _genInfoData(propertyValue: any, path: any) {
+  _genInfoData(node: any, key: string, path: any) {
+    let propertyValue = node[key];
     let info = null;
     switch (typeof propertyValue) {
       case "boolean":
@@ -220,6 +221,7 @@ class CCInspector {
         break;
     }
     if (info) {
+      info.readonly = this._isReadonly(node, key)
       info.path = path;
     } else {
       console.error(`暂不支持的属性值`, propertyValue);
@@ -256,7 +258,7 @@ class CCInspector {
         pairValues.forEach((el: string) => {
           if (el in node) {
             let propertyPath = [node.uuid, el];
-            let vecData = this._genInfoData(node[el], propertyPath);
+            let vecData = this._genInfoData(node, el, propertyPath);
             if (vecData) {
               info && info.add(new Property(el, vecData));
             }
@@ -273,7 +275,7 @@ class CCInspector {
         }
       } else {
         let propertyPath = [node.uuid, key];
-        let info = this._genInfoData(propertyValue, propertyPath);
+        let info = this._genInfoData(node, key, propertyPath);
         if (info) {
           nodeGroup.addProperty(new Property(key, info));
         }
@@ -314,22 +316,26 @@ class CCInspector {
     }
   }
 
+  _isReadonly(base: Object, key: string): boolean {
+    let obj = Object.getPrototypeOf(base);
+    if (obj) {
+      let ret = Object.getOwnPropertyDescriptor(obj, key)
+      if (ret && ret.set) {
+        return false;
+      } else {
+        return this._isReadonly(obj, key)
+      }
+    } else {
+      return true;
+    }
+  }
+
   setValue(uuid: string, key: string, value: string) {
     let nodeOrComp = this.inspectorGameMemoryStorage[uuid];
     if (nodeOrComp && key in nodeOrComp) {
-      debugger
-
-      function circleFind(base: Object): boolean {
-        let obj = Object.getPrototypeOf(base);
-        let ret = Object.getOwnPropertyDescriptor(obj, key)
-        if (ret && ret.set) {
-          return true;
-        } else {
-          return circleFind(obj)
-        }
-      }
-
-      if (circleFind(nodeOrComp)) {
+      if (this._isReadonly(nodeOrComp, key)) {
+        console.warn(`值不允许修改`);
+      } else {
         nodeOrComp[key] = value;
       }
     }

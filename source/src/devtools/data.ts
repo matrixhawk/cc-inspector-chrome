@@ -15,6 +15,7 @@ export enum DataType {
 export class Info {
   public type: DataType = DataType.Number;
   public data: any;
+  public readonly: boolean = false;
   public path: Array<string> = [];// 属性对应的路径
 }
 
