@@ -60,36 +60,7 @@ class CCInspector {
             if (uuid && key) {
               this.setValue(uuid, key, value);
               this.sendMsgToContent(Msg.UpdateProperty, data);
-              // 修改完毕后同步数据，目前是全部重刷，后续优化下
-              // this.updateTreeInfo();
-              // this.getNodeInfo(uuid);
             }
-            break;
-            switch (data.type) {
-              case DataType.Number:
-                break;
-              case DataType.String:
-                break;
-              case DataType.Text:
-                break;
-              case DataType.Vec2:
-                break;
-              case DataType.Vec3:
-                break;
-              case DataType.Enum:
-                break;
-              case DataType.Bool:
-                break;
-              case DataType.Color:
-                break;
-              case DataType.NullOrUndefined:
-                break;
-              case DataType.Array:
-                break;
-              case DataType.Object:
-                break;
-            }
-            debugger;
             break;
           }
         }
