@@ -10,7 +10,8 @@ let conn = chrome.runtime.connect({name: Page.Content})
 conn.onMessage.addListener((data: PluginEvent, sender) => {
   // 将background.js的消息返回到injection.js
   if (PluginEvent.check(data, Page.Background, Page.Content)) {
-    console.log(`%c[Connect-Message] ${JSON.stringify(data)}`, "color:green;")
+    // console.log(`%c[Connect-Message] ${JSON.stringify(data)}`, "color:green;")
+    console.log('[Connect-Message]: ', data);
     PluginEvent.reset(data, Page.Content, Page.Inject)
     window.postMessage(data, "*");
   }
@@ -20,7 +21,8 @@ conn.onMessage.addListener((data: PluginEvent, sender) => {
 window.addEventListener('message', function (event) {
   let data: PluginEvent = event.data;
   if (PluginEvent.check(data, Page.Inject, Page.Content)) {
-    console.log(`%c[Window-Message] ${JSON.stringify(data)}`, "color:green;");
+    // console.log(`%c[Window-Message] ${JSON.stringify(data)}`, "color:green;");
+    console.log('[Window-Message]: ', data);
     PluginEvent.reset(data, Page.Content, Page.Background)
     chrome.runtime.sendMessage(data);
   }
