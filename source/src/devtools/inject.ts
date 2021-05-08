@@ -176,6 +176,7 @@ class CCInspector {
       rotation: ["rotationX", "rotationY"],
       anchor: ["anchorX", "anchorY"],
       size: ["width", "height"],
+      skew: ['skewX', 'skewY'],
       position: ["x", "y", "z"],
       scale: ["scaleX", "scaleY", "scaleZ"],
       designResolution: ["width", "height"], // 这个比较特殊，在key下边，其他的都不是在key下
@@ -230,16 +231,18 @@ class CCInspector {
   _getGroupData(node: any) {
     let nodeGroup = new Group(node.constructor.name);
     let keys = this._getNodeKeys(node);
-    for (let i = 0; i < keys.length; i++) {
+    for (let i = 0; i < keys.length;) {
       let key = keys[i];
       let propertyValue = node[key];
       let pair = this._getPairProperty(key);
       if (pair) {
+        let bSplice = false;
         // 把这个成对的属性剔除掉
         pair.values.forEach((item: string) => {
           let index = keys.findIndex(el => el === item);
           if (index !== -1) {
             keys.splice(index, 1);
+            bSplice = true;
           }
         });
         // 序列化成对的属性
@@ -265,14 +268,19 @@ class CCInspector {
           let property = new Property(pair.key, info);
           nodeGroup.addProperty(property);
         }
+        if (!bSplice) {
+          i++;
+        }
       } else {
         let propertyPath = [node.uuid, key];
         let info = this._genInfoData(propertyValue, propertyPath);
         if (info) {
           nodeGroup.addProperty(new Property(key, info));
         }
+        i++;
       }
     }
+    nodeGroup.sort();
     return nodeGroup;
   }
 
@@ -310,6 +318,7 @@ class CCInspector {
     let nodeOrComp = this.inspectorGameMemoryStorage[uuid];
     if (nodeOrComp && key in nodeOrComp) {
       debugger
+
       function circleFind(base: Object): boolean {
         let obj = Object.getPrototypeOf(base);
         let ret = Object.getOwnPropertyDescriptor(obj, key)

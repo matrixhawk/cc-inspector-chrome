@@ -142,6 +142,24 @@ export class Group {
   addProperty(property: Property) {
     this.data.push(property)
   }
+
+  sort() {
+    let order = ['name', 'uuid', 'position', 'rotation', 'scale', 'anchor', 'size', 'color', 'opacity', 'skew', 'group'];
+    let orderKeys: Array<Property> = [];
+    let otherKeys: Array<Property> = [];
+    this.data.forEach(property => {
+      if (order.find(el => el === property.name)) {
+        orderKeys.push(property)
+      } else {
+        otherKeys.push(property);
+      }
+    })
+    orderKeys.sort((a, b) => {
+      return order.indexOf(a.name) - order.indexOf(b.name);
+    })
+    otherKeys.sort();
+    this.data = orderKeys.concat(otherKeys);
+  }
 }
 
 export const testData = [
