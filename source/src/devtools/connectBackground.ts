@@ -1,4 +1,4 @@
-import {PluginEvent, Page} from "@/core/types";
+import {PluginEvent, Page, Msg} from "@/core/types";
 
 class ConnectBackground {
   connect: chrome.runtime.Port | null = null;
@@ -21,9 +21,10 @@ class ConnectBackground {
     }
   }
 
-  postMessageToBackground(data: PluginEvent) {
+  postMessageToBackground(msg: Msg, data?: any ) {
     if (this.connect) {
-      this.connect.postMessage(data)
+      let sendData = new PluginEvent(Page.Devtools, Page.Background, msg, data)
+      this.connect.postMessage(sendData)
     } else {
       console.warn('没有和background建立链接')
     }

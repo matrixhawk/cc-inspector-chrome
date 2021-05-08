@@ -45,9 +45,9 @@
 import Vue from "vue";
 import {Component} from "vue-property-decorator";
 import properties from "./propertys.vue";
-import { NodeData} from "@/devtools/type";
 import {Msg, Page, PluginEvent} from '@/core/types'
 import {connectBackground} from "@/devtools/connectBackground";
+import {Info, TreeData} from "@/devtools/data";
 
 @Component({
   components: {
@@ -57,7 +57,7 @@ import {connectBackground} from "@/devtools/connectBackground";
 export default class Index extends Vue {
   private isShowDebug: boolean = false;
   treeItemData: Array<Record<string, any>> = [];
-  treeData: Array<NodeData> = []
+  treeData: Array<TreeData> = []
   expandedKeys: Array<string> = [];
   selectedUUID: string | null = null;
 
@@ -84,7 +84,7 @@ export default class Index extends Vue {
     }, false);
   }
 
-  _onMsgListInfo(eventData: Array<NodeData>) {
+  _onMsgListInfo(eventData: Array<TreeData>) {
     this.isShowDebug = true;
     if (!Array.isArray(eventData)) {
       eventData = [eventData]
@@ -111,7 +111,7 @@ export default class Index extends Vue {
     this.memory = eventData;
   }
 
-  _onMsgSupport(data:boolean) {
+  _onMsgSupport(data: boolean) {
     this.isShowDebug = data;
     if (data) {
       // 如果节点树为空，就刷新一次
@@ -143,7 +143,7 @@ export default class Index extends Vue {
             break;
           }
           case Msg.TreeInfo: {
-            this._onMsgListInfo(eventData as Array<NodeData>);
+            this._onMsgListInfo(eventData as Array<TreeData>);
             break;
           }
           case Msg.Support: {
@@ -158,6 +158,10 @@ export default class Index extends Vue {
             this._onMsgMemory(eventData)
             break;
           }
+          case Msg.UpdateProperty: {
+            this._updateProperty(eventData)
+            break;
+          }
           case Msg.TabsInfo: {
             debugger
             break
@@ -165,10 +169,33 @@ export default class Index extends Vue {
         }
       }
     });
+  }
+
+  _updateProperty(data: Info) {
+    const uuid = data.path[0];
+    const key = data.path[1];
+    const value = data.data;
+    if (key === 'name') {
+      let treeArray: Array<TreeData> = [];
+
+      function circle(array: Array<TreeData>) {
+        array.forEach(item => {
+          treeArray.push(item);
+          circle(item.children);
+        })
+      }
+
+      // 更新指定uuid节点的tree的name
+      circle(this.treeData)
+      let ret = treeArray.find(el => el.uuid === uuid);
+      if (ret) {
+        ret.name = value;
+      }
+    }
 
   }
 
-  handleNodeClick(data: NodeData) {
+  handleNodeClick(data: TreeData) {
     this.selectedUUID = data.uuid;
     // todo 去获取节点信息
     // console.log(data);
@@ -194,8 +221,7 @@ export default class Index extends Vue {
       console.log("环境异常，无法执行函数");
       return;
     }
-    let sendData = new PluginEvent(Page.Devtools, Page.Background, msg, data)
-    connectBackground.postMessageToBackground(sendData);
+    connectBackground.postMessageToBackground(msg, data);
   }
 
   // 问题：没有上下文的权限，只能操作DOM
@@ -231,13 +257,13 @@ export default class Index extends Vue {
     this.runToContentScript(Msg.MemoryInfo);
   }
 
-  onNodeExpand(data: NodeData) {
+  onNodeExpand(data: TreeData) {
     if (data.hasOwnProperty('uuid') && data.uuid) {
       this.expandedKeys.push(data.uuid)
     }
   }
 
-  onNodeCollapse(data: NodeData) {
+  onNodeCollapse(data: TreeData) {
     if (data.hasOwnProperty('uuid')) {
       let index = this.expandedKeys.findIndex(el => el === data.uuid);
       if (index !== -1) {

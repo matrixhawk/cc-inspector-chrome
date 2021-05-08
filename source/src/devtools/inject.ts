@@ -2,12 +2,12 @@
 import {
   ArrayData,
   BoolData,
-  ColorData,
-  Group,
+  ColorData, DataType,
+  Group, Info,
   NullOrUndefinedData,
   NumberData, ObjectData,
   Property,
-  StringData,
+  StringData, TreeData,
   Vec2Data,
   Vec3Data
 } from "./data";
@@ -43,17 +43,52 @@ class CCInspector {
             break;
           }
           case Msg.TreeInfo: {
-            debugger
             this.updateTreeInfo();
             break;
           }
           case Msg.NodeInfo: {
-            debugger
             let nodeUUID = pluginEvent.data;
             this.getNodeInfo(nodeUUID);
             break;
           }
           case Msg.SetProperty: {
+            const data: Info = pluginEvent.data;
+            // path的设计有优化空间
+            const uuid = data.path[0];
+            const key = data.path[1];
+            const value = data.data;
+            if (uuid && key) {
+              this.setValue(uuid, key, value);
+              this.sendMsgToContent(Msg.UpdateProperty, data);
+              // 修改完毕后同步数据，目前是全部重刷，后续优化下
+              // this.updateTreeInfo();
+              // this.getNodeInfo(uuid);
+            }
+            break;
+            switch (data.type) {
+              case DataType.Number:
+                break;
+              case DataType.String:
+                break;
+              case DataType.Text:
+                break;
+              case DataType.Vec2:
+                break;
+              case DataType.Vec3:
+                break;
+              case DataType.Enum:
+                break;
+              case DataType.Bool:
+                break;
+              case DataType.Color:
+                break;
+              case DataType.NullOrUndefined:
+                break;
+              case DataType.Array:
+                break;
+              case DataType.Object:
+                break;
+            }
             debugger;
             break;
           }
@@ -77,18 +112,9 @@ class CCInspector {
       //@ts-ignore
       let scene = cc.director.getScene();
       if (scene) {
-        let sendData = {
-          uuid: scene.uuid,
-          name: scene.name,
-          children: [],
-        };
-        this.inspectorGameMemoryStorage[scene.uuid] = scene;
-        let sceneChildren = scene.getChildren();
-        for (let i = 0; i < sceneChildren.length; i++) {
-          let node = sceneChildren[i];
-          this.getNodeChildren(node, sendData.children);
-        }
-        this.sendMsgToContent(Msg.TreeInfo, sendData);
+        let treeData = new TreeData();
+        this.getNodeChildren(scene, treeData)
+        this.sendMsgToContent(Msg.TreeInfo, treeData);
       } else {
         this.sendMsgToContent(Msg.Support, {support: false, msg: "未发现游戏场景,不支持调试游戏!"});
       }
@@ -98,19 +124,17 @@ class CCInspector {
   }
 
   // 收集节点信息
-  getNodeChildren(node: any, data: Array<any>) {
-    let nodeData = {
-      uuid: node.uuid,
-      name: node.name,
-      children: [],
-    };
+  getNodeChildren(node: any, data: TreeData) {
+    data.uuid = node.uuid;
+    data.name = node.name;
     this.inspectorGameMemoryStorage[node.uuid] = node;
     let nodeChildren = node.getChildren();
     for (let i = 0; i < nodeChildren.length; i++) {
       let childItem = nodeChildren[i];
-      this.getNodeChildren(childItem, nodeData.children);
+      let treeData = new TreeData();
+      this.getNodeChildren(childItem, treeData);
+      data.children.push(treeData)
     }
-    data.push(nodeData);
   }
 
   _isCocosGame() {
@@ -285,7 +309,20 @@ class CCInspector {
   setValue(uuid: string, key: string, value: string) {
     let nodeOrComp = this.inspectorGameMemoryStorage[uuid];
     if (nodeOrComp && key in nodeOrComp) {
-      nodeOrComp[key] = value;
+      debugger
+      function circleFind(base: Object): boolean {
+        let obj = Object.getPrototypeOf(base);
+        let ret = Object.getOwnPropertyDescriptor(obj, key)
+        if (ret && ret.set) {
+          return true;
+        } else {
+          return circleFind(obj)
+        }
+      }
+
+      if (circleFind(nodeOrComp)) {
+        nodeOrComp[key] = value;
+      }
     }
   }
 

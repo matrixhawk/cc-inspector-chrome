@@ -15,6 +15,7 @@ export enum Msg {
   TabsInfo = "tabs_info", // 当前页面信息
   UrlChange = "url_change", // 网址发生变化
   SetProperty = "set-property", // 设置node属性
+  UpdateProperty = 'update-property', // 更新属性
 }
 
 export class PluginEvent {

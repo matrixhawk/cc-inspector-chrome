@@ -9,13 +9,14 @@
                 type="textarea"
                 :autosize="{minRows:3,maxRows:5}"
                 placeholder="请输入内容"
-
+                @change="onChangeValue"
                 v-model="value.data">
       </el-input>
       <el-input-number v-if="isNumber()"
                        style="width: 100%;text-align: left"
                        v-model="value.data"
                        :step="step"
+                       @change="onChangeValue"
                        controls-position="right"
       ></el-input-number>
 
@@ -27,16 +28,16 @@
 
         </ui-prop>
       </div>
-      <el-select v-model="value.data" v-if="isEnum()" style="width: 100%;">
+      <el-select v-model="value.data" v-if="isEnum()" style="width: 100%;" @change="onChangeValue">
         <el-option v-for="(opt, index) in value.values"
                    :key="index"
                    :label="opt.name"
                    :value="opt.value">
         </el-option>
       </el-select>
-      <el-checkbox v-model="value.data" v-if="isBool()"></el-checkbox>
+      <el-checkbox v-model="value.data" v-if="isBool()" @change="onChangeValue"></el-checkbox>
       <div class="color" v-if="isColor()">
-        <el-color-picker style="position: absolute;" v-model="value.data"></el-color-picker>
+        <el-color-picker style="position: absolute;" v-model="value.data" @change="onChangeValue"></el-color-picker>
         <div class="hex" :style="{color:colorReverse(value.data)}">{{ value.data }}</div>
       </div>
       <div v-if="isArrayOrObject()" class="array-object">
@@ -56,7 +57,9 @@
 
 import Vue from "vue"
 import {Component, Prop} from "vue-property-decorator"
-import {DataType} from './data'
+import {DataType, Info, NullOrUndefinedData, Vec2Data, Vec3Data} from './data'
+import {connectBackground} from "@/devtools/connectBackground";
+import {Msg, Page, PluginEvent} from "@/core/types";
 
 @Component({
   components: {}
@@ -68,7 +71,7 @@ export default class UiProp extends Vue {
 
 
   @Prop()
-  value: Record<string, any> | undefined | any;
+  value!: Info;
 
   isString() {
     return this.value && (this.value.type === DataType.String);
@@ -122,38 +125,13 @@ export default class UiProp extends Vue {
       let uuid = this.value.path[0];
       let key = this.value.path[1]; // todo 暂时只支持一级key
       if (uuid && key) {
-        chrome.devtools.inspectedWindow.eval(`window.ccinspector.logValue('${uuid}','${key}')`)
+        chrome.devtools.inspectedWindow.eval(`window.CCInspector.logValue('${uuid}','${key}')`)
       }
     }
   }
 
   onChangeValue() {
-    window.postMessage({a: 1, b: 2}, '*')
-    return
-    if (Array.isArray(this.value.path)) {
-      let uuid = this.value.path[0];
-      let key = this.value.path[1]; // todo 暂时只支持一级key
-      if (uuid && key && this.value.hasOwnProperty('data')) {
-        let cmd = null;
-        let data = this.value.data;
-        switch (this.value.type) {
-          case DataType.Number:
-            cmd = `window.ccinspector.setValue('${uuid}','${key}', ${data})`;
-            break
-          case DataType.Bool:
-            cmd = `window.ccinspector.setValue('${uuid}','${key}', ${data})`;
-            break;
-          case DataType.String:
-          case DataType.Text:
-            cmd = `window.ccinspector.setValue('${uuid}','${key}', '${data}')`;
-            break
-        }
-        if (cmd) {
-          chrome.devtools.inspectedWindow.eval(cmd)
-        } else {
-        }
-      }
-    }
+    connectBackground.postMessageToBackground(Msg.SetProperty, this.value);
   }
 
   @Prop({default: 1})

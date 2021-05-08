@@ -12,7 +12,7 @@ export enum DataType {
   Object,
 }
 
-class Info {
+export class Info {
   public type: DataType = DataType.Number;
   public data: any;
   public path: Array<string> = [];// 属性对应的路径
@@ -113,7 +113,12 @@ export class EnumData extends Info {
     super();
     this.type = DataType.Enum;
   }
+}
 
+export class TreeData {
+  uuid: string = '';
+  name: string = '';
+  children: Array<TreeData> = [];
 }
 
 export class Property {
@@ -137,16 +142,6 @@ export class Group {
   addProperty(property: Property) {
     this.data.push(property)
   }
-}
-
-class NodeInfo {
-  public type: string = ''; // 类型
-
-
-}
-
-class CompInfo {
-
 }
 
 export const testData = [
