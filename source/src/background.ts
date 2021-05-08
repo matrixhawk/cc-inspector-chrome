@@ -1,4 +1,4 @@
-import {Page, PluginEvent} from "@/core/types";
+import {Page, PluginEvent, Msg} from "@/core/types";
 
 let Devtools: chrome.runtime.Port | null = null;
 let Content: chrome.runtime.Port | null = null;
@@ -64,11 +64,18 @@ chrome.runtime.onMessage.addListener((request: PluginEvent, sender: any, sendRes
 );
 
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+  console.warn(changeInfo.status)
   if (changeInfo.status === "complete") {
     // 加载新的url
-    // if (Content) {
-    //   Content.postMessage(new PluginEvent(Msg.UrlChange, {url: tab.favIconUrl}));
-    // }
+    if (Content) {
+      let data = new PluginEvent(
+        Page.Background,
+        Page.Content,
+        Msg.UrlChange,
+        {url: tab.favIconUrl}
+      );
+      Content.postMessage(data);
+    }
   }
 })
 

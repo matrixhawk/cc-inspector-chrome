@@ -1,5 +1,6 @@
 import Manifest from '../manifest.json'
 import {connectBackground} from "@/devtools/connectBackground";
+import {PluginEvent, Msg, Page} from "@/core/types";
 
 export function init() {
   if (chrome && chrome.devtools) {
@@ -14,8 +15,7 @@ export function init() {
         panel.onShown.addListener((window) => {
           // 面板显示，查询是否是cocos游戏
           console.log("panel show");
-          // let sendData = new PluginEvent(PluginMsg.Msg.Support);
-          // connectBackground.postMessage(sendData)
+          connectBackground.postMessageToBackground(Msg.Support, null)
         });
         panel.onHidden.addListener(() => {
           // 面板隐藏

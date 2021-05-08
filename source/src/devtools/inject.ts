@@ -19,13 +19,17 @@ class CCInspector {
 
   init() {
     console.log('cc-inspector init ~~~');
-    setInterval(() => {
-      // this.checkIsGamePage(true);
-      // if (this.stop) {
-      // } else {
-      // }
-    }, 1000);
     // 注册cc_after_render事件
+    let timer = setInterval(() => {
+      if (this._isCocosGame()) {
+        clearInterval(timer)
+        // @ts-ignore
+        cc.director.on(cc.Director.EVENT_AFTER_SCENE_LAUNCH, () => {
+          console.log('scene launch')
+        })
+      }
+    }, 300)
+
     window.addEventListener("message", (event) => {
       // 接受来自content的事件，有可能也会受到其他插件的
       if (!event || !event.data) {
@@ -33,7 +37,7 @@ class CCInspector {
       }
       let pluginEvent: PluginEvent = event.data;
       if (PluginEvent.check(pluginEvent, Page.Content, Page.Inject)) {
-        console.log(`[Inject] ${JSON.stringify(pluginEvent)}`, 'color:green;');
+        console.log(`%c[Inject] ${JSON.stringify(pluginEvent)}`, 'color:green;');
         PluginEvent.finish(pluginEvent)
         switch (pluginEvent.msg) {
           case Msg.UrlChange:
