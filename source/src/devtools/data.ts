@@ -117,6 +117,7 @@ export class EnumData extends Info {
 }
 
 export class TreeData {
+  active: boolean = true;
   uuid: string = '';
   name: string = '';
   children: Array<TreeData> = [];
@@ -145,7 +146,7 @@ export class Group {
   }
 
   sort() {
-    let order = ['name', 'uuid', 'position', 'rotation', 'scale', 'anchor', 'size', 'color', 'opacity', 'skew', 'group'];
+    let order = ['name', 'active', 'enabled', 'uuid', 'position', 'rotation', 'scale', 'anchor', 'size', 'color', 'opacity', 'skew', 'group'];
     let orderKeys: Array<Property> = [];
     let otherKeys: Array<Property> = [];
     this.data.forEach(property => {

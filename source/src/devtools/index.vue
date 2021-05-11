@@ -27,7 +27,13 @@
                    node-key="uuid"
                    @node-expand="onNodeExpand"
                    @node-collapse="onNodeCollapse"
-                   @node-click="handleNodeClick"></el-tree>
+                   @node-click="handleNodeClick">
+
+            <span slot-scope="{node,data}" class="leaf" :class="data.active?'leaf-show':'leaf-hide'">
+              <span>{{ node.label }}</span>
+              <!--              <el-button v-if="!!data||true"> 显示</el-button>-->
+            </span>
+          </el-tree>
         </div>
       </div>
       <div class="right">
@@ -175,24 +181,26 @@ export default class Index extends Vue {
     const uuid = data.path[0];
     const key = data.path[1];
     const value = data.data;
-    if (key === 'name') {
-      let treeArray: Array<TreeData> = [];
+    let treeArray: Array<TreeData> = [];
 
-      function circle(array: Array<TreeData>) {
-        array.forEach(item => {
-          treeArray.push(item);
-          circle(item.children);
-        })
-      }
-
-      // 更新指定uuid节点的tree的name
-      circle(this.treeData)
-      let ret = treeArray.find(el => el.uuid === uuid);
-      if (ret) {
-        ret.name = value;
-      }
+    function circle(array: Array<TreeData>) {
+      array.forEach(item => {
+        treeArray.push(item);
+        circle(item.children);
+      })
     }
 
+    // 更新指定uuid节点的tree的name
+    circle(this.treeData)
+    let ret = treeArray.find(el => el.uuid === uuid);
+    if (ret) {
+      if (key === 'name') {
+        ret.name = value;
+      }
+      if (key === 'active') {
+        ret.active = !!value;
+      }
+    }
   }
 
   handleNodeClick(data: TreeData) {
@@ -319,6 +327,18 @@ export default class Index extends Vue {
         overflow: auto;
         width: 300px;
 
+        .leaf {
+          width: 100%;
+        }
+
+        .leaf-show {
+          color: black;
+        }
+
+        .leaf-hide {
+          color: #c7bbbb;
+          text-decoration: line-through;
+        }
 
         &::-webkit-scrollbar {
           width: 6px;

@@ -102,6 +102,12 @@ class CCInspector {
   getNodeChildren(node: any, data: TreeData) {
     data.uuid = node.uuid;
     data.name = node.name;
+    // @ts-ignore
+    if (node instanceof cc.Scene) {
+      // 场景不允许获取active，引擎会报错
+    } else {
+      data.active = !!node.active;
+    }
     this.inspectorGameMemoryStorage[node.uuid] = node;
     let nodeChildren = node.getChildren();
     for (let i = 0; i < nodeChildren.length; i++) {
