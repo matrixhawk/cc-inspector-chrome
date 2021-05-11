@@ -19,13 +19,13 @@ class CCInspector {
 
   init() {
     console.log('cc-inspector init ~~~');
-    // 注册cc_after_render事件
     let timer = setInterval(() => {
       if (this._isCocosGame()) {
         clearInterval(timer)
         // @ts-ignore
         cc.director.on(cc.Director.EVENT_AFTER_SCENE_LAUNCH, () => {
-          console.log('scene launch')
+          let isCocosGame = this._isCocosGame();
+          this.notifySupportGame(isCocosGame)
         })
       }
     }, 300)

@@ -116,7 +116,7 @@ export default class Index extends Vue {
     if (data) {
       // 如果节点树为空，就刷新一次
       if (this.treeData.length === 0) {
-        // this.onBtnClickUpdateTree();
+        this.onBtnClickUpdateTree();
       }
     } else {
       this._reset();
@@ -197,8 +197,6 @@ export default class Index extends Vue {
 
   handleNodeClick(data: TreeData) {
     this.selectedUUID = data.uuid;
-    // todo 去获取节点信息
-    // console.log(data);
     let uuid = data.uuid;
     if (uuid !== undefined) {
       this.runToContentScript(Msg.NodeInfo, uuid);
@@ -209,11 +207,13 @@ export default class Index extends Vue {
     if (this.watchEveryTime) {
       this.timerID = setInterval(() => {
         this.onBtnClickUpdateTree();
-      }, 100);
+        if (this.selectedUUID) {
+          this.runToContentScript(Msg.NodeInfo, this.selectedUUID);
+        }
+      }, 300);
     } else {
       clearInterval(this.timerID);
     }
-
   }
 
   runToContentScript(msg: Msg, data?: any) {
