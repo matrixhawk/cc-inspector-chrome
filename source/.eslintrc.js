@@ -44,5 +44,6 @@ module.exports = {
     "@typescript-eslint/ban-ts-comment": "off",
     "no-inner-declarations": "off",
     "vue/no-unused-vars": "off",
+    "@typescript-eslint/no-namespace": "off"
   }
 };

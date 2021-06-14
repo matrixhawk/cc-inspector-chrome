@@ -81,6 +81,8 @@ export class BoolData extends Info {
 }
 
 export class Vec2Data extends Info {
+  data: Array<Property> = [];
+
   constructor() {
     super();
     this.type = DataType.Vec2
@@ -95,6 +97,7 @@ export class Vec2Data extends Info {
 }
 
 export class Vec3Data extends Info {
+  data: Array<Property> = [];
 
   constructor() {
     super();

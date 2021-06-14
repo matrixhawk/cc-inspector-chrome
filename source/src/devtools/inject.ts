@@ -2,17 +2,25 @@
 import {
   ArrayData,
   BoolData,
-  ColorData, DataType,
-  Group, Info,
+  ColorData,
+  DataType,
+  Group,
+  Info,
   NullOrUndefinedData,
-  NumberData, ObjectData,
+  NumberData,
+  ObjectData,
   Property,
-  StringData, TreeData,
+  StringData,
+  TreeData,
   Vec2Data,
   Vec3Data
 } from "./data";
+import {Msg, Page, PluginEvent} from '@/core/types'
 
-import {PluginEvent, Page, Msg} from '@/core/types'
+// @ts-ignore typescript-eslint/no-namespace
+declare namespace cc {
+  export function v2(x: number, y: number): any;
+}
 
 class CCInspector {
   inspectorGameMemoryStorage: Record<string, any> = {}
@@ -29,7 +37,6 @@ class CCInspector {
         })
       }
     }, 300)
-
     window.addEventListener("message", (event) => {
       // 接受来自content的事件，有可能也会受到其他插件的
       if (!event || !event.data) {
@@ -60,7 +67,12 @@ class CCInspector {
             // path的设计有优化空间
             const uuid = data.path[0];
             const key = data.path[1];
-            const value = data.data;
+            let value = data.data;
+            if (data.type === DataType.Color) {
+              // @ts-ignore
+              value = cc.color().fromHEX(value);
+            }
+
             if (uuid && key) {
               this.setValue(uuid, key, value);
               this.sendMsgToContent(Msg.UpdateProperty, data);
@@ -98,6 +110,45 @@ class CCInspector {
     }
   }
 
+
+  // @ts-ignore
+  draw: cc.Graphics = null;
+
+  _drawRect(node: any) {
+    let draw = this.draw;
+
+    if (!draw) {
+      // @ts-ignore
+      let node = new cc.Node('draw-node');
+      // @ts-ignore
+      cc.director.getScene().addChild(node);
+      // @ts-ignore
+      draw = this.draw = node.addComponent(cc.Graphics);
+    }
+    draw.clear()
+    draw.lineWidth = 10;
+    // @ts-ignore
+    draw.strokeColor = new cc.Color().fromHEX('#ff0000')
+    const {anchorX, anchorY, width, height, x, y} = node;
+    let halfWidth = width / 2;
+    let halfHeight = height / 2;
+    let leftBottom = node.convertToWorldSpaceAR(cc.v2(-halfWidth, -halfHeight))
+    let leftTop = node.convertToWorldSpaceAR(cc.v2(-halfWidth, halfHeight));
+    let rightBottom = node.convertToWorldSpaceAR(cc.v2(halfWidth, -halfHeight));
+    let rightTop = node.convertToWorldSpaceAR(cc.v2(halfWidth, halfHeight));
+
+    function line(began: any, end: any) {
+      draw.moveTo(began.x, began.y);
+      draw.lineTo(end.x, end.y);
+    }
+
+    line(leftBottom, rightBottom)
+    line(rightBottom, rightTop)
+    line(rightTop, leftTop)
+    line(leftTop, leftBottom)
+    this.draw.stroke();
+  }
+
   // 收集节点信息
   getNodeChildren(node: any, data: TreeData) {
     data.uuid = node.uuid;
@@ -121,17 +172,6 @@ class CCInspector {
   _isCocosGame() {
     // @ts-ignore 检测是否包含cc变量
     return typeof cc !== "undefined";
-  }
-
-  pluginSetNodeActive(uuid: string, isActive: number) {
-    let node = this.inspectorGameMemoryStorage[uuid];
-    if (node) {
-      if (isActive === 1) {
-        node.active = true;
-      } else if (isActive === 0) {
-        node.active = false;
-      }
-    }
   }
 
   _getNodeKeys(node: any) {
@@ -173,6 +213,32 @@ class CCInspector {
     return null;
   }
 
+  _buildVecData(options: any) {
+    const ctor: Function = options.ctor;
+    const keys: Array<string> = options.keys;
+    const value: Object = options.value;
+    const data: Vec3Data | Vec2Data = options.data;
+    const path: Array<string> = options.path;
+
+    if (ctor && value instanceof ctor) {
+      let hasUnOwnProperty = keys.find(key => !value.hasOwnProperty(key))
+      if (!hasUnOwnProperty) {
+        for (let key in keys) {
+          let propName = keys[key];
+          if (value.hasOwnProperty(propName)) {
+            let propPath = path.concat(propName);
+            let itemData = this._genInfoData(value, propName, propPath)
+            if (itemData) {
+              data.add(new Property(propName, itemData))
+            }
+          }
+        }
+        return data;
+      }
+    }
+    return null;
+  }
+
   _genInfoData(node: any, key: string, path: any) {
     let propertyValue = node[key];
     let info = null;
@@ -196,7 +262,23 @@ class CCInspector {
         } else if (Array.isArray(propertyValue)) {
           info = new ArrayData();
         } else if (propertyValue instanceof Object) {
-          info = new ObjectData();
+          !info && (info = this._buildVecData({
+            // @ts-ignore
+            ctor: cc.Vec3,
+            path: path,
+            data: new Vec3Data(),
+            keys: ['x', 'y', 'z'],
+            value: propertyValue,
+          }))
+          !info && (info = this._buildVecData({
+            // @ts-ignore
+            ctor: cc.Vec2,
+            path: path,
+            data: new Vec2Data(),
+            keys: ['x', 'y'],
+            value: propertyValue
+          }))
+          !info && (info = new ObjectData());
         } else {
         }
         break;
