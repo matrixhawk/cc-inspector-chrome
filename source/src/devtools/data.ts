@@ -10,6 +10,7 @@ export enum DataType {
   NullOrUndefined,
   Array, // 暂时在控制台打印下
   Object,
+  Image, // 图片
 }
 
 export class Info {
@@ -108,6 +109,17 @@ export class Vec3Data extends Info {
 
   add(info: Property) {
     this.data.push(info);
+    return this;
+  }
+}
+
+export class ImageData extends Info {
+  data: string | null = null;
+
+  constructor() {
+    super();
+    this.type = DataType.Image;
+    this.data = null;
     return this;
   }
 }

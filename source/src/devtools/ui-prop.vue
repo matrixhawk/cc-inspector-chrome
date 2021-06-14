@@ -59,7 +59,17 @@
         <div class="text">
           {{ valueString() }}
         </div>
-        <el-button @click="onShowValueInConsole"> 点击在控制台打印显示</el-button>
+        <el-button @click="onShowValueInConsole">log</el-button>
+      </div>
+      <div v-if="isImage()" class="image-property">
+        <el-popover v-if="isImage()" placement="top" trigger="hover">
+          <!--          会有一个undefined的错误-->
+          <el-image v-if="isImage()" style="width: 100px;height: 100px" fit="contain" :src="value.data"></el-image>
+          <img :src="value.data" slot="reference" style="height: 36px;" alt="图片">
+        </el-popover>
+        <div style="flex:1;display: flex; flex-direction: row-reverse;">
+          <el-button @click="onShowValueInConsole">log</el-button>
+        </div>
       </div>
       <div class="slot">
         <slot></slot>
@@ -122,6 +132,10 @@ export default class UiProp extends Vue {
 
   isArrayOrObject() {
     return this.value && (this.value.type === DataType.Array || this.value.type === DataType.Object)
+  }
+
+  isImage() {
+    return this.value && (this.value.type === DataType.Array || this.value.type === DataType.Image)
   }
 
   created() {
@@ -282,6 +296,14 @@ export default class UiProp extends Vue {
         white-space: nowrap;
         text-overflow: ellipsis;
       }
+    }
+
+    .image-property {
+      display: flex;
+      flex-direction: row;
+      align-content: center;
+      align-items: center;
+      height: 36px;
     }
 
     .slot {

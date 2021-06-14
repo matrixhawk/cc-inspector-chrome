@@ -4,7 +4,7 @@ import {
   BoolData,
   ColorData,
   DataType,
-  Group,
+  Group, ImageData,
   Info,
   NullOrUndefinedData,
   NumberData,
@@ -239,6 +239,22 @@ class CCInspector {
     return null;
   }
 
+  _buildImageData(options: any) {
+    const ctor: Function = options.ctor;
+    const value: Object = options.value;
+    const data: ImageData = options.data;
+    const path: Array<string> = options.path;
+    if (ctor && value instanceof ctor) {
+      if (value.hasOwnProperty('_textureFilename')) {
+        data.path = path;
+        //@ts-ignore
+        data.data = `${window.location.origin}/${value._textureFilename}`;
+        return data;
+      }
+    }
+    return null;
+  }
+
   _genInfoData(node: any, key: string, path: any) {
     let propertyValue = node[key];
     let info = null;
@@ -278,6 +294,13 @@ class CCInspector {
             keys: ['x', 'y'],
             value: propertyValue
           }))
+          !info && (info = this._buildImageData({
+            //@ts-ignore
+            ctor: cc.SpriteFrame,
+            data: new ImageData(),
+            path: path,
+            value: propertyValue,
+          }))
           !info && (info = new ObjectData());
         } else {
         }
@@ -288,7 +311,6 @@ class CCInspector {
       info.path = path;
     } else {
       console.error(`暂不支持的属性值`, propertyValue);
-
     }
     return info;
   }
