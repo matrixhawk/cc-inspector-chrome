@@ -1,0 +1,53 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # Runs a single command using the runners shell
+      - name: Run a one-line script
+        run: echo Hello, world!
+
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+          echo Add other actions to build,
+          echo test, and deploy your project.
+      - name: webext-buildtools-chrome-crx-action
+        # You may pin to the exact commit or the version.
+        # uses: cardinalby/webext-buildtools-chrome-crx-action@6ffc20d012116ea3fa0c6697382b026fc7df9535
+        uses: cardinalby/webext-buildtools-chrome-crx-action@2.0.0
+        with:
+          # Path to WebExtension directory
+          zipFilePath: 1
+          # Path to save result crx file
+          crxFilePath: 1
+          # Contents of private key used to sign crx file
+          privateKey: 1
+          # Path to save update.xml file for extensions hosted not on Chrome Web Store. This xml is used as response at url, specified in manifest's `update_url` key file
+          updateXmlPath:1 # optional
+          # Required, if you specified updateXmlPath. URL to the .crx file
+          updateXmlCodebaseUrl: 1# optional
+          # App Id to use in update.xml file. Generated from private key by default
+          updateXmlAppId: 1# optional
