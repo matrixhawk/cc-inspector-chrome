@@ -63,8 +63,10 @@
       </div>
       <div v-if="isImage()" class="image-property">
         <el-popover v-if="isImage()" placement="top" trigger="hover">
-          <!--          会有一个undefined的错误-->
-          <el-image v-if="isImage()" style="width: 100px;height: 100px" fit="contain" :src="value.data"></el-image>
+          <div
+              style="width: 100%;height: 100%;display: flex;flex-direction: row;align-items: center;justify-content: center;">
+            <img :src="value.data" alt="图片" style="max-width: 100px;max-height: 100px;object-fit: contain;">
+          </div>
           <img :src="value.data" slot="reference" style="height: 36px;" alt="图片">
         </el-popover>
         <div style="flex:1;display: flex; flex-direction: row-reverse;">
@@ -135,7 +137,7 @@ export default class UiProp extends Vue {
   }
 
   isImage() {
-    return this.value && (this.value.type === DataType.Array || this.value.type === DataType.Image)
+    return this.value && (this.value.type === DataType.Image)
   }
 
   created() {
