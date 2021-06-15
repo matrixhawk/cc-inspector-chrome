@@ -255,7 +255,7 @@ class CCInspector {
     return null;
   }
 
-  _genInfoData(node: any, key: string, path: any) {
+  _genInfoData(node: any, key: string, path: Array<string>) {
     let propertyValue = node[key];
     let info = null;
     switch (typeof propertyValue) {
@@ -277,6 +277,13 @@ class CCInspector {
           info = new ColorData(`#${hex}`);
         } else if (Array.isArray(propertyValue)) {
           info = new ArrayData();
+          for (let i = 0; i < propertyValue.length; i++) {
+            let propPath = path.concat(i.toString());
+            let itemData = this._genInfoData(propertyValue, i.toString(), propPath);
+            if (itemData) {
+              info.add(new Property(i.toString(), itemData));
+            }
+          }
         } else if (propertyValue instanceof Object) {
           !info && (info = this._buildVecData({
             // @ts-ignore

@@ -1,80 +1,102 @@
 <template>
   <div id="ui-prop">
-    <div @mousedown="onPropNameMouseDown" class="key">
-      <div class="text">{{ name }}</div>
-    </div>
-    <div class="value">
-      <el-input v-if="isString()" v-model="value.data"
-                :disabled="value.readonly"
-                @change="onChangeValue">
-      </el-input>
-      <el-input v-if="isText()"
-                type="textarea"
-                :autosize="{minRows:3,maxRows:5}"
-                placeholder="请输入内容"
-                :disabled="value.readonly"
-                @change="onChangeValue"
-                v-model="value.data">
-      </el-input>
-      <el-input-number v-if="isNumber()"
-                       style="width: 100%;text-align: left"
-                       v-model="value.data"
-                       :step="step"
-                       :disabled="value.readonly"
-                       @change="onChangeValue"
-                       controls-position="right"
-      ></el-input-number>
-
-      <div v-if="isVec2()||isVec3()" class="vec">
-        <ui-prop v-for="(vec, index) in value.data"
-                 :key="index"
-                 :value="vec.value"
-                 :name="vec.name">
-
-        </ui-prop>
+    <div class="normal-data" style="display: flex;flex-direction: row;align-items: center;min-height: 30px;margin: 0;">
+      <div @mousedown="onPropNameMouseDown" class="key"
+           :style="{'margin-left':indent*10+'px'}">
+        <i class=" data-arrow"
+           v-if="arrow"
+           :class="fold?'el-icon-caret-right':'el-icon-caret-bottom'"
+           :style="{'visibility':isArray()?'visible':'hidden'}"
+           @click="onClickFold"></i>
+        <div class="text">{{ name }}</div>
       </div>
-      <el-select v-model="value.data"
-                 :disabled="value.readonly"
-                 v-if="isEnum()" style="width: 100%;"
-                 @change="onChangeValue">
-        <el-option v-for="(opt, index) in value.values"
-                   :key="index"
-                   :label="opt.name"
-                   :value="opt.value">
-        </el-option>
-      </el-select>
-      <el-checkbox v-model="value.data"
-                   v-if="isBool()"
-                   :disabled="value.readonly"
-                   @change="onChangeValue">
-      </el-checkbox>
-      <div class="color" v-if="isColor()">
-        <el-color-picker style="position: absolute;"
+      <div class="value">
+        <el-input v-if="isString()" v-model="value.data"
+                  :disabled="value.readonly"
+                  @change="onChangeValue">
+        </el-input>
+        <el-input v-if="isText()"
+                  type="textarea"
+                  :autosize="{minRows:3,maxRows:5}"
+                  placeholder="请输入内容"
+                  :disabled="value.readonly"
+                  @change="onChangeValue"
+                  v-model="value.data">
+        </el-input>
+        <el-input-number v-if="isNumber()"
+                         style="width: 100%;text-align: left"
+                         v-model="value.data"
+                         :step="step"
                          :disabled="value.readonly"
-                         v-model="value.data" @change="onChangeValue">
-        </el-color-picker>
-        <div class="hex" :style="{color:colorReverse(value.data)}">{{ value.data }}</div>
-      </div>
-      <div v-if="isArrayOrObject()" class="array-object">
-        <div class="text">
-          {{ valueString() }}
+                         @change="onChangeValue"
+                         controls-position="right"
+        ></el-input-number>
+
+        <div v-if="isVec2()||isVec3()" class="vec">
+          <ui-prop v-for="(vec, index) in value.data"
+                   :key="index"
+                   :arrow="false"
+                   :value="vec.value"
+                   :name="vec.name">
+
+          </ui-prop>
         </div>
-        <el-button @click="onShowValueInConsole">log</el-button>
-      </div>
-      <div v-if="isImage()" class="image-property">
-        <el-popover v-if="isImage()" placement="top" trigger="hover">
-          <div
-              style="width: 100%;height: 100%;display: flex;flex-direction: row;align-items: center;justify-content: center;">
-            <img :src="value.data" alt="图片" style="max-width: 100px;max-height: 100px;object-fit: contain;">
+        <el-select v-model="value.data"
+                   :disabled="value.readonly"
+                   v-if="isEnum()" style="width: 100%;"
+                   @change="onChangeValue">
+          <el-option v-for="(opt, index) in value.values"
+                     :key="index"
+                     :label="opt.name"
+                     :value="opt.value">
+          </el-option>
+        </el-select>
+        <el-checkbox v-model="value.data"
+                     v-if="isBool()"
+                     :disabled="value.readonly"
+                     @change="onChangeValue">
+        </el-checkbox>
+        <div class="color" v-if="isColor()">
+          <el-color-picker style="position: absolute;"
+                           :disabled="value.readonly"
+                           v-model="value.data" @change="onChangeValue">
+          </el-color-picker>
+          <div class="hex" :style="{color:colorReverse(value.data)}">{{ value.data }}</div>
+        </div>
+        <div v-if="isArray()" style="display: flex;flex-direction: column;">
+          {{ value.data.length }}
+        </div>
+        <!--      <div v-if="isArrayOrObject()" class="array-object">-->
+        <!--        <div class="text">-->
+        <!--          {{ valueString() }}-->
+        <!--        </div>-->
+        <!--        <el-button @click="onShowValueInConsole">log</el-button>-->
+        <!--      </div>-->
+        <div v-if="isImage()" class="image-property">
+          <el-popover v-if="isImage()" placement="top" trigger="hover">
+            <div
+                style="width: 100%;height: 100%;display: flex;flex-direction: row;align-items: center;justify-content: center;">
+              <img :src="value.data" alt="图片" style="max-width: 100px;max-height: 100px;object-fit: contain;">
+            </div>
+            <img :src="value.data" slot="reference" style="height: 36px;" alt="图片">
+          </el-popover>
+          <div style="flex:1;display: flex; flex-direction: row-reverse;">
+            <el-button @click="onShowValueInConsole">log</el-button>
           </div>
-          <img :src="value.data" slot="reference" style="height: 36px;" alt="图片">
-        </el-popover>
-        <div style="flex:1;display: flex; flex-direction: row-reverse;">
-          <el-button @click="onShowValueInConsole">log</el-button>
+        </div>
+        <div class="slot">
+          <slot></slot>
         </div>
       </div>
-      <div class="slot">
-        <slot></slot>
+    </div>
+    <div v-if="isArray()">
+      <div v-show="!fold" style="display: flex;flex-direction: column;">
+        <ui-prop v-for="(arr,index) in value.data"
+                 :key="index"
+                 :indent="indent+1"
+                 :value="arr.value"
+                 :name="'['+arr.name+']'">
+        </ui-prop>
       </div>
     </div>
   </div>
@@ -96,6 +118,11 @@ export default class UiProp extends Vue {
   @Prop({default: ""})
   name: string | undefined;
 
+  @Prop({default: 0})
+  indent!: number;
+
+  @Prop({default: true})
+  arrow!: boolean;
 
   @Prop()
   value!: Info;
@@ -136,11 +163,21 @@ export default class UiProp extends Vue {
     return this.value && (this.value.type === DataType.Array || this.value.type === DataType.Object)
   }
 
+  isArray() {
+    return this.value && (this.value.type === DataType.Array)
+  }
+
   isImage() {
     return this.value && (this.value.type === DataType.Image)
   }
 
   created() {
+  }
+
+  private fold = false;
+
+  onClickFold() {
+    this.fold = !this.fold;
   }
 
   valueString() {
@@ -213,104 +250,124 @@ export default class UiProp extends Vue {
 
 <style scoped lang="less">
 #ui-prop {
-  margin: 0;
   min-height: 30px;
-  overflow: hidden;
-  width: 100%;
+  margin: 0;
   display: flex;
-  flex-direction: row;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
 
-
-  .key {
-    flex: 1;
-    float: left;
-    text-align: left;
+  .normal-data {
+    margin: 0;
+    min-height: 30px;
+    overflow: hidden;
+    width: 100%;
     display: flex;
     flex-direction: row;
     align-items: center;
-    min-width: 90px;
 
-    .text {
-      user-select: none;
-      line-height: 30px;
-      font-size: 12px;
-      margin: 3px;
-    }
-  }
 
-  .value {
-    flex: 3;
-    text-align: left;
-    height: 100%;
-    overflow: hidden;
-    min-width: 400px;
-
-    .color {
-      position: relative;
-      height: 30px;
-
-      .hex {
-        line-height: 30px;
-        position: relative;
-        text-align: center;
-        user-select: none;
-        pointer-events: none;
-      }
-    }
-
-    .vec {
-      width: 100%;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-
-      #ui-prop {
-        margin-top: 0;
-        margin-bottom: 0;
-        margin-right: 20px;
-
-        .value {
-          min-width: 100px;
-        }
-
-        .key {
-          min-width: 20px;
-        }
-      }
-
-      #ui-prop:last-child {
-        margin-right: 0;
-      }
-    }
-
-    .array-object {
+    .key {
       flex: 1;
-      max-width: 100%;
-      overflow: hidden;
+      float: left;
+      text-align: left;
       display: flex;
       flex-direction: row;
       align-items: center;
+      min-width: 90px;
+
+      .data-arrow {
+        width: 20px;
+        height: 16px;
+        font-size: 16px;
+        cursor: pointer;
+      }
 
       .text {
-        flex: 1;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
+        user-select: none;
+        line-height: 30px;
+        font-size: 12px;
+        margin: 3px;
       }
     }
 
-    .image-property {
-      display: flex;
-      flex-direction: row;
-      align-content: center;
-      align-items: center;
-      height: 36px;
-    }
+    .value {
+      flex: 3;
+      text-align: left;
+      height: 100%;
+      overflow: hidden;
+      min-width: 400px;
 
-    .slot {
-      display: flex;
-      width: 100%;
+      .color {
+        position: relative;
+        height: 30px;
+
+        .hex {
+          line-height: 30px;
+          position: relative;
+          text-align: center;
+          user-select: none;
+          pointer-events: none;
+        }
+      }
+
+      .vec {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        #ui-prop {
+          margin-top: 0;
+          margin-bottom: 0;
+
+          .normal-data {
+            .value {
+              min-width: 100px;
+            }
+
+            .key {
+              min-width: 20px;
+            }
+
+            #ui-prop:first-child {
+              margin-right: 20px;
+            }
+
+            #ui-prop:last-child {
+              margin-right: 0;
+            }
+          }
+        }
+
+        .array-object {
+          flex: 1;
+          max-width: 100%;
+          overflow: hidden;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+
+          .text {
+            flex: 1;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+          }
+        }
+
+        .image-property {
+          display: flex;
+          flex-direction: row;
+          align-content: center;
+          align-items: center;
+          height: 36px;
+        }
+
+        .slot {
+          display: flex;
+          width: 100%;
+        }
+      }
     }
   }
 }

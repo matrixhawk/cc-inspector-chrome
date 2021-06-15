@@ -28,9 +28,16 @@ export class TextData extends Info {
 }
 
 export class ArrayData extends Info {
+  data: Array<Property> = [];
+
   constructor() {
     super();
     this.type = DataType.Array;
+  }
+
+  add(info: Property) {
+    this.data.push(info);
+    return this;
   }
 }
 
