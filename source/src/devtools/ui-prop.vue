@@ -1,11 +1,14 @@
 <template>
   <div id="ui-prop">
     <div class="normal-data" style="display: flex;flex-direction: row;align-items: center;min-height: 30px;margin: 0;">
-      <div @mousedown="onPropNameMouseDown" class="key" @click="onClickFold">
-        <i class=" data-arrow"
+      <div @mousedown="onPropNameMouseDown" class="key"
+           @click="onClickFold"
+           :style="{'cursor':isArrayOrObject()?'pointer':''}"
+      >
+        <i class="data-arrow"
            v-if="arrow"
            :class="fold?'el-icon-caret-right':'el-icon-caret-bottom'"
-           :style="{'visibility':isArray()?'visible':'hidden','margin-left':indent*10+'px'}">
+           :style="{'visibility':isArrayOrObject()?'visible':'hidden','margin-left':indent*10+'px'}">
         </i>
         <div class="text">{{ name }}</div>
       </div>
@@ -88,13 +91,14 @@
         </div>
       </div>
     </div>
-    <div v-if="isArray()">
+    <div v-if="isArrayOrObject()">
       <div v-show="!fold" style="display: flex;flex-direction: column;">
         <ui-prop v-for="(arr,index) in value.data"
                  :key="index"
                  :indent="indent+1"
                  :value="arr.value"
-                 :name="'['+arr.name+']'">
+                 :name="getName(isArray(),arr)"
+        >
         </ui-prop>
       </div>
     </div>
@@ -105,9 +109,9 @@
 
 import Vue from "vue"
 import {Component, Prop} from "vue-property-decorator"
-import {DataType, Info, NullOrUndefinedData, Vec2Data, Vec3Data} from './data'
+import {DataType, Info} from './data'
 import {connectBackground} from "@/devtools/connectBackground";
-import {Msg, Page, PluginEvent} from "@/core/types";
+import {Msg} from "@/core/types";
 
 @Component({
   components: {}
@@ -162,6 +166,10 @@ export default class UiProp extends Vue {
     return this.value && (this.value.type === DataType.Array || this.value.type === DataType.Object)
   }
 
+  isObject() {
+    return this.value && (this.value.type === DataType.Object)
+  }
+
   isArray() {
     return this.value && (this.value.type === DataType.Array)
   }
@@ -171,6 +179,15 @@ export default class UiProp extends Vue {
   }
 
   created() {
+  }
+
+  getName(isArray: boolean, arr: UiProp) {
+    const type = arr.value.type;
+    if (isArray) {
+      return `[${arr.name}]`
+    } else {
+      return arr.name;
+    }
   }
 
   private fold = false;
@@ -250,7 +267,7 @@ export default class UiProp extends Vue {
 <style scoped lang="less">
 #ui-prop {
   min-height: 30px;
-  margin: 0;
+  margin: 1px 0;
   display: flex;
   flex-direction: column;
   justify-content: center;

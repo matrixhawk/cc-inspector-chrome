@@ -276,15 +276,17 @@ class CCInspector {
           let hex = propertyValue.toHEX();
           info = new ColorData(`#${hex}`);
         } else if (Array.isArray(propertyValue)) {
-          info = new ArrayData();
+          let keys = [];
           for (let i = 0; i < propertyValue.length; i++) {
-            let propPath = path.concat(i.toString());
-            let itemData = this._genInfoData(propertyValue, i.toString(), propPath);
-            if (itemData) {
-              info.add(new Property(i.toString(), itemData));
-            }
+            keys.push(i);
           }
-        } else if (propertyValue instanceof Object) {
+          info = this._buildObjectOrArrayData({
+            data: new ArrayData(),
+            path: path,
+            value: propertyValue,
+            keys: keys,
+          })
+        } else {
           !info && (info = this._buildVecData({
             // @ts-ignore
             ctor: cc.Vec3,
@@ -308,8 +310,12 @@ class CCInspector {
             path: path,
             value: propertyValue,
           }))
-          !info && (info = new ObjectData());
-        } else {
+          !info && (info = this._buildObjectOrArrayData({
+            data: new ObjectData(),
+            path: path,
+            value: propertyValue,
+            keys: Object.keys(propertyValue),
+          }));
         }
         break;
     }
@@ -320,6 +326,22 @@ class CCInspector {
       console.error(`暂不支持的属性值`, propertyValue);
     }
     return info;
+  }
+
+  _buildObjectOrArrayData(options: any) {
+    let propertyValue: Object = options.value;
+    let path: Array<string> = options.path;
+    let data: ObjectData | ArrayData = options.data;
+    let keys: Array<string> = options.keys;
+    for (let i = 0; i < keys.length; i++) {
+      let key = keys[i];
+      let propPath = path.concat(key.toString());
+      let itemData = this._genInfoData(propertyValue, key, propPath);
+      if (itemData) {
+        data.add(new Property(key.toString(), itemData))
+      }
+    }
+    return data;
   }
 
   _getGroupData(node: any) {

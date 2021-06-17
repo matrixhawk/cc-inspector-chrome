@@ -2,8 +2,10 @@
   <div id="prop">
     <div v-for="(group, index) in allGroup" :key="index" class="group">
       <div class="header" @click="onClickHeader(group)">
-        <i v-if="group.fold" class="el-icon-caret-right"></i>
-        <i v-if="!group.fold" class="el-icon-caret-bottom"></i>
+        <div style="margin: 0 5px;">
+          <i v-if="group.fold" class="el-icon-caret-right"></i>
+          <i v-if="!group.fold" class="el-icon-caret-bottom"></i>
+        </div>
         {{ group.name }}
       </div>
       <div class="content" v-show="!group.fold">
@@ -59,6 +61,7 @@ export default class properties extends Vue {
       })
     }
   }
+
   _evalCode(code: string) {
     if (chrome && chrome.devtools) {
       chrome.devtools.inspectedWindow.eval(code);

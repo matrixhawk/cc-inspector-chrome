@@ -42,9 +42,16 @@ export class ArrayData extends Info {
 }
 
 export class ObjectData extends Info {
+  data: Array<Property> = [];
+
   constructor() {
     super();
     this.type = DataType.Object;
+  }
+
+  add(info: Property) {
+    this.data.push(info);
+    return this;
   }
 }
 
