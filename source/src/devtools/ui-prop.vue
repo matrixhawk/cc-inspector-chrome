@@ -1,13 +1,12 @@
 <template>
   <div id="ui-prop">
     <div class="normal-data" style="display: flex;flex-direction: row;align-items: center;min-height: 30px;margin: 0;">
-      <div @mousedown="onPropNameMouseDown" class="key"
-           :style="{'margin-left':indent*10+'px'}">
+      <div @mousedown="onPropNameMouseDown" class="key" @click="onClickFold">
         <i class=" data-arrow"
            v-if="arrow"
            :class="fold?'el-icon-caret-right':'el-icon-caret-bottom'"
-           :style="{'visibility':isArray()?'visible':'hidden'}"
-           @click="onClickFold"></i>
+           :style="{'visibility':isArray()?'visible':'hidden','margin-left':indent*10+'px'}">
+        </i>
         <div class="text">{{ name }}</div>
       </div>
       <div class="value">
@@ -284,7 +283,6 @@ export default class UiProp extends Vue {
 
       .text {
         user-select: none;
-        line-height: 30px;
         font-size: 12px;
         margin: 3px;
       }
@@ -317,8 +315,8 @@ export default class UiProp extends Vue {
         align-items: center;
 
         #ui-prop {
-          margin-top: 0;
-          margin-bottom: 0;
+          margin: 0 10px;
+          flex: 1;
 
           .normal-data {
             .value {
@@ -326,47 +324,53 @@ export default class UiProp extends Vue {
             }
 
             .key {
-              min-width: 20px;
-            }
+              min-width: unset;
+              display: block;
+              margin-right: 5px;
+              flex: unset;
 
-            #ui-prop:first-child {
-              margin-right: 20px;
-            }
-
-            #ui-prop:last-child {
-              margin-right: 0;
+              .text {
+              }
             }
           }
         }
 
-        .array-object {
+        #ui-prop:first-child {
+          margin-left: 0;
+        }
+
+        #ui-prop:last-child {
+          margin-right: 0;
+        }
+      }
+
+      .array-object {
+        flex: 1;
+        max-width: 100%;
+        overflow: hidden;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        .text {
           flex: 1;
-          max-width: 100%;
           overflow: hidden;
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-
-          .text {
-            flex: 1;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-          }
+          white-space: nowrap;
+          text-overflow: ellipsis;
         }
+      }
 
-        .image-property {
-          display: flex;
-          flex-direction: row;
-          align-content: center;
-          align-items: center;
-          height: 36px;
-        }
+      .image-property {
+        display: flex;
+        flex-direction: row;
+        align-content: center;
+        align-items: center;
+        height: 36px;
+      }
 
-        .slot {
-          display: flex;
-          width: 100%;
-        }
+      .slot {
+        display: flex;
+        width: 100%;
       }
     }
   }
