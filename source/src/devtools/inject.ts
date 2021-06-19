@@ -64,19 +64,14 @@ class CCInspector {
           }
           case Msg.SetProperty: {
             const data: Info = pluginEvent.data;
-            // path的设计有优化空间
-            const uuid = data.path[0];
-            const key = data.path[1];
             let value = data.data;
             if (data.type === DataType.Color) {
               // @ts-ignore
               value = cc.color().fromHEX(value);
             }
 
-            if (uuid && key) {
-              this.setValue(uuid, key, value);
-              this.sendMsgToContent(Msg.UpdateProperty, data);
-            }
+            this.setValue(data.path, value);
+            this.sendMsgToContent(Msg.UpdateProperty, data);
             break;
           }
         }
@@ -431,26 +426,31 @@ class CCInspector {
   }
 
   _isReadonly(base: Object, key: string): boolean {
-    let obj = Object.getPrototypeOf(base);
-    if (obj) {
-      let ret = Object.getOwnPropertyDescriptor(obj, key)
-      if (ret && ret.set) {
-        return false;
-      } else {
-        return this._isReadonly(obj, key)
-      }
+    let ret = Object.getOwnPropertyDescriptor(base, key)
+    if (ret) {
+      return !(ret.set || ret.writable);
     } else {
-      return true;
+      let proto = Object.getPrototypeOf(base);
+      return this._isReadonly(proto, key)
     }
   }
 
-  setValue(uuid: string, key: string, value: string) {
-    let nodeOrComp = this.inspectorGameMemoryStorage[uuid];
-    if (nodeOrComp && key in nodeOrComp) {
-      if (this._isReadonly(nodeOrComp, key)) {
-        console.warn(`值不允许修改`);
+  setValue(pathArray: Array<string>, value: string) {
+    let target = this.inspectorGameMemoryStorage;
+
+    for (let i = 0; i < pathArray.length; i++) {
+      let path = pathArray[i];
+      if (i === pathArray.length - 1) {
+        // 到最后的key了
+        if (this._isReadonly(target, path)) {
+          console.warn(`值不允许修改`);
+        } else {
+          target[path] = value;
+        }
       } else {
-        nodeOrComp[key] = value;
+        if (target.hasOwnProperty(path)) {
+          target = target[path];
+        }
       }
     }
   }
