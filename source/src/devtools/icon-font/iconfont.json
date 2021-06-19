@@ -1,0 +1,16 @@
+{
+  "id": "2620843",
+  "name": "cc-icon",
+  "font_family": "iconfont",
+  "css_prefix_text": "el-icon-third",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "9785726",
+      "name": "text",
+      "font_class": "text",
+      "unicode": "e65c",
+      "unicode_decimal": 58972
+    }
+  ]
+}
