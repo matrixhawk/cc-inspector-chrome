@@ -28,6 +28,7 @@
                    @node-expand="onNodeExpand"
                    @node-collapse="onNodeCollapse"
                    @node-click="handleNodeClick">
+<!--                   :render-content="renderContent"-->
 
             <span slot-scope="{node,data}" class="leaf" :class="data.active?'leaf-show':'leaf-hide'">
               <span>{{ node.label }}</span>
@@ -53,7 +54,8 @@ import {Component} from "vue-property-decorator";
 import properties from "./propertys.vue";
 import {Msg, Page, PluginEvent} from '@/core/types'
 import {connectBackground} from "@/devtools/connectBackground";
-import {Info, TreeData} from "@/devtools/data";
+import {EngineData, Info, TreeData} from "@/devtools/data";
+import Bus, {BusMsg} from './bus';
 
 @Component({
   components: {
@@ -88,6 +90,48 @@ export default class Index extends Vue {
     window.addEventListener("message", function (event) {
       console.log("on vue:" + JSON.stringify(event));
     }, false);
+    Bus.$on(BusMsg.ShowPlace, (data: EngineData) => {
+      console.log(data)
+      this._expand(data.engineUUID);
+    })
+  }
+
+  _expand(uuid: string) {
+
+    let expandKeys: Array<string> = [];
+
+    function circle(array: any) {
+      for (let i = 0; i < array.length; i++) {
+        let item = array[i];
+        expandKeys.push(item.uuid);
+        if (item.uuid === uuid) {
+          return true
+        } else {
+          let find = circle(item.children);
+          if (find) {
+            return true;
+          } else {
+            expandKeys.pop();
+          }
+        }
+      }
+    }
+
+    circle(this.treeData)
+
+    expandKeys.forEach(key => {
+      if (!this.expandedKeys.find(el => el === key)) {
+        this.expandedKeys.push(key)
+      }
+    })
+    // 高亮uuid
+
+  }
+
+  renderContent(h: Function, options: any) {
+    let {node, data, store} = options;
+    return h('span', {class:''}, data.name)
+    // return(<span>1111</span>)
   }
 
   _onMsgListInfo(eventData: Array<TreeData>) {

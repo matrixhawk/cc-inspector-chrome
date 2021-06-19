@@ -3,7 +3,7 @@ import {
   ArrayData,
   BoolData,
   ColorData,
-  DataType,
+  DataType, EngineData,
   Group, ImageData,
   Info,
   NullOrUndefinedData,
@@ -305,12 +305,24 @@ class CCInspector {
             path: path,
             value: propertyValue,
           }))
-          !info && (info = this._buildObjectOrArrayData({
-            data: new ObjectData(),
-            path: path,
-            value: propertyValue,
-            keys: Object.keys(propertyValue),
-          }));
+          if (!info) {
+            if (typeof propertyValue === "object") {
+              let ctorName = propertyValue.constructor.name;
+              if (ctorName.startsWith('cc_')) {
+                info = new EngineData();
+                info.engineType = ctorName;
+                info.engineName=propertyValue.name;
+                info.engineUUID=propertyValue.uuid;
+              } else {
+                info = this._buildObjectOrArrayData({
+                  data: new ObjectData(),
+                  path: path,
+                  value: propertyValue,
+                  keys: Object.keys(propertyValue),
+                })
+              }
+            }
+          }
         }
         break;
     }

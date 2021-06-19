@@ -11,6 +11,7 @@ export enum DataType {
   Array, // 暂时在控制台打印下
   Object,
   Image, // 图片
+  Engine,// 引擎的类型：cc.Node, cc.Sprite, cc.Label等。。。
 }
 
 export class Info {
@@ -24,6 +25,17 @@ export class TextData extends Info {
   constructor() {
     super();
     this.type = DataType.Text;
+  }
+}
+
+export class EngineData extends Info {
+  public engineType: string = '';
+  public engineUUID: string = '';
+  public engineName: string = '';
+
+  constructor() {
+    super();
+    this.type = DataType.Engine;
   }
 }
 

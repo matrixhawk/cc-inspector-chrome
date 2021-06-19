@@ -86,6 +86,14 @@
             <el-button @click="onShowValueInConsole">log</el-button>
           </div>
         </div>
+        <div v-if="isEngine()" class="engine">
+          <div class="head">
+            <i class="icon" :class="getEngineTypeIcon()"></i>
+            <div class="type">{{ value.engineType }}</div>
+          </div>
+          <div class="name">{{ value.engineName }}</div>
+          <el-button @click="onPlaceInTree" type="primary" icon="el-icon-place"></el-button>
+        </div>
         <div class="slot">
           <slot></slot>
         </div>
@@ -109,14 +117,14 @@
 
 import Vue from "vue"
 import {Component, Prop} from "vue-property-decorator"
-import {DataType, Info} from './data'
+import {DataType, Info, EngineData} from './data'
 import {connectBackground} from "@/devtools/connectBackground";
 import {Msg} from "@/core/types";
+import Bus, {BusMsg} from './bus'
 
 @Component({
   components: {}
 })
-// todo 支持array
 export default class UiProp extends Vue {
   @Prop({default: ""})
   name: string | undefined;
@@ -178,7 +186,31 @@ export default class UiProp extends Vue {
     return this.value && (this.value.type === DataType.Image)
   }
 
+  isEngine() {
+    return this.value && (this.value.type === DataType.Engine)
+  }
+
+  onPlaceInTree() {
+    Bus.$emit(BusMsg.ShowPlace, this.value);
+  }
+
   created() {
+  }
+
+  getEngineTypeIcon() {
+    const value = this.value as EngineData;
+    switch (value.engineType) {
+      case 'cc_Sprite': {
+        return 'el-icon-picture-outline';
+      }
+      case 'cc_Label': {
+        return 'el-icon-third-text';
+      }
+      case 'cc_Node': {
+        return 'el-icon-third-node'
+      }
+    }
+    return 'el-icon-third-unknow';
   }
 
   getName(isArray: boolean, arr: UiProp) {
@@ -322,6 +354,48 @@ export default class UiProp extends Vue {
           text-align: center;
           user-select: none;
           pointer-events: none;
+        }
+      }
+
+      .engine {
+        display: flex;
+        flex-direction: row;
+        border: solid #409EFF 1px;
+        border-radius: 5px;
+        align-items: center;
+        align-content: center;
+
+        .head {
+          background-color: cornflowerblue;
+          height: 28px;
+          align-items: center;
+          align-content: center;
+          display: flex;
+          flex-direction: row;
+
+          .icon {
+            font-size: 20px;
+            width: 20px;
+            margin-left: 5px;
+          }
+
+          .type {
+            display: flex;
+            align-content: center;
+            align-items: center;
+            margin: 0 5px;
+          }
+        }
+
+
+        .name {
+          flex: 1;
+          height: 28px;
+          padding-left: 5px;
+          background-color: gold;
+          display: flex;
+          align-items: center;
+          align-content: center;
         }
       }
 
