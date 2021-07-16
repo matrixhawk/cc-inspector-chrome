@@ -311,8 +311,8 @@ class CCInspector {
               if (ctorName.startsWith('cc_')) {
                 info = new EngineData();
                 info.engineType = ctorName;
-                info.engineName=propertyValue.name;
-                info.engineUUID=propertyValue.uuid;
+                info.engineName = propertyValue.name;
+                info.engineUUID = propertyValue.uuid;
               } else {
                 info = this._buildObjectOrArrayData({
                   data: new ObjectData(),
@@ -340,6 +340,8 @@ class CCInspector {
     let path: Array<string> = options.path;
     let data: ObjectData | ArrayData = options.data;
     let keys: Array<string> = options.keys;
+    // 剔除_开头的属性
+    keys = keys.filter(key => !key.toString().startsWith('_'));
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i];
       let propPath = path.concat(key.toString());
