@@ -123,10 +123,10 @@
 
 import Vue from "vue"
 import {Component, Prop} from "vue-property-decorator"
-import {DataType, Info, EngineData} from "./data"
+import {DataType, Info, EngineData} from "../data"
 import {connectBackground} from "@/devtools/connectBackground";
 import {Msg} from "@/core/types";
-import Bus, {BusMsg} from "./bus"
+import Bus, {BusMsg} from "../bus"
 
 @Component({
   components: {}

@@ -51,7 +51,7 @@
 <script lang="ts">
 import Vue from "vue";
 import {Component} from "vue-property-decorator";
-import properties from "./propertys.vue";
+import properties from "./ui/propertys.vue";
 import {Msg, Page, PluginEvent} from '@/core/types'
 import {connectBackground} from "@/devtools/connectBackground";
 import {EngineData, Info, TreeData} from "@/devtools/data";
