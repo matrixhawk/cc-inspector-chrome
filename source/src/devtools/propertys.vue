@@ -33,7 +33,7 @@ export default class properties extends Vue {
   allGroup: Array<Record<string, any>> | undefined;
 
   onClickHeader(group: any) {
-    if (group && group.hasOwnProperty('fold')) {
+    if (group && group.hasOwnProperty("fold")) {
       group.fold = !group.fold;
     }
   }
@@ -45,7 +45,7 @@ export default class properties extends Vue {
 
   }
 
-  @Watch('allGroup')
+  @Watch("allGroup")
   watchAllGroup() {
     this._initValue();
   }
@@ -56,9 +56,11 @@ export default class properties extends Vue {
 
   _initValue() {
     if (this.allGroup) {
-      this.allGroup.forEach(item => {
-        this.$set(item, 'fold', false);
-      })
+      // 第一个cc.Node不折叠
+      for (let i = 0; i < this.allGroup.length; i++) {
+        let item = this.allGroup[i];
+        this.$set(item, "fold", i !== 0);
+      }
     }
   }
 
