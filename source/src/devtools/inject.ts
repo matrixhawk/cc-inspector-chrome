@@ -15,7 +15,7 @@ import {
   Vec2Data,
   Vec3Data
 } from "./data";
-import {Msg, Page, PluginEvent} from '@/core/types'
+import {Msg, Page, PluginEvent} from "@/core/types"
 
 // @ts-ignore typescript-eslint/no-namespace
 declare namespace cc {
@@ -26,7 +26,7 @@ class CCInspector {
   inspectorGameMemoryStorage: Record<string, any> = {}
 
   init() {
-    console.log('cc-inspector init ~~~');
+    console.log("cc-inspector init ~~~");
     let timer = setInterval(() => {
       if (this._isCocosGame()) {
         clearInterval(timer)
@@ -44,7 +44,7 @@ class CCInspector {
       }
       let pluginEvent: PluginEvent = event.data;
       if (PluginEvent.check(pluginEvent, Page.Content, Page.Inject)) {
-        console.log(`%c[Inject] ${JSON.stringify(pluginEvent)}`, 'color:green;');
+        console.log(`%c[Inject] ${JSON.stringify(pluginEvent)}`, "color:green;");
         PluginEvent.finish(pluginEvent)
         switch (pluginEvent.msg) {
           case Msg.UrlChange:
@@ -114,7 +114,7 @@ class CCInspector {
 
     if (!draw) {
       // @ts-ignore
-      let node = new cc.Node('draw-node');
+      let node = new cc.Node("draw-node");
       // @ts-ignore
       cc.director.getScene().addChild(node);
       // @ts-ignore
@@ -123,7 +123,7 @@ class CCInspector {
     draw.clear()
     draw.lineWidth = 10;
     // @ts-ignore
-    draw.strokeColor = new cc.Color().fromHEX('#ff0000')
+    draw.strokeColor = new cc.Color().fromHEX("#ff0000")
     const {anchorX, anchorY, width, height, x, y} = node;
     let halfWidth = width / 2;
     let halfHeight = height / 2;
@@ -192,7 +192,7 @@ class CCInspector {
       rotation: ["rotationX", "rotationY"],
       anchor: ["anchorX", "anchorY"],
       size: ["width", "height"],
-      skew: ['skewX', 'skewY'],
+      skew: ["skewX", "skewY"],
       position: ["x", "y", "z"],
       scale: ["scaleX", "scaleY", "scaleZ"],
       designResolution: ["width", "height"], // 这个比较特殊，在key下边，其他的都不是在key下
@@ -240,7 +240,7 @@ class CCInspector {
     const data: ImageData = options.data;
     const path: Array<string> = options.path;
     if (ctor && value instanceof ctor) {
-      if (value.hasOwnProperty('_textureFilename')) {
+      if (value.hasOwnProperty("_textureFilename")) {
         data.path = path;
         //@ts-ignore
         data.data = `${window.location.origin}/${value._textureFilename}`;
@@ -287,7 +287,7 @@ class CCInspector {
             ctor: cc.Vec3,
             path: path,
             data: new Vec3Data(),
-            keys: ['x', 'y', 'z'],
+            keys: ["x", "y", "z"],
             value: propertyValue,
           }))
           !info && (info = this._buildVecData({
@@ -295,7 +295,7 @@ class CCInspector {
             ctor: cc.Vec2,
             path: path,
             data: new Vec2Data(),
-            keys: ['x', 'y'],
+            keys: ["x", "y"],
             value: propertyValue
           }))
           !info && (info = this._buildImageData({
@@ -308,7 +308,7 @@ class CCInspector {
           if (!info) {
             if (typeof propertyValue === "object") {
               let ctorName = propertyValue.constructor.name;
-              if (ctorName.startsWith('cc_')) {
+              if (ctorName.startsWith("cc_")) {
                 info = new EngineData();
                 info.engineType = ctorName;
                 info.engineName = propertyValue.name;
@@ -341,7 +341,7 @@ class CCInspector {
     let data: ObjectData | ArrayData = options.data;
     let keys: Array<string> = options.keys;
     // 剔除_开头的属性
-    keys = keys.filter(key => !key.toString().startsWith('_'));
+    keys = keys.filter(key => !key.toString().startsWith("_"));
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i];
       let propPath = path.concat(key.toString());
@@ -353,8 +353,23 @@ class CCInspector {
     return data;
   }
 
+  private getCompName(comp: any): string {
+    const nameKeys = [
+      "__classname__", // 2.4.0 验证通过
+    ];
+    for (let i = 0; i < nameKeys.length; i++) {
+      let key = nameKeys[i];
+      // 一般来说，这里的name是不会出现假值
+      if (comp[key]) {
+        return comp[key];
+      }
+    }
+    return comp.constructor.name;
+  }
+
   _getGroupData(node: any) {
-    let nodeGroup = new Group(node.constructor.name);
+    const name = this.getCompName(node);
+    let nodeGroup = new Group(name);
     let keys = this._getNodeKeys(node);
     for (let i = 0; i < keys.length;) {
       let key = keys[i];

@@ -83,6 +83,7 @@ export default class properties extends Vue {
       user-select: none;
       cursor: pointer;
       border-bottom: 1px #6d6d6d solid;
+      background-color: #1da1f7;
     }
 
     .header:hover {

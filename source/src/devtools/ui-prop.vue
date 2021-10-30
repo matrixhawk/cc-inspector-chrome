@@ -10,7 +10,13 @@
            :class="fold?'el-icon-caret-right':'el-icon-caret-bottom'"
            :style="{'visibility':isArrayOrObject()?'visible':'hidden','margin-left':indent*10+'px'}">
         </i>
-        <div class="text">{{ name }}</div>
+        <div class="text">
+          <el-popover placement="top" trigger="click">
+            <div>{{ name }}</div>
+            <span slot="reference">{{ name }}</span>
+          </el-popover>
+        </div>
+
       </div>
       <div class="value">
         <el-input v-if="isString()" v-model="value.data"
@@ -117,10 +123,10 @@
 
 import Vue from "vue"
 import {Component, Prop} from "vue-property-decorator"
-import {DataType, Info, EngineData} from './data'
+import {DataType, Info, EngineData} from "./data"
 import {connectBackground} from "@/devtools/connectBackground";
 import {Msg} from "@/core/types";
-import Bus, {BusMsg} from './bus'
+import Bus, {BusMsg} from "./bus"
 
 @Component({
   components: {}
@@ -200,17 +206,17 @@ export default class UiProp extends Vue {
   getEngineTypeIcon() {
     const value = this.value as EngineData;
     switch (value.engineType) {
-      case 'cc_Sprite': {
-        return 'el-icon-picture-outline';
+      case "cc_Sprite": {
+        return "el-icon-picture-outline";
       }
-      case 'cc_Label': {
-        return 'el-icon-third-text';
+      case "cc_Label": {
+        return "el-icon-third-text";
       }
-      case 'cc_Node': {
-        return 'el-icon-third-node'
+      case "cc_Node": {
+        return "el-icon-third-node"
       }
     }
-    return 'el-icon-third-unknow';
+    return "el-icon-third-unknow";
   }
 
   getName(isArray: boolean, arr: UiProp) {
@@ -232,7 +238,7 @@ export default class UiProp extends Vue {
     try {
       return JSON.stringify(this.value.data)
     } catch (e) {
-      return ''
+      return ""
     }
   }
 
@@ -267,7 +273,7 @@ export default class UiProp extends Vue {
   colorReverse(OldColorValue: string) {
     OldColorValue = "0x" + OldColorValue.replace(/#/g, "");
     var str = "000000" + (0xFFFFFF - parseInt(OldColorValue)).toString(16);
-    return '#' + str.substring(str.length - 6, str.length);
+    return "#" + str.substring(str.length - 6, str.length);
   }
 
   _onSelect() {
@@ -331,9 +337,19 @@ export default class UiProp extends Vue {
       }
 
       .text {
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
         user-select: none;
         font-size: 12px;
         margin: 3px;
+
+        span{
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
       }
     }
 
@@ -419,9 +435,6 @@ export default class UiProp extends Vue {
               display: block;
               margin-right: 5px;
               flex: unset;
-
-              .text {
-              }
             }
           }
         }
