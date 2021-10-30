@@ -51,11 +51,11 @@
 <script lang="ts">
 import Vue from "vue";
 import {Component} from "vue-property-decorator";
-import properties from "./ui/propertys.vue";
+import properties from "./propertys.vue";
 import {Msg, Page, PluginEvent} from '@/core/types'
 import {connectBackground} from "@/devtools/connectBackground";
 import {EngineData, Info, TreeData} from "@/devtools/data";
-import Bus, {BusMsg} from './bus';
+import Bus, {BusMsg} from '@/devtools/bus';
 
 @Component({
   components: {
@@ -327,7 +327,7 @@ export default class Index extends Vue {
 </script>
 
 <style scoped lang="less">
-@import "../index.less";
+@import "../../index.less";
 
 #devtools {
   display: flex;
