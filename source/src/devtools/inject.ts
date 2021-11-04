@@ -47,7 +47,6 @@ class CCInspector {
         console.log(`%c[Inject] ${JSON.stringify(pluginEvent)}`, "color:green;");
         PluginEvent.finish(pluginEvent)
         switch (pluginEvent.msg) {
-          case Msg.UrlChange:
           case Msg.Support: {
             let isCocosGame = this._isCocosGame();
             this.notifySupportGame(isCocosGame)

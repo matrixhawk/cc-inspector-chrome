@@ -5,37 +5,57 @@ import {Msg, Page, PluginEvent} from "@/core/types";
 
 injectScript("js/inject.js");
 
-// 和background.js保持长连接通讯
-let conn = chrome.runtime.connect({name: Page.Content})
-conn.onMessage.addListener((data: PluginEvent, sender) => {
-  // 将background.js的消息返回到injection.js
-  if (PluginEvent.check(data, Page.Background, Page.Content)) {
-    // console.log(`%c[Connect-Message] ${JSON.stringify(data)}`, "color:green;")
-    console.log('[Connect-Message]: ', data);
-    PluginEvent.reset(data, Page.Content, Page.Inject)
-    window.postMessage(data, "*");
+class Content {
+  private connect: chrome.runtime.Port | null = null;
+
+  constructor() {
+    // 接受来自inject.js的消息数据,然后中转到background.js
+    window.addEventListener("message", (event) => {
+      let data: PluginEvent = event.data;
+      if (PluginEvent.check(data, Page.Inject, Page.Content)) {
+        console.log("[Window-Message]: ", data);
+        PluginEvent.reset(data, Page.Content, Page.Devtools)
+        this.connect?.postMessage(data)
+      }
+    }, false);
   }
-})
 
-// 接受来自inject.js的消息数据,然后中转到background.js
-window.addEventListener('message', function (event) {
-  let data: PluginEvent = event.data;
-  if (PluginEvent.check(data, Page.Inject, Page.Content)) {
-    // console.log(`%c[Window-Message] ${JSON.stringify(data)}`, "color:green;");
-    console.log('[Window-Message]: ', data);
-    PluginEvent.reset(data, Page.Content, Page.Background)
-    chrome.runtime.sendMessage(data);
+  // 和background.js保持长连接通讯，background和content的交互也要通过这个链接进行通讯
+  private connectToBackground() {
+    this.connect = chrome.runtime.connect({name: Page.Content})
+    this.connect.onMessage.addListener((data: PluginEvent, sender) => {
+      if (PluginEvent.check(data, Page.Background, Page.Content)) {
+        // console.log(`%c[Connect-Message] ${JSON.stringify(data)}`, "color:green;")
+        console.log("[Connect-Message]: ", data);
+        PluginEvent.reset(data, Page.Content, Page.Inject)
+        window.postMessage(data, "*");
+      }
+    })
   }
-}, false);
 
+  private sendMessageToBackground(data: PluginEvent) {
+    if (this.connect) {
+      this.connect.postMessage(data);
+    }
+  }
 
-let gameCanvas = document.querySelector("#GameCanvas");
-if (!gameCanvas) {
-  let sendData = new PluginEvent(Page.Content, Page.Background, Msg.Support, {
-    support: false,
-    msg: "未发现GameCanvas,不支持调试游戏!"
-  })
-  chrome.runtime.sendMessage(sendData, (ret) => {
-    console.log(ret)
-  });
+  async run() {
+    this.connectToBackground();
+    this.checkGame();
+  }
+
+  private checkGame() {
+    let gameCanvas = document.querySelector("#GameCanvas");
+    if (!gameCanvas) {
+      let sendData = new PluginEvent(Page.Content, Page.Devtools, Msg.Support, {
+        support: false,
+        msg: "未发现GameCanvas,不支持调试游戏!"
+      })
+      this.sendMessageToBackground(sendData)
+    }
+  }
 }
+
+
+const content = new Content();
+content.run();

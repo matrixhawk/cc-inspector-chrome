@@ -15,7 +15,7 @@ export function init() {
         panel.onShown.addListener((window) => {
           // 面板显示，查询是否是cocos游戏
           console.log("panel show");
-          connectBackground.postMessageToBackground(Msg.Support, null)
+          // connectBackground.postMessageToBackground(Msg.Support, null)
         });
         panel.onHidden.addListener(() => {
           // 面板隐藏

@@ -13,7 +13,8 @@ export enum Msg {
   Support = "game-support",// 游戏支持信息
   MemoryInfo = "memory-info",//
   TabsInfo = "tabs_info", // 当前页面信息
-  UrlChange = "url_change", // 网址发生变化
+  GetTabID = "GetTabID", // 获取页面ID
+  Test='Test',
   SetProperty = "set-property", // 设置node属性
   UpdateProperty = 'update-property', // 更新属性
 }
@@ -45,7 +46,7 @@ export class PluginEvent {
       this.source = source;
       this.target = target;
       this.msg = msg;
-      this.data = data || null;
+      this.data = data;
     } else {
       console.warn(`无效的target: ${target}`)
     }

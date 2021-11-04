@@ -28,7 +28,7 @@
                    @node-expand="onNodeExpand"
                    @node-collapse="onNodeCollapse"
                    @node-click="handleNodeClick">
-<!--                   :render-content="renderContent"-->
+            <!--                   :render-content="renderContent"-->
 
             <span slot-scope="{node,data}" class="leaf" :class="data.active?'leaf-show':'leaf-hide'">
               <span>{{ node.label }}</span>
@@ -52,10 +52,10 @@
 import Vue from "vue";
 import {Component} from "vue-property-decorator";
 import properties from "./propertys.vue";
-import {Msg, Page, PluginEvent} from '@/core/types'
+import {Msg, Page, PluginEvent} from "@/core/types"
 import {connectBackground} from "@/devtools/connectBackground";
 import {EngineData, Info, TreeData} from "@/devtools/data";
-import Bus, {BusMsg} from '@/devtools/bus';
+import Bus, {BusMsg} from "@/devtools/bus";
 
 @Component({
   components: {
@@ -130,7 +130,7 @@ export default class Index extends Vue {
 
   renderContent(h: Function, options: any) {
     let {node, data, store} = options;
-    return h('span', {class:''}, data.name)
+    return h("span", {class: ""}, data.name)
     // return(<span>1111</span>)
   }
 
@@ -184,14 +184,12 @@ export default class Index extends Vue {
       if (!data) {
         return;
       }
-      if (PluginEvent.check(data, Page.Background, Page.Devtools)) {
+      if (data.target === Page.Devtools) {
+        debugger
         console.log(`[Devtools] ${JSON.stringify(data)}`);
         PluginEvent.finish(data);
         let eventData: any = data.data;
         switch (data.msg) {
-          case Msg.UrlChange: {
-            break;
-          }
           case Msg.TreeInfo: {
             this._onMsgListInfo(eventData as Array<TreeData>);
             break;
@@ -238,10 +236,10 @@ export default class Index extends Vue {
     circle(this.treeData)
     let ret = treeArray.find(el => el.uuid === uuid);
     if (ret) {
-      if (key === 'name') {
+      if (key === "name") {
         ret.name = value;
       }
-      if (key === 'active') {
+      if (key === "active") {
         ret.active = !!value;
       }
     }
@@ -287,7 +285,7 @@ export default class Index extends Vue {
   }
 
   _inspectedCode() {
-    let injectCode = '';
+    let injectCode = "";
     chrome.devtools.inspectedWindow.eval(injectCode, (result, isException) => {
       if (isException) {
         console.error(isException);
@@ -302,6 +300,7 @@ export default class Index extends Vue {
   }
 
   onBtnClickUpdatePage() {
+    debugger
     this.runToContentScript(Msg.Support);
   }
 
@@ -310,13 +309,13 @@ export default class Index extends Vue {
   }
 
   onNodeExpand(data: TreeData) {
-    if (data.hasOwnProperty('uuid') && data.uuid) {
+    if (data.hasOwnProperty("uuid") && data.uuid) {
       this.expandedKeys.push(data.uuid)
     }
   }
 
   onNodeCollapse(data: TreeData) {
-    if (data.hasOwnProperty('uuid')) {
+    if (data.hasOwnProperty("uuid")) {
       let index = this.expandedKeys.findIndex(el => el === data.uuid);
       if (index !== -1) {
         this.expandedKeys.splice(index, 1)
