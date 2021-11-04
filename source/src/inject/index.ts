@@ -14,13 +14,12 @@ import {
   TreeData,
   Vec2Data,
   Vec3Data
-} from "./data";
+} from "@/devtools/data";
 import {Msg, Page, PluginEvent} from "@/core/types"
+import {BuildDataOptions, BuildImageOptions, BuildVecOptions} from "@/inject/types";
 
-// @ts-ignore typescript-eslint/no-namespace
-declare namespace cc {
-  export function v2(x: number, y: number): any;
-}
+declare var cc: any;
+
 
 class CCInspector {
   inspectorGameMemoryStorage: Record<string, any> = {}
@@ -207,7 +206,7 @@ class CCInspector {
     return null;
   }
 
-  _buildVecData(options: any) {
+  _buildVecData(options: BuildVecOptions) {
     const ctor: Function = options.ctor;
     const keys: Array<string> = options.keys;
     const value: Object = options.value;
@@ -233,7 +232,7 @@ class CCInspector {
     return null;
   }
 
-  _buildImageData(options: any) {
+  _buildImageData(options: BuildImageOptions) {
     const ctor: Function = options.ctor;
     const value: Object = options.value;
     const data: ImageData = options.data;
@@ -249,7 +248,7 @@ class CCInspector {
     return null;
   }
 
-  _genInfoData(node: any, key: string, path: Array<string>) {
+  _genInfoData(node: any, key: string | number, path: Array<string>) {
     let propertyValue = node[key];
     let info = null;
     switch (typeof propertyValue) {
@@ -270,11 +269,11 @@ class CCInspector {
           let hex = propertyValue.toHEX();
           info = new ColorData(`#${hex}`);
         } else if (Array.isArray(propertyValue)) {
-          let keys = [];
+          let keys: number[] = [];
           for (let i = 0; i < propertyValue.length; i++) {
             keys.push(i);
           }
-          info = this._buildObjectOrArrayData({
+          info = this._buildArrayData({
             data: new ArrayData(),
             path: path,
             value: propertyValue,
@@ -313,7 +312,7 @@ class CCInspector {
                 info.engineName = propertyValue.name;
                 info.engineUUID = propertyValue.uuid;
               } else {
-                info = this._buildObjectOrArrayData({
+                info = this._buildObjectData({
                   data: new ObjectData(),
                   path: path,
                   value: propertyValue,
@@ -334,11 +333,20 @@ class CCInspector {
     return info;
   }
 
-  _buildObjectOrArrayData(options: any) {
+  _buildArrayData(options: BuildDataOptions) {
+    return this._buildObjectOrArrayData(options);
+  }
+
+  _buildObjectData(options: BuildDataOptions) {
+    // todo 只返回一级key，更深层级的key需要的时候，再获取，防止circle object导致的死循环
+
+  }
+
+  _buildObjectOrArrayData(options: BuildDataOptions) {
     let propertyValue: Object = options.value;
     let path: Array<string> = options.path;
     let data: ObjectData | ArrayData = options.data;
-    let keys: Array<string> = options.keys;
+    let keys: Array<string | number> = options.keys;
     // 剔除_开头的属性
     keys = keys.filter(key => !key.toString().startsWith("_"));
     for (let i = 0; i < keys.length; i++) {
@@ -423,7 +431,7 @@ class CCInspector {
     return nodeGroup;
   }
 
-  // 获取节点信息
+  // 获取节点信息，只获取一级key即可，后续
   getNodeInfo(uuid: string) {
     let node = this.inspectorGameMemoryStorage[uuid];
     if (node) {
@@ -453,7 +461,7 @@ class CCInspector {
     }
   }
 
-  _isReadonly(base: Object, key: string): boolean {
+  _isReadonly(base: Object, key: string | number): boolean {
     let ret = Object.getOwnPropertyDescriptor(base, key)
     if (ret) {
       return !(ret.set || ret.writable);
