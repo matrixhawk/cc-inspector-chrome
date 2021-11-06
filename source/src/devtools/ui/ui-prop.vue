@@ -10,8 +10,8 @@
            :class="fold?'el-icon-caret-right':'el-icon-caret-bottom'"
            :style="{'visibility':isArrayOrObject()?'visible':'hidden','margin-left':indent*10+'px'}">
         </i>
-        <div class="text">
-          <el-popover placement="top" trigger="click">
+        <div class="text" ref="propText">
+          <el-popover placement="top" trigger="hover" :disabled="!isShowTooltip()">
             <div>{{ name }}</div>
             <span slot="reference">{{ name }}</span>
           </el-popover>
@@ -203,6 +203,17 @@ export default class UiProp extends Vue {
   }
 
   created() {
+  }
+
+  isShowTooltip() {
+    const el: HTMLDivElement = this.$refs.propText;
+    if (el) {
+      if (el.scrollWidth > el.offsetWidth) {
+        // 出现了省略号
+        return true;
+      }
+    }
+    return false;
   }
 
   getEngineTypeIcon() {
