@@ -19,6 +19,9 @@
 
       </div>
       <div class="value">
+        <div v-if="isInvalid()" class="invalid">
+          {{ getInvalidDisplayText() }}
+        </div>
         <el-input v-if="isString()" v-model="value.data"
                   :disabled="value.readonly"
                   @change="onChangeValue">
@@ -152,6 +155,30 @@ export default class UiProp extends Vue {
       this.subData = this.value.data;
     } else {
       this.subData = null;
+    }
+  }
+
+  isInvalid() {
+    return this.value && (this.value.type === DataType.Invalid);
+  }
+
+  getInvalidDisplayText() {
+    if (this.isInvalid()) {
+      const data = this.value.data;
+      switch (data) {
+        case undefined: {
+          return "undefined"
+        }
+        case null: {
+          return "null"
+        }
+        case Infinity: {
+          return "Infinity"
+        }
+        default: {
+          return `未知的无效数据：${data}`
+        }
+      }
     }
   }
 
@@ -401,6 +428,10 @@ export default class UiProp extends Vue {
           user-select: none;
           pointer-events: none;
         }
+      }
+
+      .invalid {
+        color: grey;
       }
 
       .objectDesc {

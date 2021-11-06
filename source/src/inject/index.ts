@@ -8,7 +8,7 @@ import {
   Group,
   ImageData,
   Info,
-  NullOrUndefinedData,
+  InvalidData,
   NumberData,
   ObjectData, ObjectItemRequestData,
   Property,
@@ -282,8 +282,8 @@ class CCInspector {
         info = new StringData(propertyValue);
         break;
       default:
-        if (propertyValue == null || typeof propertyValue === "undefined") {
-          info = new NullOrUndefinedData();
+        if (this._isInvalidValue(propertyValue)) {
+          info = new InvalidData(propertyValue);
           //@ts-ignore
         } else if (propertyValue instanceof cc.Color) {
           let hex = propertyValue.toHEX();
@@ -388,6 +388,10 @@ class CCInspector {
     return keys.filter(key => !key.toString().startsWith("_"));
   }
 
+  _isInvalidValue(value: any) {
+    return value === null || value === Infinity || value === undefined;
+  }
+
   _buildObjectData({value, path, data, filterKey}: BuildObjectOptions) {
     let keys = Object.keys(value);
     if (filterKey) {
@@ -406,6 +410,8 @@ class CCInspector {
 
         })
         keyDesc = `(${propValue.length}) [...]`
+      } else if (this._isInvalidValue(propValue)) { // 不能改变顺序
+        keyDesc = propValue;
       } else if (typeof propValue === "object") {
         keyDesc = `${propValue.constructor.name} {...}`;
       } else {

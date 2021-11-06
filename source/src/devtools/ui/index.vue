@@ -195,7 +195,7 @@ export default class Index extends Vue {
         return;
       }
       if (data.target === Page.Devtools) {
-        console.log(`[Devtools] ${JSON.stringify(data)}`);
+        console.log("[Devtools]", data);
         PluginEvent.finish(data);
         let eventData: any = data.data;
         switch (data.msg) {

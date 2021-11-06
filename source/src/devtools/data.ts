@@ -10,7 +10,7 @@ export enum DataType {
   Enum,
   Bool,
   Color,
-  NullOrUndefined,
+  Invalid,
   Array, // 暂时在控制台打印下
   Object,
   ObjectItem,
@@ -78,11 +78,13 @@ export class ObjectData extends Info {
   }
 }
 
-export class NullOrUndefinedData extends Info {
-  constructor() {
-    super();
-    this.type = DataType.NullOrUndefined;
+export class InvalidData extends Info {
+  data: any;
 
+  constructor(data: any) {
+    super();
+    this.data = data;
+    this.type = DataType.Invalid;
   }
 }
 
