@@ -71,9 +71,6 @@
           </el-color-picker>
           <div class="hex" :style="{color:colorReverse(value.data)}">{{ value.data }}</div>
         </div>
-        <div v-if="isArray()" style="display: flex;flex-direction: column;">
-          {{ value.data.length }}
-        </div>
         <!--      <div v-if="isArrayOrObject()" class="array-object">-->
         <!--        <div class="text">-->
         <!--        </div>-->
@@ -99,10 +96,13 @@
           <div class="name">{{ value.engineName }}</div>
           <el-button @click="onPlaceInTree" type="primary" icon="el-icon-place"></el-button>
         </div>
-        <div v-if="isArrayOrObject()&&fold" class="arrayOrObjectDesc">
+        <div v-if="isObject()&&fold" class="objectDesc">
           {{ value.data }}
         </div>
-        <div class="slot">
+        <div v-if="isArray()" class="array">
+          Array({{ value.data.length }})
+        </div>
+        <div class="slot" v-if="false">
           <slot></slot>
         </div>
       </div>
@@ -124,7 +124,7 @@
 <script lang="ts">
 
 import Vue from "vue"
-import {Component, Prop} from "vue-property-decorator"
+import {Component, Prop, Watch} from "vue-property-decorator"
 import {DataType, Info, EngineData, Property} from "../data"
 import {connectBackground} from "@/devtools/connectBackground";
 import {Msg} from "@/core/types";
@@ -145,6 +145,15 @@ export default class UiProp extends Vue {
 
   @Prop()
   value!: Info;
+
+  @Watch("value")
+  watchValue() {
+    if (this.isArray()) {
+      this.subData = this.value.data;
+    } else {
+      this.subData = null;
+    }
+  }
 
   isString() {
     return this.value && (this.value.type === DataType.String);
@@ -203,6 +212,11 @@ export default class UiProp extends Vue {
   }
 
   created() {
+
+  }
+
+  mounted() {
+    this.watchValue();
   }
 
   isShowTooltip() {
@@ -389,11 +403,17 @@ export default class UiProp extends Vue {
         }
       }
 
-      .arrayOrObjectDesc {
+      .objectDesc {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         user-select: none;
+      }
+
+      .array {
+        display: flex;
+        flex-direction: column;
+        color: red;
       }
 
       .engine {
