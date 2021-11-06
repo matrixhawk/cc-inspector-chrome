@@ -1,3 +1,6 @@
+// @ts-ignore
+import {v4} from "uuid"
+
 export enum DataType {
   Number,
   String,
@@ -10,15 +13,20 @@ export enum DataType {
   NullOrUndefined,
   Array, // 暂时在控制台打印下
   Object,
+  ObjectItem,
   Image, // 图片
   Engine,// 引擎的类型：cc.Node, cc.Sprite, cc.Label等。。。
 }
 
 export class Info {
+  public id: string | null = null;
   public type: DataType = DataType.Number;
   public data: any;
   public readonly: boolean = false;
   public path: Array<string> = [];// 属性对应的路径
+  constructor() {
+    this.id = v4();
+  }
 }
 
 export class TextData extends Info {
@@ -28,10 +36,15 @@ export class TextData extends Info {
   }
 }
 
+export interface ObjectItemRequestData {
+  id: string | null;
+  data: Property[];
+}
+
 export class EngineData extends Info {
-  public engineType: string = '';
-  public engineUUID: string = '';
-  public engineName: string = '';
+  public engineType: string = "";
+  public engineUUID: string = "";
+  public engineName: string = "";
 
   constructor() {
     super();
@@ -53,17 +66,15 @@ export class ArrayData extends Info {
   }
 }
 
-export class ObjectData extends Info {
-  data: Array<Property> = [];
+export class ObjectDataItem extends Info {
 
+}
+
+export class ObjectData extends Info {
+  data: string = "";// object的简单描述快照，类似chrome的console，{a:'fff',b:xxx}
   constructor() {
     super();
     this.type = DataType.Object;
-  }
-
-  add(info: Property) {
-    this.data.push(info);
-    return this;
   }
 }
 
@@ -159,13 +170,13 @@ export class EnumData extends Info {
 
 export class TreeData {
   active: boolean = true;
-  uuid: string = '';
-  name: string = '';
+  uuid: string = "";
+  name: string = "";
   children: Array<TreeData> = [];
 }
 
 export class Property {
-  public name: string = 'property';
+  public name: string = "property";
   public value: Info = new Info();
 
   constructor(name: string, info: Info) {
@@ -175,7 +186,7 @@ export class Property {
 }
 
 export class Group {
-  public name: string = 'group';
+  public name: string = "group";
   public data: Array<Property> = [];
 
   constructor(name: string) {
@@ -187,7 +198,7 @@ export class Group {
   }
 
   sort() {
-    let order = ['name', 'active', 'enabled', 'uuid', 'position', 'rotation', 'scale', 'anchor', 'size', 'color', 'opacity', 'skew', 'group'];
+    let order = ["name", "active", "enabled", "uuid", "position", "rotation", "scale", "anchor", "size", "color", "opacity", "skew", "group"];
     let orderKeys: Array<Property> = [];
     let otherKeys: Array<Property> = [];
     this.data.forEach(property => {
@@ -204,86 +215,3 @@ export class Group {
     this.data = orderKeys.concat(otherKeys);
   }
 }
-
-export const testData = [
-  {
-    name: "group1",
-    uuid: 'node/comp uuid',
-    data: [
-      {name: "uuid", value: {type: DataType.String, data: 'abc', path: 'uuid'}},
-      {name: "opacity", value: {type: DataType.Number, data: 100}},
-
-      {
-        name: "size",
-        value: {
-          type: DataType.Vec2,
-          data: [
-            {name: "X", value: {type: DataType.Number, data: 100}},
-            {name: "Y", value: {type: DataType.Number, data: 200}},
-          ]
-        }
-      },
-      {
-        name: "position",
-        value: {
-          type: DataType.Vec3,
-          data: [
-            {name: "X", value: {type: DataType.Number, data: 100}},
-            {name: "Y", value: {type: DataType.Number, data: 200}},
-            {name: "Z", value: {type: DataType.Number, data: 300}},
-          ]
-        }
-      },
-      {
-        name: "layout",
-        value: {
-          type: DataType.Enum,
-          data: 1,
-          values: [
-            {name: "horizontal", value: 1},
-            {name: "vertical", value: 2},
-          ]
-        }
-      },
-      {
-        name: "text",
-        value: {
-          type: DataType.Text,
-          data: 'aaaaaaaaafsf',
-        }
-      }
-    ]
-  },
-  {
-    name: "group2",
-    data: [
-      {
-        name: "bool", value: {
-          type: DataType.Bool,
-          data: true,
-        }
-      },
-      {
-        name: 'color',
-        value: {
-          type: DataType.Color,
-          data: '#ff0000'
-        }
-      },
-      {
-        name: 'array',
-        value: {
-          type: DataType.Array,
-          data: [1, 2, 3, 4]
-        }
-      }, {
-        name: 'object',
-        value: {
-          type: DataType.Object,
-          data: {a: '11111111111111111111111111111111111111111111111111111111111', b: 2, c: 3}
-        }
-      }
-    ]
-  },
-];
-

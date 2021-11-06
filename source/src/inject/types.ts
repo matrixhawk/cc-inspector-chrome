@@ -1,10 +1,17 @@
 import {ArrayData, ImageData, ObjectData, Vec2Data, Vec3Data} from "@/devtools/data";
 
-export interface BuildDataOptions {
+export interface BuildObjectOptions {
   path: string[];
   value: Object;
-  data: ObjectData | ArrayData;
-  keys: string[] | number[];
+  data: ObjectData;
+  filterKey:boolean;
+}
+
+export interface BuildArrayOptions {
+  path: string[];
+  value: Object;
+  data: ArrayData;
+  keys: number[];
 }
 
 export interface BuildVecOptions {

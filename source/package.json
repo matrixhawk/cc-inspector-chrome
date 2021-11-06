@@ -13,6 +13,7 @@
     "@types/node": "^14.14.37",
     "babel-eslint": "^10.1.0",
     "core-js": "^3.6.5",
+    "uuid": "^8.3.2",
     "element-ui": "^2.15.1",
     "fs-extra": "^9.1.0",
     "less": "^4.1.1",
@@ -22,6 +23,7 @@
     "vue-property-decorator": "^9.1.2"
   },
   "devDependencies": {
+    "@types/uuid": "^8.3.1",
     "@types/chrome": "0.0.133",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",

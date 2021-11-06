@@ -3,12 +3,14 @@ import {
   ArrayData,
   BoolData,
   ColorData,
-  DataType, EngineData,
-  Group, ImageData,
+  DataType,
+  EngineData,
+  Group,
+  ImageData,
   Info,
   NullOrUndefinedData,
   NumberData,
-  ObjectData,
+  ObjectData, ObjectItemRequestData,
   Property,
   StringData,
   TreeData,
@@ -16,9 +18,9 @@ import {
   Vec3Data
 } from "@/devtools/data";
 import {Msg, Page, PluginEvent} from "@/core/types"
-import {BuildDataOptions, BuildImageOptions, BuildVecOptions} from "@/inject/types";
+import {BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOptions} from "@/inject/types";
 
-declare var cc: any;
+declare const cc: any;
 
 
 class CCInspector {
@@ -70,6 +72,24 @@ class CCInspector {
 
             this.setValue(data.path, value);
             this.sendMsgToContent(Msg.UpdateProperty, data);
+            break;
+          }
+          case Msg.GetObjectItemData: {
+            const data: ObjectData = pluginEvent.data;
+            let val = this.getValue(data.path);
+            if (val) {
+              let itemData: Property[] = this._buildObjectItemData({
+                data: data,
+                path: data.path,
+                value: val,
+                filterKey: false,
+              });
+              let result: ObjectItemRequestData = {
+                id: data.id,
+                data: itemData,
+              }
+              this.sendMsgToContent(Msg.GetObjectItemData, result);
+            }
             break;
           }
         }
@@ -248,7 +268,7 @@ class CCInspector {
     return null;
   }
 
-  _genInfoData(node: any, key: string | number, path: Array<string>) {
+  _genInfoData(node: any, key: string | number, path: Array<string>, filterKey = true) {
     let propertyValue = node[key];
     let info = null;
     switch (typeof propertyValue) {
@@ -316,7 +336,7 @@ class CCInspector {
                   data: new ObjectData(),
                   path: path,
                   value: propertyValue,
-                  keys: Object.keys(propertyValue),
+                  filterKey: filterKey,
                 })
               }
             }
@@ -333,30 +353,67 @@ class CCInspector {
     return info;
   }
 
-  _buildArrayData(options: BuildDataOptions) {
-    return this._buildObjectOrArrayData(options);
-  }
-
-  _buildObjectData(options: BuildDataOptions) {
-    // todo 只返回一级key，更深层级的key需要的时候，再获取，防止circle object导致的死循环
-
-  }
-
-  _buildObjectOrArrayData(options: BuildDataOptions) {
-    let propertyValue: Object = options.value;
-    let path: Array<string> = options.path;
-    let data: ObjectData | ArrayData = options.data;
-    let keys: Array<string | number> = options.keys;
-    // 剔除_开头的属性
+  _buildArrayData({value, path, data, keys}: BuildArrayOptions) {
     keys = keys.filter(key => !key.toString().startsWith("_"));
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i];
       let propPath = path.concat(key.toString());
-      let itemData = this._genInfoData(propertyValue, key, propPath);
+      let itemData = this._genInfoData(value, key, propPath);
       if (itemData) {
         data.add(new Property(key.toString(), itemData))
       }
     }
+    return data;
+  }
+
+  _buildObjectItemData({value, path, data, filterKey}: BuildObjectOptions): Property[] {
+    let keys = Object.keys(value);
+    if (filterKey) {
+      keys = this.filterKeys(keys);// 不再进行开发者定义的数据
+    }
+    let ret: Property[] = []
+    for (let i = 0; i < keys.length; i++) {
+      let key = keys[i];
+      let propPath = path.concat(key.toString());
+      let itemData = this._genInfoData(value, key, propPath, filterKey);
+      if (itemData) {
+        ret.push(new Property(key, itemData))
+      }
+    }
+    return ret;
+  }
+
+  filterKeys(keys: string[]) {
+    // 剔除_开头的属性
+    return keys.filter(key => !key.toString().startsWith("_"));
+  }
+
+  _buildObjectData({value, path, data, filterKey}: BuildObjectOptions) {
+    let keys = Object.keys(value);
+    if (filterKey) {
+      keys = this.filterKeys(keys)
+    }
+    //  只返回一级key，更深层级的key需要的时候，再获取，防止circle object导致的死循环
+    let desc: Record<string, any> = {};
+    for (let i = 0; i < keys.length; i++) {
+      let key = keys[i];
+      let propPath = path.concat(key.toString());
+      let propValue = (value as any)[key];
+      let keyDesc = "";
+      if (Array.isArray(propValue)) {
+        // 只收集一级key
+        propValue.forEach(item => {
+
+        })
+        keyDesc = `(${propValue.length}) [...]`
+      } else if (typeof propValue === "object") {
+        keyDesc = `${propValue.constructor.name} {...}`;
+      } else {
+        keyDesc = propValue;
+      }
+      desc[key] = keyDesc;
+    }
+    data.data = JSON.stringify(desc);
     return data;
   }
 
@@ -489,6 +546,19 @@ class CCInspector {
         }
       }
     }
+  }
+
+  getValue(path: string[]) {
+    let target = this.inspectorGameMemoryStorage;
+    for (let i = 0; i < path.length; i++) {
+      let key = path[i];
+      if (target.hasOwnProperty(key)) {
+        target = target[key]
+      } else {
+        return null;
+      }
+    }
+    return target;
   }
 
 

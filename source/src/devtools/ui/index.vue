@@ -54,7 +54,7 @@ import {Component} from "vue-property-decorator";
 import properties from "./propertys.vue";
 import {Msg, Page, PluginEvent} from "@/core/types"
 import {connectBackground} from "@/devtools/connectBackground";
-import {EngineData, Info, TreeData} from "@/devtools/data";
+import {EngineData, Info, TreeData, ObjectData, ObjectItemRequestData} from "@/devtools/data";
 import Bus, {BusMsg} from "@/devtools/bus";
 
 @Component({
@@ -82,6 +82,9 @@ export default class Index extends Vue {
   }
   timerID: number = 0;
 
+
+  private requestList: Array<{ id: string, cb: Function }> = [];
+
   created() {
     if (chrome && chrome.runtime) {
       this._initChromeRuntimeConnect();
@@ -94,6 +97,13 @@ export default class Index extends Vue {
       console.log(data)
       this._expand(data.engineUUID);
     })
+    Bus.$on(BusMsg.RequestObjectData, (data: ObjectData, cb: Function) => {
+      if (this.requestList.find(el => el.id === data.id)) {
+        return
+      }
+      this.requestList.push({id: data.id, cb});
+      this.sendMsgToContentScript(Msg.GetObjectItemData, data)
+    });
   }
 
   _expand(uuid: string) {
@@ -185,7 +195,6 @@ export default class Index extends Vue {
         return;
       }
       if (data.target === Page.Devtools) {
-        debugger
         console.log(`[Devtools] ${JSON.stringify(data)}`);
         PluginEvent.finish(data);
         let eventData: any = data.data;
@@ -212,6 +221,17 @@ export default class Index extends Vue {
           }
           case Msg.TabsInfo: {
             debugger
+            break
+          }
+          case Msg.GetObjectItemData: {
+            let eventData: ObjectItemRequestData = data.data as ObjectItemRequestData;
+            if (eventData.id !== null) {
+              let findIndex = this.requestList.findIndex(el => el.id === eventData.id)
+              if (findIndex > -1) {
+                let del = this.requestList.splice(findIndex, 1)[0];
+                del.cb(eventData.data);
+              }
+            }
             break
           }
         }
@@ -249,7 +269,7 @@ export default class Index extends Vue {
     this.selectedUUID = data.uuid;
     let uuid = data.uuid;
     if (uuid !== undefined) {
-      this.runToContentScript(Msg.NodeInfo, uuid);
+      this.sendMsgToContentScript(Msg.NodeInfo, uuid);
     }
   }
 
@@ -258,7 +278,7 @@ export default class Index extends Vue {
       this.timerID = setInterval(() => {
         this.onBtnClickUpdateTree();
         if (this.selectedUUID) {
-          this.runToContentScript(Msg.NodeInfo, this.selectedUUID);
+          this.sendMsgToContentScript(Msg.NodeInfo, this.selectedUUID);
         }
       }, 300);
     } else {
@@ -266,7 +286,7 @@ export default class Index extends Vue {
     }
   }
 
-  runToContentScript(msg: Msg, data?: any) {
+  sendMsgToContentScript(msg: Msg, data?: any) {
     if (!chrome || !chrome.devtools) {
       console.log("环境异常，无法执行函数");
       return;
@@ -296,16 +316,15 @@ export default class Index extends Vue {
   }
 
   onBtnClickUpdateTree() {
-    this.runToContentScript(Msg.TreeInfo);
+    this.sendMsgToContentScript(Msg.TreeInfo);
   }
 
   onBtnClickUpdatePage() {
-    debugger
-    this.runToContentScript(Msg.Support);
+    this.sendMsgToContentScript(Msg.Support);
   }
 
   onMemoryTest() {
-    this.runToContentScript(Msg.MemoryInfo);
+    this.sendMsgToContentScript(Msg.MemoryInfo);
   }
 
   onNodeExpand(data: TreeData) {

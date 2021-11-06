@@ -1,7 +1,8 @@
-import Vue from 'vue'
+import Vue from "vue"
 
 export enum BusMsg {
-  ShowPlace = 'ShowPlace',
+  ShowPlace = "ShowPlace",
+  RequestObjectData = "RequestObjectData",
 }
 
 export default new Vue();

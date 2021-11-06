@@ -1,7 +1,7 @@
 export enum Page {
   Inject = "Inject",
   Devtools = "Devtools",
-  Background = 'Background',
+  Background = "Background",
   Content = "Content",
   Popup = "Popup",
   Options = "Options",
@@ -14,9 +14,9 @@ export enum Msg {
   MemoryInfo = "memory-info",//
   TabsInfo = "tabs_info", // 当前页面信息
   GetTabID = "GetTabID", // 获取页面ID
-  Test='Test',
+  GetObjectItemData = "GetObjectItemData",
   SetProperty = "set-property", // 设置node属性
-  UpdateProperty = 'update-property', // 更新属性
+  UpdateProperty = "update-property", // 更新属性
 }
 
 export class PluginEvent {

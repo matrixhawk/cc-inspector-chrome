@@ -76,7 +76,6 @@
         </div>
         <!--      <div v-if="isArrayOrObject()" class="array-object">-->
         <!--        <div class="text">-->
-        <!--          {{ valueString() }}-->
         <!--        </div>-->
         <!--        <el-button @click="onShowValueInConsole">log</el-button>-->
         <!--      </div>-->
@@ -100,14 +99,17 @@
           <div class="name">{{ value.engineName }}</div>
           <el-button @click="onPlaceInTree" type="primary" icon="el-icon-place"></el-button>
         </div>
+        <div v-if="isArrayOrObject()&&fold" class="arrayOrObjectDesc">
+          {{ value.data }}
+        </div>
         <div class="slot">
           <slot></slot>
         </div>
       </div>
     </div>
     <div v-if="isArrayOrObject()">
-      <div v-show="!fold" style="display: flex;flex-direction: column;">
-        <ui-prop v-for="(arr,index) in value.data"
+      <div v-show="!fold&&subData" style="display: flex;flex-direction: column;">
+        <ui-prop v-for="(arr,index) in subData"
                  :key="index"
                  :indent="indent+1"
                  :value="arr.value"
@@ -123,7 +125,7 @@
 
 import Vue from "vue"
 import {Component, Prop} from "vue-property-decorator"
-import {DataType, Info, EngineData} from "../data"
+import {DataType, Info, EngineData, Property} from "../data"
 import {connectBackground} from "@/devtools/connectBackground";
 import {Msg} from "@/core/types";
 import Bus, {BusMsg} from "../bus"
@@ -228,17 +230,20 @@ export default class UiProp extends Vue {
     }
   }
 
-  private fold = false;
+  private fold = true;
+
+  private subData: Property[] | null = null;
 
   onClickFold() {
-    this.fold = !this.fold;
-  }
+    if (this.isObject() && this.fold && !this.subData) {
+      // 请求object的item数据
+      Bus.$emit(BusMsg.RequestObjectData, this.value, (info: Property[]) => {
 
-  valueString() {
-    try {
-      return JSON.stringify(this.value.data)
-    } catch (e) {
-      return ""
+        this.fold = false;
+        this.subData = info;
+      })
+    } else {
+      this.fold = !this.fold;
     }
   }
 
@@ -345,7 +350,7 @@ export default class UiProp extends Vue {
         font-size: 12px;
         margin: 3px;
 
-        span{
+        span {
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -371,6 +376,13 @@ export default class UiProp extends Vue {
           user-select: none;
           pointer-events: none;
         }
+      }
+
+      .arrayOrObjectDesc {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        user-select: none;
       }
 
       .engine {
