@@ -271,78 +271,81 @@ class CCInspector {
   _genInfoData(node: any, key: string | number, path: Array<string>, filterKey = true) {
     let propertyValue = node[key];
     let info = null;
-    switch (typeof propertyValue) {
-      case "boolean":
-        info = new BoolData(propertyValue);
-        break;
-      case "number":
-        info = new NumberData(propertyValue);
-        break;
-      case "string":
-        info = new StringData(propertyValue);
-        break;
-      default:
-        if (this._isInvalidValue(propertyValue)) {
-          info = new InvalidData(propertyValue);
+    let invalidType = this._isInvalidValue(propertyValue);
+    if (invalidType) {
+      info = new InvalidData(invalidType);
+    } else {
+      switch (typeof propertyValue) {
+        case "boolean":
+          info = new BoolData(propertyValue);
+          break;
+        case "number":
+          info = new NumberData(propertyValue);
+          break;
+        case "string":
+          info = new StringData(propertyValue);
+          break;
+        default:
           //@ts-ignore
-        } else if (propertyValue instanceof cc.Color) {
-          let hex = propertyValue.toHEX();
-          info = new ColorData(`#${hex}`);
-        } else if (Array.isArray(propertyValue)) {
-          let keys: number[] = [];
-          for (let i = 0; i < propertyValue.length; i++) {
-            keys.push(i);
-          }
-          info = this._buildArrayData({
-            data: new ArrayData(),
-            path: path,
-            value: propertyValue,
-            keys: keys,
-          })
-        } else {
-          !info && (info = this._buildVecData({
-            // @ts-ignore
-            ctor: cc.Vec3,
-            path: path,
-            data: new Vec3Data(),
-            keys: ["x", "y", "z"],
-            value: propertyValue,
-          }))
-          !info && (info = this._buildVecData({
-            // @ts-ignore
-            ctor: cc.Vec2,
-            path: path,
-            data: new Vec2Data(),
-            keys: ["x", "y"],
-            value: propertyValue
-          }))
-          !info && (info = this._buildImageData({
-            //@ts-ignore
-            ctor: cc.SpriteFrame,
-            data: new ImageData(),
-            path: path,
-            value: propertyValue,
-          }))
-          if (!info) {
-            if (typeof propertyValue === "object") {
-              let ctorName = propertyValue.constructor.name;
-              if (ctorName.startsWith("cc_")) {
-                info = new EngineData();
-                info.engineType = ctorName;
-                info.engineName = propertyValue.name;
-                info.engineUUID = propertyValue.uuid;
-              } else {
-                info = this._buildObjectData({
-                  data: new ObjectData(),
-                  path: path,
-                  value: propertyValue,
-                  filterKey: filterKey,
-                })
+          if (propertyValue instanceof cc.Color) {
+            let hex = propertyValue.toHEX();
+            info = new ColorData(`#${hex}`);
+          } else if (Array.isArray(propertyValue)) {
+            let keys: number[] = [];
+            for (let i = 0; i < propertyValue.length; i++) {
+              keys.push(i);
+            }
+            info = this._buildArrayData({
+              data: new ArrayData(),
+              path: path,
+              value: propertyValue,
+              keys: keys,
+            })
+          } else {
+            !info && (info = this._buildVecData({
+              // @ts-ignore
+              ctor: cc.Vec3,
+              path: path,
+              data: new Vec3Data(),
+              keys: ["x", "y", "z"],
+              value: propertyValue,
+            }))
+            !info && (info = this._buildVecData({
+              // @ts-ignore
+              ctor: cc.Vec2,
+              path: path,
+              data: new Vec2Data(),
+              keys: ["x", "y"],
+              value: propertyValue
+            }))
+            !info && (info = this._buildImageData({
+              //@ts-ignore
+              ctor: cc.SpriteFrame,
+              data: new ImageData(),
+              path: path,
+              value: propertyValue,
+            }))
+            if (!info) {
+              if (typeof propertyValue === "object") {
+                let ctorName = propertyValue.constructor.name;
+                if (ctorName.startsWith("cc_")) {
+                  info = new EngineData();
+                  info.engineType = ctorName;
+                  info.engineName = propertyValue.name;
+                  info.engineUUID = propertyValue.uuid;
+                } else {
+                  info = this._buildObjectData({
+                    data: new ObjectData(),
+                    path: path,
+                    value: propertyValue,
+                    filterKey: filterKey,
+                  })
+                }
               }
             }
           }
-        }
-        break;
+          break;
+      }
     }
     if (info) {
       info.readonly = this._isReadonly(node, key)
@@ -389,7 +392,23 @@ class CCInspector {
   }
 
   _isInvalidValue(value: any) {
-    return value === null || value === Infinity || value === undefined;
+    // !!Infinity=true
+    if ((value && value !== Infinity) || value === 0 || value === false) {
+      return false;
+    }
+
+    if (value === null) {
+      return "null"
+    } else if (value === Infinity) {
+      return "Infinity"
+    } else if (value === undefined) {
+      return "undefined"
+    } else if (Number.isNaN(value)) {
+      return "NaN";
+    } else {
+      debugger
+      return false;
+    }
   }
 
   _buildObjectData({value, path, data, filterKey}: BuildObjectOptions) {

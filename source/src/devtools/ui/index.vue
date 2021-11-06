@@ -98,7 +98,7 @@ export default class Index extends Vue {
       this._expand(data.engineUUID);
     })
     Bus.$on(BusMsg.RequestObjectData, (data: ObjectData, cb: Function) => {
-      if (this.requestList.find(el => el.id === data.id)) {
+      if (!data.id || this.requestList.find(el => el.id === data.id)) {
         return
       }
       this.requestList.push({id: data.id, cb});

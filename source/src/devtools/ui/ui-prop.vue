@@ -20,7 +20,7 @@
       </div>
       <div class="value">
         <div v-if="isInvalid()" class="invalid">
-          {{ getInvalidDisplayText() }}
+          {{ value.data }}
         </div>
         <el-input v-if="isString()" v-model="value.data"
                   :disabled="value.readonly"
@@ -162,26 +162,6 @@ export default class UiProp extends Vue {
     return this.value && (this.value.type === DataType.Invalid);
   }
 
-  getInvalidDisplayText() {
-    if (this.isInvalid()) {
-      const data = this.value.data;
-      switch (data) {
-        case undefined: {
-          return "undefined"
-        }
-        case null: {
-          return "null"
-        }
-        case Infinity: {
-          return "Infinity"
-        }
-        default: {
-          return `未知的无效数据：${data}`
-        }
-      }
-    }
-  }
-
   isString() {
     return this.value && (this.value.type === DataType.String);
   }
@@ -244,10 +224,14 @@ export default class UiProp extends Vue {
 
   mounted() {
     this.watchValue();
+    if(this.isInvalid()){
+      this.value.data;
+      debugger
+    }
   }
 
   isShowTooltip() {
-    const el: HTMLDivElement = this.$refs.propText;
+    const el: HTMLDivElement = this.$refs.propText as HTMLDivElement;
     if (el) {
       if (el.scrollWidth > el.offsetWidth) {
         // 出现了省略号

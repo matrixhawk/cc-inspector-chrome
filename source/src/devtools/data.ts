@@ -79,7 +79,7 @@ export class ObjectData extends Info {
 }
 
 export class InvalidData extends Info {
-  data: any;
+  data: "undefined" | "null" | "Infinity" | "NaN"|string;
 
   constructor(data: any) {
     super();
