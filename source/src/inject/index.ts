@@ -225,10 +225,7 @@ class CCInspector {
     const keyVisible1 = Object.keys(node); // Object不走原型链
     let keyVisible2: string[] = [];
     for (let nodeKey in node) {// 走原型链
-      // 这里的判断暂时不能去掉，否则会检索不到很多数据
-      if (Object.hasOwnProperty.call(node, nodeKey) || true) {
-        keyVisible2.push(nodeKey)
-      }
+      keyVisible2.push(nodeKey)
     }
     let allKeys: string[] = uniq(keyHidden.concat(keyVisible1, keyVisible2)).sort();
     allKeys = allKeys.filter(key => {
