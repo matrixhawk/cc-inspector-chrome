@@ -173,7 +173,7 @@ class CCInspector {
       data.active = !!node.active;
     }
     this.inspectorGameMemoryStorage[node.uuid] = node;
-    let nodeChildren = node.getChildren();
+    let nodeChildren = node.children;
     for (let i = 0; i < nodeChildren.length; i++) {
       let childItem = nodeChildren[i];
       let treeData = new TreeData();
@@ -259,12 +259,14 @@ class CCInspector {
     const path: Array<string> = options.path;
     if (ctor && value instanceof ctor) {
       // 2.4.6 没有了这个属性
+      data.path = path;
       if (value.hasOwnProperty("_textureFilename")) {
-        data.path = path;
         //@ts-ignore
         data.data = `${window.location.origin}/${value._textureFilename}`;
-        return data;
+      } else {
+        data.data = null;
       }
+      return data;
     }
     return null;
   }
@@ -330,14 +332,18 @@ class CCInspector {
               if (typeof propertyValue === "object") {
                 let ctorName = propertyValue.constructor?.name;
                 if (ctorName) {
-                  if (ctorName.startsWith("cc_")) {
+                  if (ctorName.startsWith("cc_") ||
+                    // 2.4.0
+                    ctorName === "CCClass") {
                     info = new EngineData();
                     info.engineType = ctorName;
                     info.engineName = propertyValue.name;
                     info.engineUUID = propertyValue.uuid;
                   }
-                } else {
+                }
+                if (!info) {
                   // 空{}
+                  // MaterialVariant 2.4.0
                   info = this._buildObjectData({
                     data: new ObjectData(),
                     path: path,

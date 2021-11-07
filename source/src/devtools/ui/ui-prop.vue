@@ -210,6 +210,10 @@ export default class UiProp extends Vue {
     return this.value && (this.value.type === DataType.Image)
   }
 
+  isImageValid() {
+    return !!this.value.data;
+  }
+
   isEngine() {
     return this.value && (this.value.type === DataType.Engine)
   }

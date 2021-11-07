@@ -11,7 +11,8 @@
       </div>
       <div class="left">
         <div class="tool-btn">
-          <el-switch active-text="实时监控" v-model="watchEveryTime" @change="onChangeWatchState"></el-switch>
+          <el-switch v-if="false" active-text="实时监控" v-model="watchEveryTime" @change="onChangeWatchState"></el-switch>
+          <div style="padding-left: 15px;">节点树</div>
           <div class="flex1"></div>
           <el-button type="success" class="el-icon-refresh" @click="onBtnClickUpdateTree"></el-button>
         </div>
