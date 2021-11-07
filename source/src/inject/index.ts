@@ -258,6 +258,7 @@ class CCInspector {
     const data: ImageData = options.data;
     const path: Array<string> = options.path;
     if (ctor && value instanceof ctor) {
+      // 2.4.6 没有了这个属性
       if (value.hasOwnProperty("_textureFilename")) {
         data.path = path;
         //@ts-ignore
@@ -327,13 +328,16 @@ class CCInspector {
             }))
             if (!info) {
               if (typeof propertyValue === "object") {
-                let ctorName = propertyValue.constructor.name;
-                if (ctorName.startsWith("cc_")) {
-                  info = new EngineData();
-                  info.engineType = ctorName;
-                  info.engineName = propertyValue.name;
-                  info.engineUUID = propertyValue.uuid;
+                let ctorName = propertyValue.constructor?.name;
+                if (ctorName) {
+                  if (ctorName.startsWith("cc_")) {
+                    info = new EngineData();
+                    info.engineType = ctorName;
+                    info.engineName = propertyValue.name;
+                    info.engineUUID = propertyValue.uuid;
+                  }
                 } else {
+                  // 空{}
                   info = this._buildObjectData({
                     data: new ObjectData(),
                     path: path,
@@ -393,7 +397,7 @@ class CCInspector {
 
   _isInvalidValue(value: any) {
     // !!Infinity=true
-    if ((value && value !== Infinity) || value === 0 || value === false) {
+    if ((value && value !== Infinity) || value === 0 || value === false || value === "") {
       return false;
     }
 
@@ -577,7 +581,7 @@ class CCInspector {
     let target = this.inspectorGameMemoryStorage;
     for (let i = 0; i < path.length; i++) {
       let key = path[i];
-      if (target.hasOwnProperty(key)) {
+      if (target[key] !== undefined || target.hasOwnProperty(key)) {
         target = target[key]
       } else {
         return null;

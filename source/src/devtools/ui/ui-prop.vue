@@ -224,10 +224,6 @@ export default class UiProp extends Vue {
 
   mounted() {
     this.watchValue();
-    if(this.isInvalid()){
-      this.value.data;
-      debugger
-    }
   }
 
   isShowTooltip() {
