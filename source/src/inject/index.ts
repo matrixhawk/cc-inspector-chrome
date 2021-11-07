@@ -19,6 +19,8 @@ import {
 } from "@/devtools/data";
 import {Msg, Page, PluginEvent} from "@/core/types"
 import {BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOptions} from "@/inject/types";
+// @ts-ignore
+import {uniq} from "lodash"
 
 declare const cc: any;
 
@@ -187,22 +189,61 @@ class CCInspector {
     return typeof cc !== "undefined";
   }
 
+  getAllPropertyDescriptors(obj: Object): string[] {
+    let keys: string[] = [];
+
+    function circle(root: Object) {
+      const descriptors = Object.getOwnPropertyDescriptors(root);
+      for (let descriptorsKey in descriptors) {
+        if (Object.hasOwnProperty.call(descriptors, descriptorsKey)) {
+          const value = descriptors[descriptorsKey];
+          // 不可枚举的属性，并且允许修改get set的才有效
+          if (!value.enumerable && value.configurable) {
+            keys.push(descriptorsKey);
+          }
+        }
+      }
+      const proto = Object.getPrototypeOf(root);
+      if (proto) {
+        circle(proto)
+      }
+    }
+
+    circle(obj)
+    return keys;
+  }
+
   _getNodeKeys(node: any) {
-    let keys = [];
+    // 3.x变成了getter
     let excludeProperty = [
-      "children", "quat", "node",
+      "children", "quat", "node", "components", "parent",
       // 生命周期函数
       "onFocusInEditor", "onRestore", "start", "lateUpdate", "update", "resetInEditor", "onLostFocusInEditor",
       "onEnable", "onDisable", "onDestroy", "onLoad",
     ];
-    for (let key in node) {
-      if (!key.startsWith("_") &&
-        !excludeProperty.includes(key) &&
-        typeof node[key] !== "function") {
-        keys.push(key);
+    const keyHidden = this.getAllPropertyDescriptors(node);
+    const keyVisible1 = Object.keys(node); // Object不走原型链
+    let keyVisible2: string[] = [];
+    for (let nodeKey in node) {// 走原型链
+      // 这里的判断暂时不能去掉，否则会检索不到很多数据
+      if (Object.hasOwnProperty.call(node, nodeKey) || true) {
+        keyVisible2.push(nodeKey)
       }
     }
-    return keys;
+    let allKeys: string[] = uniq(keyHidden.concat(keyVisible1, keyVisible2)).sort();
+    allKeys = allKeys.filter(key => {
+      return !key.startsWith("_") && !excludeProperty.includes(key);
+    });
+
+    allKeys = allKeys.filter(key => {
+      try {
+        return typeof node[key] !== "function"
+      } catch (e) {
+        // console.warn(`属性${key}出现异常：\n`, e);
+        return false;
+      }
+    })
+    return allKeys;
   }
 
   _getPairProperty(key: string) {
