@@ -1,6 +1,6 @@
 {
   "name": "app",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -9,9 +9,6 @@
     "build-watch": "vue-cli-service build --watch"
   },
   "dependencies": {
-    "@types/kind-of": "^6.0.0",
-    "@types/lodash": "^4.14.176",
-    "babel-eslint": "^10.1.0",
     "core-js": "^3.6.5",
     "element-ui": "^2.15.1",
     "fs-extra": "^9.1.0",
@@ -24,6 +21,9 @@
     "vue-property-decorator": "^9.1.2"
   },
   "devDependencies": {
+    "@types/kind-of": "^6.0.0",
+    "@types/lodash": "^4.14.176",
+    "babel-eslint": "^10.1.0",
     "@types/fs-extra": "^9.0.9",
     "@types/node": "^14.14.37",
     "@types/uuid": "^8.3.1",
