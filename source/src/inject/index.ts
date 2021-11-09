@@ -21,6 +21,7 @@ import {Msg, Page, PluginEvent} from "@/core/types"
 import {BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOptions} from "@/inject/types";
 // @ts-ignore
 import {uniq} from "lodash"
+import {trySetValueWithConfig, getValue} from "@/inject/setValue";
 
 declare const cc: any;
 
@@ -72,13 +73,16 @@ class CCInspector {
               value = cc.color().fromHEX(value);
             }
 
-            this.setValue(data.path, value);
-            this.sendMsgToContent(Msg.UpdateProperty, data);
+            if (this.setValue(data.path, value)) {
+              this.sendMsgToContent(Msg.UpdateProperty, data);
+            } else {
+              console.warn(`设置失败：${data.path}`)
+            }
             break;
           }
           case Msg.GetObjectItemData: {
             const data: ObjectData = pluginEvent.data;
-            let val = this.getValue(data.path);
+            let val = getValue(this.inspectorGameMemoryStorage, data.path);
             if (val) {
               let itemData: Property[] = this._buildObjectItemData({
                 data: data,
@@ -296,8 +300,8 @@ class CCInspector {
     const data: ImageData = options.data;
     const path: Array<string> = options.path;
     if (ctor && value instanceof ctor) {
-      // 2.4.6 没有了这个属性
       data.path = path;
+      // 2.4.6 没有了这个属性
       if (value.hasOwnProperty("_textureFilename")) {
         //@ts-ignore
         data.data = `${window.location.origin}/${value._textureFilename}`;
@@ -309,7 +313,7 @@ class CCInspector {
     return null;
   }
 
-  _genInfoData(node: any, key: string | number, path: Array<string>, filterKey = true) {
+  _genInfoData(node: any, key: string | number, path: Array<string>, filterKey = true): Info | null {
     let propertyValue = node[key];
     let info = null;
     let invalidType = this._isInvalidValue(propertyValue);
@@ -597,13 +601,20 @@ class CCInspector {
       return !(ret.set || ret.writable);
     } else {
       let proto = Object.getPrototypeOf(base);
-      return this._isReadonly(proto, key)
+      if (proto) {
+        return this._isReadonly(proto, key)
+      } else {
+        return false;
+      }
     }
   }
 
-  setValue(pathArray: Array<string>, value: string) {
+  setValue(pathArray: Array<string>, value: string): boolean {
     let target = this.inspectorGameMemoryStorage;
-
+    // 尝试设置creator3.x的数据
+    if (trySetValueWithConfig(pathArray, target, value)) {
+      return true;
+    }
     for (let i = 0; i < pathArray.length; i++) {
       let path = pathArray[i];
       if (i === pathArray.length - 1) {
@@ -612,26 +623,18 @@ class CCInspector {
           console.warn(`值不允许修改`);
         } else {
           target[path] = value;
+          return true;
         }
       } else {
-        if (target.hasOwnProperty(path)) {
+        // creator3.x的enumerable导致无法判断
+        if (target.hasOwnProperty(path) || target[path]) {
           target = target[path];
+        } else {
+          return false;
         }
       }
     }
-  }
-
-  getValue(path: string[]) {
-    let target = this.inspectorGameMemoryStorage;
-    for (let i = 0; i < path.length; i++) {
-      let key = path[i];
-      if (target[key] !== undefined || target.hasOwnProperty(key)) {
-        target = target[key]
-      } else {
-        return null;
-      }
-    }
-    return target;
+    return false;
   }
 
 
