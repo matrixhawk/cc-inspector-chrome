@@ -1,5 +1,35 @@
 const Copy = require("./plugins/copy");
 const Path = require("path");
+const TerserPlugin = require("terser-webpack-plugin");
+console.log("***env: ", process.env.NODE_ENV);
+let configureWebpack = {};
+switch (process.env.NODE_ENV) {
+  case "development": {
+    configureWebpack = {
+      mode: "development",
+      devtool: "#source-map",
+    };
+    break;
+  }
+  case "production": {
+    configureWebpack = {
+      mode: "production",
+      optimization: {
+        minimizer: [
+          new TerserPlugin({
+            terserOptions: {
+              compress: {
+                drop_console: true, // 移除console
+              }
+            }
+          })
+        ]
+      }
+    };
+    break;
+  }
+}
+
 module.exports = {
   publicPath: "/",
   outputDir: "dist",
@@ -27,8 +57,5 @@ module.exports = {
       }
     }
   },
-  configureWebpack: {
-    mode: "development",// production
-    devtool: "#source-map",
-  }
+  configureWebpack,
 };
