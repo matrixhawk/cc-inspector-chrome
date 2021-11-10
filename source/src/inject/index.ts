@@ -247,21 +247,21 @@ class CCInspector {
     return allKeys;
   }
 
-  _getPairProperty(key: string) {
+  _getPairProperty(key: string): null | { key: string, values: string[] } {
     let pairProperty: Record<string, any> = {
       rotation: ["rotationX", "rotationY"],
       anchor: ["anchorX", "anchorY"],
       size: ["width", "height"],
       skew: ["skewX", "skewY"],
-      position: ["x", "y", "z"],
+      position: ["x", "y", "z"], // position比较特殊，过来的key就是position也需要能处理
       scale: ["scaleX", "scaleY", "scaleZ"],
       designResolution: ["width", "height"], // 这个比较特殊，在key下边，其他的都不是在key下
     };
-    for (let value in pairProperty) {
-      if (pairProperty.hasOwnProperty(value)) {
-        let pair = pairProperty[value];
-        if (pair.includes(key)) {
-          return {key: value, values: pair};
+    for (let pairPropertyKey in pairProperty) {
+      if (pairProperty.hasOwnProperty(pairPropertyKey)) {
+        let pair = pairProperty[pairPropertyKey];
+        if (pair.includes(key) || key === pairPropertyKey) {
+          return {key: pairPropertyKey, values: pair};
         }
       }
     }
@@ -523,7 +523,10 @@ class CCInspector {
           let index = keys.findIndex(el => el === item);
           if (index !== -1) {
             keys.splice(index, 1);
-            bSplice = true;
+            if (pair && item === pair.key) {
+              // 切掉了自己，才能步进+1
+              bSplice = true;
+            }
           }
         });
         // 序列化成对的属性
