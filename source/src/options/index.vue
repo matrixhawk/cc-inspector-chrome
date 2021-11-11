@@ -11,8 +11,6 @@
 
 <script lang="ts">
 import {Component, Vue} from "vue-property-decorator";
-// @ts-ignore
-import PuzzleBoard from 'vue-8-puzzle';
 @Component({
   components: {PuzzleBoard},
 })
