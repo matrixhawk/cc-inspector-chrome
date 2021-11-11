@@ -128,12 +128,13 @@
 
 import Vue from "vue"
 import {Component, Prop, Watch} from "vue-property-decorator"
-import {DataType, Info, EngineData, Property} from "../data"
+import {DataType, EngineData, Info, Property} from "../data"
 import {connectBackground} from "@/devtools/connectBackground";
 import {Msg} from "@/core/types";
 import Bus, {BusMsg} from "../bus"
 
 @Component({
+  name:'UiProp',
   components: {}
 })
 export default class UiProp extends Vue {
