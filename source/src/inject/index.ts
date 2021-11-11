@@ -255,7 +255,6 @@ class CCInspector {
       skew: ["skewX", "skewY"],
       position: ["x", "y", "z"], // position比较特殊，过来的key就是position也需要能处理
       scale: ["scaleX", "scaleY", "scaleZ"],
-      designResolution: ["width", "height"], // 这个比较特殊，在key下边，其他的都不是在key下
     };
     for (let pairPropertyKey in pairProperty) {
       if (pairProperty.hasOwnProperty(pairPropertyKey)) {
@@ -537,6 +536,7 @@ class CCInspector {
         } else if (pairValues.length === 3) {
           info = new Vec3Data();
         }
+        // todo path
         pairValues.forEach((el: string) => {
           if (el in node) {
             let propertyPath = [node.uuid, el];
