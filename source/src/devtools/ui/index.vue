@@ -407,8 +407,7 @@ export default class Index extends Vue {
     display: flex;
     flex: 1;
     flex-direction: row;
-    overflow-x: hidden;
-    overflow-y: auto;
+    overflow: auto;
 
     .left {
       display: flex;
@@ -429,6 +428,7 @@ export default class Index extends Vue {
         align-items: center;
         justify-content: center;
       }
+
       .treeList {
         margin-top: 3px;
         height: 100%;
@@ -468,10 +468,10 @@ export default class Index extends Vue {
       flex: 1;
       background: #e5e9f2;
       overflow-x: hidden;
-      overflow-y: auto;
+      overflow-y: overlay;
 
       &::-webkit-scrollbar {
-        width: 0;
+        width: 6px;
         background: #999;
         border-radius: 2px;
         height: 6px;
