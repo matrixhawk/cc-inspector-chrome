@@ -16,17 +16,17 @@
           <div class="flex1"></div>
           <el-button type="success" class="el-icon-refresh" @click="onBtnClickUpdateTree"></el-button>
         </div>
-        <div class="treeList">
-          <el-input placeholder="输入关键字进行过滤" v-model="filterText">
-            <template slot="append">
-              <div class="matchCase ">
-                <div class="iconfont el-icon-third-font-size" @click.stop="onChangeCase"
-                     title="匹配大小写"
-                     :style="{'color':matchCase?'red':''}">
-                </div>
+        <el-input placeholder="输入关键字进行过滤" v-model="filterText">
+          <template slot="append">
+            <div class="matchCase ">
+              <div class="iconfont el-icon-third-font-size" @click.stop="onChangeCase"
+                   title="匹配大小写"
+                   :style="{'color':matchCase?'red':''}">
               </div>
-            </template>
-          </el-input>
+            </div>
+          </template>
+        </el-input>
+        <div class="treeList">
           <el-tree :data="treeData"
                    ref="tree"
                    style="display: inline-block;"
@@ -407,7 +407,8 @@ export default class Index extends Vue {
     display: flex;
     flex: 1;
     flex-direction: row;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 
     .left {
       display: flex;
@@ -420,6 +421,14 @@ export default class Index extends Vue {
         justify-content: center;
       }
 
+      .matchCase {
+        width: 30px;
+        height: 26px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+      }
       .treeList {
         margin-top: 3px;
         height: 100%;
@@ -439,16 +448,6 @@ export default class Index extends Vue {
         .leaf-hide {
           color: #c7bbbb;
           text-decoration: line-through;
-        }
-
-
-        .matchCase {
-          width: 30px;
-          height: 26px;
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          justify-content: center;
         }
 
         &::-webkit-scrollbar {
