@@ -17,6 +17,16 @@
           <el-button type="success" class="el-icon-refresh" @click="onBtnClickUpdateTree"></el-button>
         </div>
         <div class="treeList">
+          <el-input placeholder="输入关键字进行过滤" v-model="filterText">
+            <template slot="append">
+              <div class="matchCase ">
+                <div class="iconfont el-icon-third-font-size" @click.stop="onChangeCase"
+                     title="匹配大小写"
+                     :style="{'color':matchCase?'red':''}">
+                </div>
+              </div>
+            </template>
+          </el-input>
           <el-tree :data="treeData"
                    ref="tree"
                    style="display: inline-block;"
@@ -24,6 +34,7 @@
                    :highlight-current="true"
                    :default-expand-all="false"
                    :default-expanded-keys="expandedKeys"
+                   :filter-node-method="filterNode"
                    :expand-on-click-node="false"
                    node-key="uuid"
                    @node-expand="onNodeExpand"
@@ -51,7 +62,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import {Component} from "vue-property-decorator";
+import {Component, Watch} from "vue-property-decorator";
 import properties from "./propertys.vue";
 import {Msg, Page, PluginEvent} from "@/core/types"
 import {connectBackground} from "@/devtools/connectBackground";
@@ -69,6 +80,20 @@ export default class Index extends Vue {
   treeData: Array<TreeData> = []
   expandedKeys: Array<string> = [];
   selectedUUID: string | null = null;
+
+  filterText: string | null = null;
+
+  @Watch("filterText")
+  updateFilterText(val: any) {
+    (this.$refs?.tree as any)?.filter(val);
+  }
+
+  private matchCase = false;
+
+  onChangeCase() {
+    this.matchCase = !this.matchCase;
+    this.updateFilterText(this.filterText);
+  }
 
   // el-tree的渲染key
   defaultProps = {
@@ -105,6 +130,19 @@ export default class Index extends Vue {
       this.requestList.push({id: data.id, cb});
       this.sendMsgToContentScript(Msg.GetObjectItemData, data)
     });
+  }
+
+  filterNode(value: any, data: any) {
+    if (!value) {
+      return true;
+    } else {
+      if (this.matchCase) {
+        // 严格匹配大写
+        return data?.name?.indexOf(value) !== -1;
+      } else {
+        return data?.name?.toLowerCase().indexOf(value.toLowerCase()) !== -1;
+      }
+    }
   }
 
   _expand(uuid: string) {
@@ -401,6 +439,16 @@ export default class Index extends Vue {
         .leaf-hide {
           color: #c7bbbb;
           text-decoration: line-through;
+        }
+
+
+        .matchCase {
+          width: 30px;
+          height: 26px;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
         }
 
         &::-webkit-scrollbar {

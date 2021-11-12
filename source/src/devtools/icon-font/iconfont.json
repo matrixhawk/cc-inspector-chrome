@@ -6,6 +6,13 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "8794801",
+      "name": "font-size",
+      "font_class": "font-size",
+      "unicode": "e7b9",
+      "unicode_decimal": 59321
+    },
+    {
       "icon_id": "1156016",
       "name": "车巴巴-未知项",
       "font_class": "unknown",
