@@ -22,6 +22,7 @@ import {BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOption
 // @ts-ignore
 import {uniq} from "lodash"
 import {trySetValueWithConfig, getValue} from "@/inject/setValue";
+import {isHasProperty} from "@/inject/util";
 
 declare const cc: any;
 
@@ -507,15 +508,25 @@ class CCInspector {
     return comp.constructor.name;
   }
 
+  // 校验keys的有效性，3.x有position，没有x,y,z
+  _checkKeysValid(obj: any, keys: string[]) {
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      if (!isHasProperty(obj, key)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   _getGroupData(node: any) {
     const name = this.getCompName(node);
     let nodeGroup = new Group(name);
     let keys = this._getNodeKeys(node);
     for (let i = 0; i < keys.length;) {
       let key = keys[i];
-      let propertyValue = node[key];
       let pair = this._getPairProperty(key);
-      if (pair) {
+      if (pair && this._checkKeysValid(node, pair.values)) {
         let bSplice = false;
         // 把这个成对的属性剔除掉
         pair.values.forEach((item: string) => {
@@ -538,14 +549,10 @@ class CCInspector {
         }
         // todo path
         pairValues.forEach((el: string) => {
-          if (el in node) {
-            let propertyPath = [node.uuid, el];
-            let vecData = this._genInfoData(node, el, propertyPath);
-            if (vecData) {
-              info && info.add(new Property(el, vecData));
-            }
-          } else {
-            console.warn(`属性异常，节点丢失属性: ${el}，请检查 pairProperty的设置`);
+          let propertyPath = [node.uuid, el];
+          let vecData = this._genInfoData(node, el, propertyPath);
+          if (vecData) {
+            info && info.add(new Property(el, vecData));
           }
         });
         if (info) {

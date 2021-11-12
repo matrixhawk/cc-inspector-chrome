@@ -20,7 +20,6 @@
 
 
     <div class="foot">
-      <div class="space"></div>
       <a href="https://tidys.gitee.io/doc/#" target="_blank">
         <img class="icon" src="./res/tiezi.png" alt="">
       </a>
@@ -30,6 +29,8 @@
       <a href="https://jq.qq.com/?_wv=1027&k=5SdPdy2" target="_blank">
         <img class="icon" src="./res/qq.png" alt="">
       </a>
+      <div class="space"></div>
+      <div v-if="version">ver:{{ version }}</div>
     </div>
   </div>
 
@@ -38,6 +39,7 @@
 <script lang="ts">
 import {Component, Vue} from "vue-property-decorator";
 import Manifest from "../manifest.json"
+import {version} from "../../package.json"
 
 @Component({
   components: {},
@@ -48,7 +50,7 @@ export default class App extends Vue {
   data() {
     return {
       title: "cc-inspector",
-      isShowMoneyPng: true,
+      version: version,
     }
   }
 
