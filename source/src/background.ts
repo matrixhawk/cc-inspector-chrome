@@ -108,13 +108,8 @@ class PortManagement {
         if (id && id > -1) {
           let portMan = this.find(id);
           if (portMan) {
-            // let data = new PluginEvent(
-            //   Page.Background,
-            //   Page.Content,
-            //   Msg.Test,
-            //   {url: tab.url}
-            // );
-            // portMan.sendContentMsg(data);
+            let data = new PluginEvent(Page.Background, Page.Content, Msg.Support);
+            portMan.sendContentMsg(data);
           }
         }
       }
