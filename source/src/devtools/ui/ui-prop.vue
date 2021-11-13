@@ -134,7 +134,7 @@ import {Msg} from "@/core/types";
 import Bus, {BusMsg} from "../bus"
 
 @Component({
-  name:'UiProp',
+  name: "UiProp",
   components: {}
 })
 export default class UiProp extends Vue {
@@ -152,6 +152,7 @@ export default class UiProp extends Vue {
 
   @Watch("value")
   watchValue() {
+    this.fold = true;
     if (this.isArray()) {
       this.subData = this.value.data;
     } else {
