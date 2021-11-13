@@ -18,8 +18,9 @@ class PortMan {
   }
 
   private onPortConnect(port: chrome.runtime.Port, onMsg: Function, onDisconnect: Function) {
+    console.log(`%c[Connect] ${port.name}`, "color:green");
     port.onMessage.addListener((data: any, sender: any) => {
-      console.log(`%c[Connect-Message] ${sender.name}\n${JSON.stringify(data)}`, "color:green;")
+      console.log(`%c[Connect-Message] ${sender.name}\n${JSON.stringify(data)}`, "color:blue;")
       // 如果多个页面都监听 onMessage 事件，对于某一次事件只有第一次调用 sendResponse() 能成功发出回应，所有其他回应将被忽略。
       // sender.postMessage(data);
       onMsg && onMsg(data);
