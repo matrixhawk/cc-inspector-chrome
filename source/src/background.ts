@@ -1,5 +1,13 @@
 import {Msg, Page, PluginEvent} from "@/core/types";
 
+// @ts-ignore
+import * as  UA from "universal-analytics"
+import {v4} from "uuid"
+
+// 统计服务
+const userID = localStorage.getItem("userID") || v4()
+UA("UA-134924925-3", userID);
+
 console.log("on background")
 
 class PortMan {
