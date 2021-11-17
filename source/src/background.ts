@@ -3,6 +3,7 @@ import {Msg, Page, PluginEvent} from "@/core/types";
 // @ts-ignore
 import * as  UA from "universal-analytics"
 import {v4} from "uuid"
+import {devtools_page} from "./manifest.json"
 
 // 统计服务
 const userID = localStorage.getItem("userID") || v4()
@@ -11,8 +12,9 @@ UA("UA-134924925-3", userID);
 console.log("on background")
 
 class PortMan {
-  content: chrome.runtime.Port | null = null;
-  devtools: chrome.runtime.Port | null = null;
+  public currentUseContentFrameID = 0;
+  public content: Array<chrome.runtime.Port> = []; // 因为iframe的原因，可能对应多个，主iframe的id===0
+  public devtools: chrome.runtime.Port | null = null;
   public id: number | null = null;// tab.id作为唯一标识
   public title: string = "";
   public url: string = "";
@@ -35,22 +37,31 @@ class PortMan {
     });
     port.onDisconnect.addListener((port: chrome.runtime.Port) => {
       console.log(`%c[Connect-Dis] ${port.name}`, "color:red");
-      onDisconnect && onDisconnect()
+      onDisconnect && onDisconnect(port)
     });
+  }
+
+  getCurrentUseContent(): chrome.runtime.Port | null {
+    return this.content.find(el => el.sender?.frameId !== undefined && el.sender.frameId === this.currentUseContentFrameID) || null;
   }
 
   dealConnect(port: chrome.runtime.Port) {
     switch (port.name) {
       case Page.Content: {
-        this.content = port;
+        this.content.push(port);
         this.onPortConnect(port,
           (data: PluginEvent) => {
             if (data.target === Page.Devtools) {
               this.sendDevtoolMsg(data);
             }
           },
-          () => {
-            this.content = null;
+          (disPort: chrome.runtime.Port) => {
+            const index = this.content.findIndex(el =>
+              disPort.sender?.frameId !== undefined
+              && el.sender?.frameId !== undefined
+              && el.sender?.frameId === disPort.sender?.frameId
+            );
+            this.content.splice(index, 1);
             this.checkValid();
           })
         break;
@@ -62,7 +73,7 @@ class PortMan {
             // 从devtools过来的消息统一派发到Content中
             if (PluginEvent.check(data, Page.Devtools, Page.Background)) {
               PluginEvent.reset(data, Page.Background, Page.Content);
-              this.content?.postMessage(data)
+              this.getCurrentUseContent()?.postMessage(data)
             }
           },
           () => {
@@ -75,13 +86,13 @@ class PortMan {
   }
 
   checkValid() {
-    if (!this.devtools && !this.content) {
+    if (!this.devtools && !this.content.length) {
       this.mgr?.remove(this);
     }
   }
 
   sendContentMsg(data: PluginEvent) {
-    this.content?.postMessage(data);
+    this.getCurrentUseContent()?.postMessage(data);
   }
 
   sendDevtoolMsg(data: PluginEvent) {
@@ -122,6 +133,13 @@ class PortManagement {
         }
       }
     })
+  }
+
+  isDevtools(port: chrome.runtime.Port) {
+    const devtoolsUrl = `chrome-extension://${port.sender?.id}/${devtools_page}`
+    if (port.sender?.url === devtoolsUrl) {
+
+    }
   }
 
   initConnect() {
