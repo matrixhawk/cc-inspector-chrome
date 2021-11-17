@@ -1,5 +1,12 @@
 <template>
   <div id="devtools">
+    <div class="head">
+      <div class="label">inspect target:</div>
+      <el-select v-model="frameID" placeholder="请选择" @change="onChangeFrame" style="flex:1;">
+        <el-option v-for="item in iframes" :key="item.value" :label="item.label" :value="item.value">
+        </el-option>
+      </el-select>
+    </div>
     <div v-show="isShowDebug" class="find">
       <div v-if="false">
         <el-button type="success" @click="onMemoryTest">内存测试</el-button>
@@ -66,7 +73,7 @@ import {Component, Watch} from "vue-property-decorator";
 import properties from "./propertys.vue";
 import {Msg, Page, PluginEvent} from "@/core/types"
 import {connectBackground} from "@/devtools/connectBackground";
-import {EngineData, Info, TreeData, ObjectData, ObjectItemRequestData} from "@/devtools/data";
+import {EngineData, FrameDetails, Info, ObjectData, ObjectItemRequestData, TreeData} from "@/devtools/data";
 import Bus, {BusMsg} from "@/devtools/bus";
 
 @Component({
@@ -82,6 +89,9 @@ export default class Index extends Vue {
   selectedUUID: string | null = null;
 
   filterText: string | null = null;
+
+  iframes: Array<{ label: string, value: number | string }> = []
+  frameID = 0;
 
   @Watch("filterText")
   updateFilterText(val: any) {
@@ -143,6 +153,10 @@ export default class Index extends Vue {
         return data?.name?.toLowerCase().indexOf(value.toLowerCase()) !== -1;
       }
     }
+  }
+
+  onChangeFrame() {
+
   }
 
   _expand(uuid: string) {
@@ -273,6 +287,27 @@ export default class Index extends Vue {
             }
             break
           }
+          case Msg.UpdateFrames: {
+            const details: FrameDetails[] = data.data as FrameDetails[];
+            // 先把iframes里面无效的清空了
+            this.iframes = this.iframes.filter(item => {
+              details.find(el => el.frameID === item.value)
+            })
+
+            // 同步配置
+            details.forEach(item => {
+              let findItem = this.iframes.find(el => el.value === item.frameID);
+              if (findItem) {
+                findItem.label = item.url;
+              } else {
+                this.iframes.push({
+                  label: item.url,
+                  value: item.frameID,
+                })
+              }
+            })
+            break;
+          }
         }
       }
     });
@@ -388,8 +423,22 @@ export default class Index extends Vue {
 
 #devtools {
   display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
+  overflow: hidden;
+
+  .head {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 1px 0;
+    border-bottom: solid 1px grey;
+
+    .label {
+      margin: 0 3px;
+    }
+  }
 
   .no-find {
     display: flex;

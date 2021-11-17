@@ -41,6 +41,11 @@ export interface ObjectItemRequestData {
   data: Property[];
 }
 
+export interface FrameDetails {
+  frameID: number;
+  url: string;
+}
+
 export class EngineData extends Info {
   public engineType: string = "";
   public engineUUID: string = "";

@@ -4,6 +4,7 @@ import {Msg, Page, PluginEvent} from "@/core/types";
 import * as  UA from "universal-analytics"
 import {v4} from "uuid"
 import {devtools_page} from "./manifest.json"
+import {FrameDetails} from "@/devtools/data";
 
 // 统计服务
 const userID = localStorage.getItem("userID") || v4()
@@ -45,10 +46,22 @@ class PortMan {
     return this.content.find(el => el.sender?.frameId !== undefined && el.sender.frameId === this.currentUseContentFrameID) || null;
   }
 
+  _updateFrames() {
+    let data: FrameDetails[] = this.content.map(item => {
+      return {
+        url: item.sender?.url || "",
+        frameID: item.sender?.frameId || 0,
+      }
+    })
+    let event = new PluginEvent(Page.Background, Page.Devtools, Msg.UpdateFrames, data)
+    this.sendDevtoolMsg(event)
+  }
+
   dealConnect(port: chrome.runtime.Port) {
     switch (port.name) {
       case Page.Content: {
         this.content.push(port);
+        this._updateFrames();
         this.onPortConnect(port,
           (data: PluginEvent) => {
             if (data.target === Page.Devtools) {
@@ -62,12 +75,14 @@ class PortMan {
               && el.sender?.frameId === disPort.sender?.frameId
             );
             this.content.splice(index, 1);
+            this._updateFrames();
             this.checkValid();
           })
         break;
       }
       case Page.Devtools: {
         this.devtools = port;
+        this._updateFrames(); // 当devtools链接后，主动派发frames数据
         this.onPortConnect(port,
           (data: PluginEvent) => {
             // 从devtools过来的消息统一派发到Content中
