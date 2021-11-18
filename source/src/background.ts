@@ -85,10 +85,21 @@ class PortMan {
         this._updateFrames(); // 当devtools链接后，主动派发frames数据
         this.onPortConnect(port,
           (data: PluginEvent) => {
-            // 从devtools过来的消息统一派发到Content中
-            if (PluginEvent.check(data, Page.Devtools, Page.Background)) {
-              PluginEvent.reset(data, Page.Background, Page.Content);
-              this.getCurrentUseContent()?.postMessage(data)
+            if (data.msg === Msg.UseFrame) {
+              this.currentUseContentFrameID = data.data;
+              // 更新这个frame的tree
+              this.updateCurrentFrameTree();
+            } else {
+              // 从devtools过来的消息统一派发到Content中
+              if (PluginEvent.check(data, Page.Devtools, Page.Background)) {
+                if (data.msg === Msg.TreeInfo) {
+                  if (this.currentUseContentFrameID !== data.data) {
+                    console.log(`frameID[${data.data}]不一致`);
+                  }
+                }
+                PluginEvent.reset(data, Page.Background, Page.Content);
+                this.getCurrentUseContent()?.postMessage(data)
+              }
             }
           },
           () => {
@@ -98,6 +109,11 @@ class PortMan {
         break
       }
     }
+  }
+
+  private updateCurrentFrameTree() {
+    const sendData = new PluginEvent(Page.Background, Page.Content, Msg.TreeInfo);
+    this.getCurrentUseContent()?.postMessage(sendData);
   }
 
   checkValid() {

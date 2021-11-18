@@ -15,6 +15,7 @@ export enum Msg {
   TabsInfo = "tabs_info", // 当前页面信息
   GetTabID = "GetTabID", // 获取页面ID
   UpdateFrames = "UpdateFrames", // 更新页面的frame
+  UseFrame = "UseFrame",
   GetObjectItemData = "GetObjectItemData",
   SetProperty = "set-property", // 设置node属性
   UpdateProperty = "update-property", // 更新属性

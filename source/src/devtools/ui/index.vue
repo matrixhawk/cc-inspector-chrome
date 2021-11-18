@@ -1,6 +1,6 @@
 <template>
   <div id="devtools">
-    <div class="head">
+    <div class="head" v-show="iframes.length>1">
       <div class="label">inspect target:</div>
       <el-select v-model="frameID" placeholder="请选择" @change="onChangeFrame" style="flex:1;">
         <el-option v-for="item in iframes" :key="item.value" :label="item.label" :value="item.value">
@@ -90,8 +90,8 @@ export default class Index extends Vue {
 
   filterText: string | null = null;
 
-  iframes: Array<{ label: string, value: number | string }> = []
-  frameID = 0;
+  iframes: Array<{ label: string, value: number }> = []
+  frameID: number | null = null;
 
   @Watch("filterText")
   updateFilterText(val: any) {
@@ -156,7 +156,7 @@ export default class Index extends Vue {
   }
 
   onChangeFrame() {
-
+    this.sendMsgToContentScript(Msg.UseFrame, this.frameID)
   }
 
   _expand(uuid: string) {
@@ -197,12 +197,12 @@ export default class Index extends Vue {
     // return(<span>1111</span>)
   }
 
-  _onMsgListInfo(eventData: Array<TreeData>) {
+  _onMsgTreeInfo(treeData: Array<TreeData>) {
     this.isShowDebug = true;
-    if (!Array.isArray(eventData)) {
-      eventData = [eventData]
+    if (!Array.isArray(treeData)) {
+      treeData = [treeData]
     }
-    this.treeData = eventData;
+    this.treeData = treeData;
     if (this.selectedUUID) {
       this.$nextTick(() => {
         //@ts-ignore
@@ -220,7 +220,7 @@ export default class Index extends Vue {
     this.treeItemData = eventData;
   }
 
-  _onMsgMemory(eventData: any) {
+  _onMsgMemoryInfo(eventData: any) {
     this.memory = eventData;
   }
 
@@ -242,6 +242,14 @@ export default class Index extends Vue {
   }
 
   _initChromeRuntimeConnect() {
+    const msgFunctionMap: Record<string, Function> = {};
+    msgFunctionMap[Msg.TreeInfo] = this._onMsgTreeInfo;
+    msgFunctionMap[Msg.Support] = this._onMsgSupport;
+    msgFunctionMap[Msg.NodeInfo] = this._onMsgNodeInfo;
+    msgFunctionMap[Msg.MemoryInfo] = this._onMsgMemoryInfo;
+    msgFunctionMap[Msg.UpdateProperty] = this._onMsgUpdateProperty;
+    msgFunctionMap[Msg.UpdateFrames] = this._onMsgUpdateFrames;
+    msgFunctionMap[Msg.GetObjectItemData] = this._onMsgGetObjectItemData;
     // 接收来自background.js的消息数据
     connectBackground.onBackgroundMessage((data: PluginEvent, sender: any) => {
       if (!data) {
@@ -250,70 +258,55 @@ export default class Index extends Vue {
       if (data.target === Page.Devtools) {
         console.log("[Devtools]", data);
         PluginEvent.finish(data);
-        let eventData: any = data.data;
-        switch (data.msg) {
-          case Msg.TreeInfo: {
-            this._onMsgListInfo(eventData as Array<TreeData>);
-            break;
-          }
-          case Msg.Support: {
-            this._onMsgSupport(!!eventData)
-            break;
-          }
-          case Msg.NodeInfo: {
-            this._onMsgNodeInfo(eventData);
-            break;
-          }
-          case  Msg.MemoryInfo: {
-            this._onMsgMemory(eventData)
-            break;
-          }
-          case Msg.UpdateProperty: {
-            this._updateProperty(eventData)
-            break;
-          }
-          case Msg.TabsInfo: {
-            debugger
-            break
-          }
-          case Msg.GetObjectItemData: {
-            let eventData: ObjectItemRequestData = data.data as ObjectItemRequestData;
-            if (eventData.id !== null) {
-              let findIndex = this.requestList.findIndex(el => el.id === eventData.id)
-              if (findIndex > -1) {
-                let del = this.requestList.splice(findIndex, 1)[0];
-                del.cb(eventData.data);
-              }
-            }
-            break
-          }
-          case Msg.UpdateFrames: {
-            const details: FrameDetails[] = data.data as FrameDetails[];
-            // 先把iframes里面无效的清空了
-            this.iframes = this.iframes.filter(item => {
-              details.find(el => el.frameID === item.value)
-            })
-
-            // 同步配置
-            details.forEach(item => {
-              let findItem = this.iframes.find(el => el.value === item.frameID);
-              if (findItem) {
-                findItem.label = item.url;
-              } else {
-                this.iframes.push({
-                  label: item.url,
-                  value: item.frameID,
-                })
-              }
-            })
-            break;
+        const {msg} = data;
+        if (msg) {
+          const func = msgFunctionMap[msg];
+          if (func) {
+            func(data.data)
+          } else {
+            console.warn(`没有${msg}消息的函数`)
           }
         }
       }
     });
   }
 
-  _updateProperty(data: Info) {
+  _onMsgGetObjectItemData(requestData: ObjectItemRequestData) {
+    if (requestData.id !== null) {
+      let findIndex = this.requestList.findIndex(el => el.id === requestData.id)
+      if (findIndex > -1) {
+        let del = this.requestList.splice(findIndex, 1)[0];
+        del.cb(requestData.data);
+      }
+    }
+  }
+
+  _onMsgUpdateFrames(details: FrameDetails[]) {
+    // 先把iframes里面无效的清空了
+    this.iframes = this.iframes.filter(item => {
+      details.find(el => el.frameID === item.value)
+    })
+
+    // 同步配置
+    details.forEach(item => {
+      let findItem = this.iframes.find(el => el.value === item.frameID);
+      if (findItem) {
+        findItem.label = item.url;
+      } else {
+        this.iframes.push({
+          label: item.url,
+          value: item.frameID,
+        })
+      }
+    })
+    // 第一次获取到frame配置后，自动获取frame数据
+    if (this.frameID === null && this.iframes.length > 0 && !this.iframes.find(el => el.value === this.frameID)) {
+      this.frameID = this.iframes[0].value;
+      this.onChangeFrame();
+    }
+  }
+
+  _onMsgUpdateProperty(data: Info) {
     const uuid = data.path[0];
     const key = data.path[1];
     const value = data.data;
@@ -390,7 +383,7 @@ export default class Index extends Vue {
   }
 
   onBtnClickUpdateTree() {
-    this.sendMsgToContentScript(Msg.TreeInfo);
+    this.sendMsgToContentScript(Msg.TreeInfo, this.frameID);
   }
 
   onBtnClickUpdatePage() {
