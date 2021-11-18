@@ -30,9 +30,8 @@ declare const cc: any;
 class CCInspector {
   inspectorGameMemoryStorage: Record<string, any> = {}
 
-  init() {
-    console.log("cc-inspector init ~~~");
-    let timer = setInterval(() => {
+  private watchIsCocosGame() {
+    const timer = setInterval(() => {
       if (this._isCocosGame()) {
         clearInterval(timer)
         // @ts-ignore
@@ -42,6 +41,11 @@ class CCInspector {
         })
       }
     }, 300)
+  }
+
+  init() {
+    console.log("cc-inspector init ~~~");
+    this.watchIsCocosGame();
     window.addEventListener("message", (event) => {
       // 接受来自content的事件，有可能也会受到其他插件的
       if (!event || !event.data) {
