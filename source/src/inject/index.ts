@@ -8,7 +8,7 @@ import {
   Group,
   ImageData,
   Info,
-  InvalidData,
+  InvalidData, NodeInfoData,
   NumberData,
   ObjectData, ObjectItemRequestData,
   Property,
@@ -588,14 +588,18 @@ class CCInspector {
       let nodeGroup = this._getGroupData(node);
       groupData.push(nodeGroup);
       // 收集组件信息
-      let nodeComp = node._components;
+      const nodeComp = node._components;
       for (let i = 0; i < nodeComp.length; i++) {
         let itemComp = nodeComp[i];
         this.inspectorGameMemoryStorage[itemComp.uuid] = itemComp;
         let compGroup = this._getGroupData(itemComp);
         groupData.push(compGroup);
       }
-      this.sendMsgToContent(Msg.NodeInfo, groupData);
+      const data: NodeInfoData = {
+        uuid: uuid,
+        group: groupData,
+      }
+      this.sendMsgToContent(Msg.NodeInfo, data);
     } else {
       // 未获取到节点数据
       console.log("未获取到节点数据");

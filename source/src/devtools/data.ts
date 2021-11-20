@@ -222,3 +222,8 @@ export class Group {
     this.data = orderKeys.concat(otherKeys);
   }
 }
+
+export interface NodeInfoData {
+  uuid: string;// 节点的uuid
+  group: Group[];
+}

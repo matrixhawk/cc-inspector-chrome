@@ -11,7 +11,7 @@
     </el-drawer>
     <div class="head" v-show="iframes.length>1">
       <div class="label">inspect target:</div>
-      <el-select v-model="frameID" placeholder="请选择" @change="onChangeFrame" style="flex:1;">
+      <el-select v-model="frameID" placeholder="please select ..." @change="onChangeFrame" style="flex:1;">
         <el-option v-for="item in iframes" :key="item.value" :label="item.label" :value="item.value">
         </el-option>
       </el-select>
@@ -31,13 +31,13 @@
           <el-button v-show="isShowRefreshBtn" type="success" class="el-icon-refresh"
                      size="mini"
                      @click="onBtnClickUpdateTree"></el-button>
-          <el-button @click="onClickSettings">set</el-button>
+          <el-button @click="onClickSettings" class="el-icon-s-tools"></el-button>
         </div>
-        <el-input placeholder="输入关键字进行过滤" v-model="filterText">
+        <el-input placeholder="enter keywords to filter" v-model="filterText">
           <template slot="append">
             <div class="matchCase ">
               <div class="iconfont el-icon-third-font-size" @click.stop="onChangeCase"
-                   title="匹配大小写"
+                   title="match case"
                    :style="{'color':matchCase?'red':''}">
               </div>
             </div>
@@ -67,11 +67,11 @@
         </div>
       </div>
       <div class="right">
-        <properties :all-group="treeItemData"></properties>
+        <properties v-if="treeItemData" :data="treeItemData"></properties>
       </div>
     </div>
     <div v-show="!isShowDebug" class="no-find">
-      <span>未发现cocos creator的游戏!</span>
+      <span>No games created by cocos creator found!</span>
       <el-button type="success" class="el-icon-refresh" @click="onBtnClickUpdatePage">刷新</el-button>
     </div>
   </div>
@@ -83,7 +83,16 @@ import {Component, Watch} from "vue-property-decorator";
 import properties from "./propertys.vue";
 import {Msg, Page, PluginEvent} from "@/core/types"
 import {connectBackground} from "@/devtools/connectBackground";
-import {EngineData, FrameDetails, Info, ObjectData, ObjectItemRequestData, TreeData} from "@/devtools/data";
+import {
+  EngineData,
+  FrameDetails,
+  Group,
+  Info,
+  NodeInfoData,
+  ObjectData,
+  ObjectItemRequestData,
+  TreeData
+} from "@/devtools/data";
 import Bus, {BusMsg} from "@/devtools/bus";
 import settingsVue from "./settings.vue"
 import {RefreshAuto, RefreshManual, settings} from "@/devtools/settings";
@@ -96,7 +105,7 @@ import {RefreshAuto, RefreshManual, settings} from "@/devtools/settings";
 })
 export default class Index extends Vue {
   private isShowDebug: boolean = false;
-  treeItemData: Array<Record<string, any>> = [];
+  treeItemData: NodeInfoData | null = null;
   treeData: Array<TreeData> = []
   expandedKeys: Array<string> = [];
   selectedUUID: string | null = null;
@@ -248,11 +257,8 @@ export default class Index extends Vue {
     }
   }
 
-  _onMsgNodeInfo(eventData: any) {
+  _onMsgNodeInfo(eventData: NodeInfoData) {
     this.isShowDebug = true;
-    if (!Array.isArray(eventData)) {
-      eventData = [eventData]
-    }
     this.treeItemData = eventData;
   }
 
@@ -274,7 +280,7 @@ export default class Index extends Vue {
 
   _reset() {
     this.treeData = [];
-    this.treeItemData = [];
+    this.treeItemData = null;
   }
 
   mounted() {
