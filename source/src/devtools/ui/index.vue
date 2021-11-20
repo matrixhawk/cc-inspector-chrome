@@ -1,5 +1,14 @@
 <template>
   <div id="devtools">
+    <el-drawer
+        title="settings"
+        direction="btt"
+        @close="onCloseSettings"
+        :visible.sync="showSettings">
+      <div>
+        <settings-vue></settings-vue>
+      </div>
+    </el-drawer>
     <div class="head" v-show="iframes.length>1">
       <div class="label">inspect target:</div>
       <el-select v-model="frameID" placeholder="请选择" @change="onChangeFrame" style="flex:1;">
@@ -18,10 +27,11 @@
       </div>
       <div class="left">
         <div class="tool-btn">
-          <el-switch v-if="false" active-text="实时监控" v-model="watchEveryTime" @change="onChangeWatchState"></el-switch>
-          <div style="padding-left: 15px;">节点树</div>
-          <div class="flex1"></div>
-          <el-button type="success" class="el-icon-refresh" @click="onBtnClickUpdateTree"></el-button>
+          <div style="padding-left: 15px;flex:1;">Node Tree</div>
+          <el-button v-show="isShowRefreshBtn" type="success" class="el-icon-refresh"
+                     size="mini"
+                     @click="onBtnClickUpdateTree"></el-button>
+          <el-button @click="onClickSettings">set</el-button>
         </div>
         <el-input placeholder="输入关键字进行过滤" v-model="filterText">
           <template slot="append">
@@ -75,10 +85,13 @@ import {Msg, Page, PluginEvent} from "@/core/types"
 import {connectBackground} from "@/devtools/connectBackground";
 import {EngineData, FrameDetails, Info, ObjectData, ObjectItemRequestData, TreeData} from "@/devtools/data";
 import Bus, {BusMsg} from "@/devtools/bus";
+import settingsVue from "./settings.vue"
+import {RefreshAuto, RefreshManual, settings} from "@/devtools/settings";
 
 @Component({
   components: {
     properties,
+    settingsVue,
   }
 })
 export default class Index extends Vue {
@@ -105,18 +118,41 @@ export default class Index extends Vue {
     this.updateFilterText(this.filterText);
   }
 
+  private showSettings = false;
+
+  onClickSettings() {
+    this.showSettings = true;
+  }
+
+  private isShowRefreshBtn = false;
+
+  onCloseSettings() {
+    if (settings.data) {
+      const {refreshType, refreshTime} = settings.data;
+      switch (refreshType) {
+        case RefreshAuto: {
+          this.isShowRefreshBtn = false;
+          this.onEnableTreeWatch(true, refreshTime)
+          break;
+        }
+        case RefreshManual: {
+          this.isShowRefreshBtn = true;
+          this.onEnableTreeWatch(false)
+        }
+      }
+    }
+  }
+
   // el-tree的渲染key
   defaultProps = {
     children: "children",
     label: "name"
   };
-  private watchEveryTime: boolean = false;// 实时监控节点树
-
   memory = {
     performance: {},
     console: {},
   }
-  timerID: number = 0;
+  timerID: number | null = null;
 
 
   private requestList: Array<{ id: string, cb: Function }> = [];
@@ -241,6 +277,10 @@ export default class Index extends Vue {
     this.treeItemData = [];
   }
 
+  mounted() {
+    this.onCloseSettings();
+  }
+
   _initChromeRuntimeConnect() {
     const msgFunctionMap: Record<string, Function> = {};
     msgFunctionMap[Msg.TreeInfo] = this._onMsgTreeInfo;
@@ -340,16 +380,24 @@ export default class Index extends Vue {
     }
   }
 
-  onChangeWatchState() {
-    if (this.watchEveryTime) {
+  onEnableTreeWatch(watch: boolean, time = 300) {
+    if (watch) {
+      this._clearTimer();
       this.timerID = setInterval(() => {
         this.onBtnClickUpdateTree();
         if (this.selectedUUID) {
           this.sendMsgToContentScript(Msg.NodeInfo, this.selectedUUID);
         }
-      }, 300);
+      }, time);
     } else {
+      this._clearTimer();
+    }
+  }
+
+  private _clearTimer() {
+    if (this.timerID !== null) {
       clearInterval(this.timerID);
+      this.timerID = null;
     }
   }
 
