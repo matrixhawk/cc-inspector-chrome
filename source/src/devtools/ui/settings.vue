@@ -40,7 +40,7 @@ export default class Settings extends Vue {
     {label: "manual", value: RefreshManual}
   ]
   refreshType = "";
-  refreshTime = 100;
+  refreshTime = 500;
 
   isRefreshAuto() {
     return this.refreshType === RefreshAuto;
@@ -48,7 +48,7 @@ export default class Settings extends Vue {
 
   created() {
     this.refreshType = settings.data?.refreshType || "";
-    this.refreshTime = settings.data?.refreshTime || 100;
+    this.refreshTime = settings.data?.refreshTime || 500;
   }
 
   onChangeRefreshType() {

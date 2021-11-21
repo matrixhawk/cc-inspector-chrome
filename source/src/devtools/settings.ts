@@ -9,7 +9,7 @@ interface SettingsData {
 }
 
 let defaultData: SettingsData = {
-  refreshTime: 100,
+  refreshTime: 500,
   refreshType: RefreshManual,
 }
 

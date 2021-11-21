@@ -11,6 +11,7 @@ import {Component, Prop, Watch} from "vue-property-decorator"
 import UiProp from "./ui-prop.vue"
 import {Group, NodeInfoData} from "@/devtools/data";
 import PropertyGroup from "@/devtools/ui/property-group.vue";
+import Bus, {BusMsg} from "@/devtools/bus";
 
 @Component({
   components: {PropertyGroup, UiProp},
@@ -26,6 +27,10 @@ export default class properties extends Vue {
 
   @Watch("data")
   watchData(newValue: NodeInfoData, oldValue: NodeInfoData) {
+    if (newValue.uuid !== oldValue.uuid) {
+      // 切换node，全部展开属性
+      Bus.$emit(BusMsg.FoldAllGroup, false)
+    }
   }
 
   created() {

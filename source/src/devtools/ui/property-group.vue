@@ -21,6 +21,7 @@ import Component from "vue-class-component";
 import {Prop} from "vue-property-decorator";
 import {Group} from "@/devtools/data";
 import UiProp from "@/devtools/ui/ui-prop.vue";
+import Bus, {BusMsg} from "@/devtools/bus";
 
 @Component({
   name: "property-group",
@@ -30,18 +31,21 @@ export default class PropertyGroup extends Vue {
   private fold = false;
   @Prop({
     default: () => {
-      return new Group('test')
+      return new Group("test")
     }
   })
   group!: Group;
 
   created() {
+    Bus.$on(BusMsg.FoldAllGroup, (b) => {
+      this.fold = !!b;
+    })
   }
 
   mounted() {
   }
 
-  onClickHeader(group: any) {
+  onClickHeader() {
     this.fold = !this.fold;
   }
 }
