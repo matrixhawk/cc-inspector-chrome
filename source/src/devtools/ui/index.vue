@@ -248,13 +248,43 @@ export default class Index extends Vue {
       treeData = [treeData]
     }
     this.treeData = treeData;
-    if (this.selectedUUID) {
+    if (this._checkSelectedUUID()) {
       this.$nextTick(() => {
         //@ts-ignore
         this.$refs.tree.setCurrentKey(this.selectedUUID);
         // todo 需要重新获取下node的数据
       })
     }
+  }
+
+  _checkSelectedUUID() {
+    if (this.selectedUUID) {
+      const b = this._findUuidInTree(this.treeData, this.selectedUUID)
+      if (b) {
+        return true;
+      }
+    }
+    this.selectedUUID = null;
+    this.treeItemData = null;
+    return false;
+  }
+
+  _findUuidInTree(data: TreeData[], targetUUID: string) {
+
+    function circle(tree: TreeData[]) {
+      for (let i = 0; i < tree.length; i++) {
+        let item: TreeData = tree[i];
+        if (item.uuid === targetUUID) {
+          return true;
+        }
+        if (circle(item.children)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    return circle(data)
   }
 
   _onMsgNodeInfo(eventData: NodeInfoData) {
@@ -391,9 +421,6 @@ export default class Index extends Vue {
       this._clearTimer();
       this.timerID = setInterval(() => {
         this.onBtnClickUpdateTree();
-        if (this.selectedUUID) {
-          this.sendMsgToContentScript(Msg.NodeInfo, this.selectedUUID);
-        }
       }, time);
     } else {
       this._clearTimer();
