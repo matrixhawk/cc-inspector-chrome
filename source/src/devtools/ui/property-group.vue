@@ -37,8 +37,8 @@ export default class PropertyGroup extends Vue {
   group!: Group;
 
   created() {
-    Bus.$on(BusMsg.FoldAllGroup, (b) => {
-      this.fold = !!b;
+    Bus.$on(BusMsg.FoldAllGroup, (b: boolean) => {
+      this.fold = b;
     })
   }
 

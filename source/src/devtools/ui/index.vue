@@ -86,7 +86,6 @@ import {connectBackground} from "@/devtools/connectBackground";
 import {
   EngineData,
   FrameDetails,
-  Group,
   Info,
   NodeInfoData,
   ObjectData,
@@ -133,9 +132,7 @@ export default class Index extends Vue {
     this.showSettings = true;
   }
 
-  private isShowRefreshBtn = false;
-
-  onCloseSettings() {
+  private syncSettings() {
     if (settings.data) {
       const {refreshType, refreshTime} = settings.data;
       switch (refreshType) {
@@ -150,6 +147,12 @@ export default class Index extends Vue {
         }
       }
     }
+  }
+
+  private isShowRefreshBtn = false;
+
+  onCloseSettings() {
+    this.syncSettings();
   }
 
   // el-tree的渲染key
@@ -249,10 +252,10 @@ export default class Index extends Vue {
     }
     this.treeData = treeData;
     if (this._checkSelectedUUID()) {
+      this.updateNodeInfo();
       this.$nextTick(() => {
         //@ts-ignore
         this.$refs.tree.setCurrentKey(this.selectedUUID);
-        // todo 需要重新获取下node的数据
       })
     }
   }
@@ -296,25 +299,21 @@ export default class Index extends Vue {
     this.memory = eventData;
   }
 
-  _onMsgSupport(data: boolean) {
-    this.isShowDebug = data;
-    if (data) {
-      // 如果节点树为空，就刷新一次
-      if (this.treeData.length === 0) {
-        this.onBtnClickUpdateTree();
-      }
+  _onMsgSupport(isCocosGame: boolean) {
+    this.isShowDebug = isCocosGame;
+    if (isCocosGame) {
+      this.syncSettings();
+      this.onBtnClickUpdateTree();
     } else {
-      this._reset();
+      this._clearTimer();
+      this.treeData = [];
+      this.treeItemData = null;
+      this.selectedUUID = null;
     }
   }
 
-  _reset() {
-    this.treeData = [];
-    this.treeItemData = null;
-  }
-
   mounted() {
-    this.onCloseSettings();
+    this.syncSettings();
   }
 
   _initChromeRuntimeConnect() {
@@ -410,9 +409,12 @@ export default class Index extends Vue {
 
   handleNodeClick(data: TreeData) {
     this.selectedUUID = data.uuid;
-    let uuid = data.uuid;
-    if (uuid !== undefined) {
-      this.sendMsgToContentScript(Msg.NodeInfo, uuid);
+    this.updateNodeInfo();
+  }
+
+  private updateNodeInfo() {
+    if (this.selectedUUID) {
+      this.sendMsgToContentScript(Msg.NodeInfo, this.selectedUUID);
     }
   }
 

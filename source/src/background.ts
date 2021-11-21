@@ -112,7 +112,7 @@ class PortMan {
   }
 
   private updateCurrentFrameTree() {
-    const sendData = new PluginEvent(Page.Background, Page.Content, Msg.TreeInfo);
+    const sendData = new PluginEvent(Page.Background, Page.Content, Msg.Support);
     this.getCurrentUseContent()?.postMessage(sendData);
   }
 

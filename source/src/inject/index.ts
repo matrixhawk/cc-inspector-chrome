@@ -127,7 +127,8 @@ class CCInspector {
         this.getNodeChildren(scene, treeData)
         this.sendMsgToContent(Msg.TreeInfo, treeData);
       } else {
-        this.sendMsgToContent(Msg.Support, {support: false, msg: "未发现游戏场景,不支持调试游戏!"});
+        console.warn("can't execute api : cc.director.getScene")
+        this.notifySupportGame(false);
       }
     } else {
       this.notifySupportGame(false)
