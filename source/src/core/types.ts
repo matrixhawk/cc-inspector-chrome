@@ -17,6 +17,7 @@ export enum Msg {
   UpdateFrames = "UpdateFrames", // 更新页面的frame
   UseFrame = "UseFrame",
   GetObjectItemData = "GetObjectItemData",
+  LogData = "LogData",
   SetProperty = "set-property", // 设置node属性
   UpdateProperty = "update-property", // 更新属性
 }

@@ -1,11 +1,19 @@
 <template>
   <div class="property-group">
-    <div class="header" @click="onClickHeader">
+    <div class="header" @click="onClickHeader"
+         @mouseenter="showLogBtn=true"
+         @mouseleave="showLogBtn=false">
       <div style="margin: 0 5px;">
         <i v-if="fold" class="el-icon-caret-right"></i>
         <i v-if="!fold" class="el-icon-caret-bottom"></i>
       </div>
-      {{ group.name }}
+      <div style="flex:1;">
+        {{ group.name }}
+      </div>
+      <el-button style="margin-right: 10px;"
+                 v-show="showLogBtn"
+                 type="success" icon="el-icon-chat-dot-round" @click.stop="onLog">
+      </el-button>
     </div>
     <div class="content" v-show="!fold">
       <ui-prop v-for="(item, index) in group.data" :key="index"
@@ -29,6 +37,7 @@ import Bus, {BusMsg} from "@/devtools/bus";
 })
 export default class PropertyGroup extends Vue {
   private fold = false;
+  private showLogBtn = false;
   @Prop({
     default: () => {
       return new Group("test")
@@ -43,6 +52,10 @@ export default class PropertyGroup extends Vue {
   }
 
   mounted() {
+  }
+
+  onLog() {
+    Bus.$emit(BusMsg.LogData, [this.group.id]);
   }
 
   onClickHeader() {

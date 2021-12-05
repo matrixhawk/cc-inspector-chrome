@@ -193,11 +193,13 @@ export class Property {
 }
 
 export class Group {
+  public id: string = "";
   public name: string = "group";
   public data: Array<Property> = [];
 
-  constructor(name: string) {
+  constructor(name: string,id?:string) {
     this.name = name;
+    this.id=id||'';
   }
 
   addProperty(property: Property) {

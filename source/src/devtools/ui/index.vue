@@ -147,7 +147,6 @@ export default class Index extends Vue {
   }
 
 
-
   private syncSettings() {
     if (settings.data) {
       const {refreshType, refreshTime} = settings.data;
@@ -204,6 +203,9 @@ export default class Index extends Vue {
       this.requestList.push({id: data.id, cb});
       this.sendMsgToContentScript(Msg.GetObjectItemData, data)
     });
+    Bus.$on(BusMsg.LogData, (data: string[]) => {
+      this.sendMsgToContentScript(Msg.LogData, data);
+    })
   }
 
   filterNode(value: any, data: any) {

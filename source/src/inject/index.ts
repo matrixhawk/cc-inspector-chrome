@@ -85,6 +85,12 @@ class CCInspector {
             }
             break;
           }
+          case Msg.LogData: {
+            const data: string[] = pluginEvent.data;
+            const value = getValue(this.inspectorGameMemoryStorage, data);
+            console.log(value);
+            break;
+          }
           case Msg.GetObjectItemData: {
             const data: ObjectData = pluginEvent.data;
             let val = getValue(this.inspectorGameMemoryStorage, data.path);
@@ -526,7 +532,7 @@ class CCInspector {
 
   _getGroupData(node: any) {
     const name = this.getCompName(node);
-    let nodeGroup = new Group(name);
+    let nodeGroup = new Group(name, node.uuid);
     let keys = this._getNodeKeys(node);
     for (let i = 0; i < keys.length;) {
       let key = keys[i];
