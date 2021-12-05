@@ -88,7 +88,9 @@ class CCInspector {
           case Msg.LogData: {
             const data: string[] = pluginEvent.data;
             const value = getValue(this.inspectorGameMemoryStorage, data);
-            console.log(value);
+            // 直接写console.log会被tree shaking
+            const logFunction = console.log;
+            logFunction(value);
             break;
           }
           case Msg.GetObjectItemData: {
