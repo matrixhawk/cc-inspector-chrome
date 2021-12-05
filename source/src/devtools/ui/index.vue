@@ -25,7 +25,7 @@
         <span>JS堆栈大小: {{ memory.performance.totalJSHeapSize }}</span>
         <span>JS堆栈使用: {{ memory.performance.usedJSHeapSize }}</span>
       </div>
-      <div class="left">
+      <div ref="left" class="left">
         <div class="tool-btn">
           <div style="padding-left: 15px;flex:1;">Node Tree</div>
           <el-button v-show="isShowRefreshBtn" type="success" class="el-icon-refresh"
@@ -66,7 +66,8 @@
           </el-tree>
         </div>
       </div>
-      <div class="right">
+      <ui-divider ref="divider" @move="onDividerMove"></ui-divider>
+      <div ref="right" class="right">
         <properties v-if="treeItemData" :data="treeItemData"></properties>
       </div>
     </div>
@@ -95,9 +96,11 @@ import {
 import Bus, {BusMsg} from "@/devtools/bus";
 import settingsVue from "./settings.vue"
 import {RefreshAuto, RefreshManual, settings} from "@/devtools/settings";
+import UiDivider from "@/devtools/ui/ui-divider.vue";
 
 @Component({
   components: {
+    UiDivider,
     properties,
     settingsVue,
   }
@@ -131,6 +134,19 @@ export default class Index extends Vue {
   onClickSettings() {
     this.showSettings = true;
   }
+
+  onDividerMove(event: MouseEvent) {
+    const leftDiv: HTMLDivElement = this.$refs.left as HTMLDivElement;
+    if (leftDiv) {
+      let width = leftDiv.clientWidth;
+      width += event.movementX;
+      if (width >= 300 && width < document.body.clientWidth - 100) {
+        leftDiv.style.width = `${width}px`;
+      }
+    }
+  }
+
+
 
   private syncSettings() {
     if (settings.data) {
@@ -537,6 +553,7 @@ export default class Index extends Vue {
     .left {
       display: flex;
       flex-direction: column;
+      width: 300px;
 
       .tool-btn {
         display: flex;
@@ -560,7 +577,7 @@ export default class Index extends Vue {
         border-radius: 4px;
         min-height: 20px;
         overflow: auto;
-        width: 300px;
+        width: 100%;
 
         .leaf {
           width: 100%;
