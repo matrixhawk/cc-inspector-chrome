@@ -1,4 +1,8 @@
-#说明
+# cic
+
+目前chrome插进的代码都在src里面，其他目录为迁徙的老代码，还没整理完毕
+
+# 说明
 
 inject在development模式下无法正常使用，暂时的解决办法，注释掉`vue-cli-plugin-browser-extension/index.js`代码中的124行：
 ```
