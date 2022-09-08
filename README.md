@@ -19,5 +19,12 @@ popup界面增加联系方式。
 
 适配插件版本(不紧急)
 
+# 后续工作
+目前使用的vue2开发的插件，并且使用的是vue.config.js
+
+后续打算使用vue3重写，并且完全使用webpack进行打包配置，以灵活应对打包配置，关联项目
+
+https://github.com/tidys/project-tool
+
 
 
