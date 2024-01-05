@@ -1034,7 +1034,7 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@xuyanfeng/cc-ui@0.2.14":
+"@xuyanfeng/cc-ui@^0.2.14":
   version "0.2.14"
   resolved "https://registry.yarnpkg.com/@xuyanfeng/cc-ui/-/cc-ui-0.2.14.tgz#799d20ec150f9c32530f42822a18f39b76410e33"
   integrity sha512-YyL1GeitR2orKNPQfpDkKeW5O33vgE0fJNgYCKauzbt5KVaz99DZR5NFSa9WYz5MPfyOpAK/1ImQX1R2ZtIsSQ==

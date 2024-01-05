@@ -14,8 +14,8 @@ function i18n(key: string) {
 
 const manifest: CocosPluginManifest = {
   name: pkgName,
-  version: "1.0.0",
-  description: "cc-inspector",
+  version: "2.1.0",
+  description: "cc-inspector desc",
   author: "xu_yanfeng",
   main: "./src/main.ts",
   panels: [
@@ -41,12 +41,12 @@ const manifest: CocosPluginManifest = {
   i18n_en: "./src/i18n/en.ts",
   i18n_zh: "./src/i18n/zh.ts",
   chrome: {
-    view_devtools: "",
-    view_options: "",
-    view_popup: "",
-    script_background: "",
-    script_content: "",
-    script_inject: "",
+    view_devtools: "src/views/devtools/index.ts",
+    view_options: "src/views/options/index.ts",
+    view_popup: "src/views/popup/index.ts",
+    script_background: "src/scripts/background.ts",
+    script_content: "src/scripts/content.ts",
+    script_inject: "src/scripts/inject.ts",
   },
 };
 // 这里的options变量名暂时不支持修改，发布时会进行必要的修改
@@ -58,6 +58,7 @@ const options: CocosPluginOptions = {
   watchBuild: true,
   outputProject: {
     web: "./web",
+    chrome: "./chrome",
   },
 };
 export default { manifest, options };
