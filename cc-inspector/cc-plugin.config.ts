@@ -40,6 +40,9 @@ const manifest: CocosPluginManifest = {
   ],
   i18n_en: "./src/i18n/en.ts",
   i18n_zh: "./src/i18n/zh.ts",
+  icon: {
+    "48": "./icons/48.png",
+  },
   chrome: {
     view_devtools: "src/views/devtools/index.ts",
     view_options: "src/views/options/index.ts",
