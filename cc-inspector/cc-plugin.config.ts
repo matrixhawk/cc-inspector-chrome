@@ -44,6 +44,7 @@ const manifest: CocosPluginManifest = {
     "48": "./icons/48.png",
   },
   chrome: {
+    pem: "./crx-key.pem",
     view_devtools: "src/views/devtools/index.ts",
     view_options: "src/views/options/index.ts",
     view_popup: "src/views/popup/index.ts",
