@@ -1,5 +1,8 @@
 <template>
-  <div class="options">options</div>
+  <div class="options">
+    <div class="text">哈哈，让你发现了</div>
+    <div class="text">不过这里什么都没有</div>
+  </div>
 </template>
 <script lang="ts">
 import { defineComponent, onMounted, ref, provide, nextTick } from "vue";
@@ -7,14 +10,22 @@ export default defineComponent({
   name: "options",
   components: {},
   setup(props, ctx) {
-    return {}; 
+    return {};
   },
 });
 </script>
 <style scoped lang="less">
 .options {
-    widows: 10px;
-    height: 10px;
-    background-color: rebeccapurple;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .text {
+    user-select: none;
+    font-size: 40px;
+  }
 }
 </style>
