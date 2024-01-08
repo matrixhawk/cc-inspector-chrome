@@ -49,10 +49,9 @@ const manifest: CocosPluginManifest = {
     view_popup: "src/views/popup/index.ts",
     script_background: "src/scripts/background.ts",
     script_content: "src/scripts/content.ts",
-    script_inject: "src/scripts/inject.ts",
+    script_inject: "src/scripts/inject/index.ts",
   },
 };
-// 这里的options变量名暂时不支持修改，发布时会进行必要的修改
 const options: CocosPluginOptions = {
   server: {
     enabled: true,

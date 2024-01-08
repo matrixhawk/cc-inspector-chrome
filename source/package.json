@@ -14,21 +14,16 @@
     "fs-extra": "^9.1.0",
     "less": "^4.1.1",
     "less-loader": "^7.3.0",
-    "lodash": "^4.17.21",
     "universal-analytics": "^0.4.23",
-    "uuid": "^8.3.2",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.3",
     "vue-property-decorator": "^9.1.2"
   },
   "devDependencies": {
-    "@types/kind-of": "^6.0.0",
-    "@types/lodash": "^4.14.176",
+
     "babel-eslint": "^10.1.0",
     "@types/fs-extra": "^9.0.9",
-    "@types/node": "^14.14.37",
-    "@types/uuid": "^8.3.1",
-    "@types/chrome": "0.0.133",
+
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "@vue/cli-plugin-babel": "~4.5.0",

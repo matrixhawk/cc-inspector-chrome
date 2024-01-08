@@ -1,4 +1,4 @@
-import {ArrayData, ImageData, ObjectData, Vec2Data, Vec3Data} from "@/devtools/data";
+import {ArrayData, ImageData, ObjectData, Vec2Data, Vec3Data} from "../../views/devtools/data";
 
 export interface BuildObjectOptions {
   path: string[];

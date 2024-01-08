@@ -1,4 +1,4 @@
-import {isVersion3} from "@/inject/util";
+import {isVersion3} from "./util";
 
 interface ConfigItem {
   path: string[],

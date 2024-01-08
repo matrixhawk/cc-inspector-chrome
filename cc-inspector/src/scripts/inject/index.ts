@@ -8,39 +8,44 @@ import {
   Group,
   ImageData,
   Info,
-  InvalidData, NodeInfoData,
+  InvalidData,
+  NodeInfoData,
   NumberData,
-  ObjectData, ObjectItemRequestData,
+  ObjectData,
+  ObjectItemRequestData,
   Property,
   StringData,
   TreeData,
   Vec2Data,
-  Vec3Data
-} from "@/devtools/data";
-import {Msg, Page, PluginEvent} from "@/core/types"
-import {BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOptions} from "@/inject/types";
-// @ts-ignore
-import {uniq} from "lodash"
-import {trySetValueWithConfig, getValue} from "@/inject/setValue";
-import {isHasProperty} from "@/inject/util";
+  Vec3Data,
+} from "../../views/devtools/data";
+import { Msg, Page, PluginEvent } from "../../core/types";
+import {
+  BuildArrayOptions,
+  BuildImageOptions,
+  BuildObjectOptions,
+  BuildVecOptions,
+} from "./types";
+import { uniq } from "lodash";
+import { trySetValueWithConfig, getValue } from "./setValue";
+import { isHasProperty } from "./util";
 
 declare const cc: any;
 
-
 class CCInspector {
-  inspectorGameMemoryStorage: Record<string, any> = {}
+  inspectorGameMemoryStorage: Record<string, any> = {};
 
   private watchIsCocosGame() {
     const timer = setInterval(() => {
       if (this._isCocosGame()) {
-        clearInterval(timer)
+        clearInterval(timer);
         // @ts-ignore
         cc.director.on(cc.Director.EVENT_AFTER_SCENE_LAUNCH, () => {
           let isCocosGame = this._isCocosGame();
-          this.notifySupportGame(isCocosGame)
-        })
+          this.notifySupportGame(isCocosGame);
+        });
       }
-    }, 300)
+    }, 300);
   }
 
   init() {
@@ -49,16 +54,19 @@ class CCInspector {
     window.addEventListener("message", (event) => {
       // 接受来自content的事件，有可能也会受到其他插件的
       if (!event || !event.data) {
-        return
+        return;
       }
       let pluginEvent: PluginEvent = event.data;
       if (PluginEvent.check(pluginEvent, Page.Content, Page.Inject)) {
-        console.log(`%c[Inject] ${JSON.stringify(pluginEvent)}`, "color:green;");
-        PluginEvent.finish(pluginEvent)
+        console.log(
+          `%c[Inject] ${JSON.stringify(pluginEvent)}`,
+          "color:green;"
+        );
+        PluginEvent.finish(pluginEvent);
         switch (pluginEvent.msg) {
           case Msg.Support: {
             let isCocosGame = this._isCocosGame();
-            this.notifySupportGame(isCocosGame)
+            this.notifySupportGame(isCocosGame);
             break;
           }
           case Msg.TreeInfo: {
@@ -81,7 +89,7 @@ class CCInspector {
             if (this.setValue(data.path, value)) {
               this.sendMsgToContent(Msg.UpdateProperty, data);
             } else {
-              console.warn(`设置失败：${data.path}`)
+              console.warn(`设置失败：${data.path}`);
             }
             break;
           }
@@ -106,7 +114,7 @@ class CCInspector {
               let result: ObjectItemRequestData = {
                 id: data.id,
                 data: itemData,
-              }
+              };
               this.sendMsgToContent(Msg.GetObjectItemData, result);
             }
             break;
@@ -118,7 +126,10 @@ class CCInspector {
 
   sendMsgToContent(msg: Msg, data: any) {
     // 发送给content.js处理，也会导致发送给了自身，死循环
-    window.postMessage(new PluginEvent(Page.Inject, Page.Content, msg, data), "*");
+    window.postMessage(
+      new PluginEvent(Page.Inject, Page.Content, msg, data),
+      "*"
+    );
   }
 
   notifySupportGame(b: boolean) {
@@ -132,17 +143,16 @@ class CCInspector {
       let scene = cc.director.getScene();
       if (scene) {
         let treeData = new TreeData();
-        this.getNodeChildren(scene, treeData)
+        this.getNodeChildren(scene, treeData);
         this.sendMsgToContent(Msg.TreeInfo, treeData);
       } else {
-        console.warn("can't execute api : cc.director.getScene")
+        console.warn("can't execute api : cc.director.getScene");
         this.notifySupportGame(false);
       }
     } else {
-      this.notifySupportGame(false)
+      this.notifySupportGame(false);
     }
   }
-
 
   // @ts-ignore
   draw: cc.Graphics = null;
@@ -158,14 +168,14 @@ class CCInspector {
       // @ts-ignore
       draw = this.draw = node.addComponent(cc.Graphics);
     }
-    draw.clear()
+    draw.clear();
     draw.lineWidth = 10;
     // @ts-ignore
-    draw.strokeColor = new cc.Color().fromHEX("#ff0000")
-    const {anchorX, anchorY, width, height, x, y} = node;
+    draw.strokeColor = new cc.Color().fromHEX("#ff0000");
+    const { anchorX, anchorY, width, height, x, y } = node;
     let halfWidth = width / 2;
     let halfHeight = height / 2;
-    let leftBottom = node.convertToWorldSpaceAR(cc.v2(-halfWidth, -halfHeight))
+    let leftBottom = node.convertToWorldSpaceAR(cc.v2(-halfWidth, -halfHeight));
     let leftTop = node.convertToWorldSpaceAR(cc.v2(-halfWidth, halfHeight));
     let rightBottom = node.convertToWorldSpaceAR(cc.v2(halfWidth, -halfHeight));
     let rightTop = node.convertToWorldSpaceAR(cc.v2(halfWidth, halfHeight));
@@ -175,10 +185,10 @@ class CCInspector {
       draw.lineTo(end.x, end.y);
     }
 
-    line(leftBottom, rightBottom)
-    line(rightBottom, rightTop)
-    line(rightTop, leftTop)
-    line(leftTop, leftBottom)
+    line(leftBottom, rightBottom);
+    line(rightBottom, rightTop);
+    line(rightTop, leftTop);
+    line(leftTop, leftBottom);
     this.draw.stroke();
   }
 
@@ -198,7 +208,7 @@ class CCInspector {
       let childItem = nodeChildren[i];
       let treeData = new TreeData();
       this.getNodeChildren(childItem, treeData);
-      data.children.push(treeData)
+      data.children.push(treeData);
     }
   }
 
@@ -223,45 +233,61 @@ class CCInspector {
       }
       const proto = Object.getPrototypeOf(root);
       if (proto) {
-        circle(proto)
+        circle(proto);
       }
     }
 
-    circle(obj)
+    circle(obj);
     return keys;
   }
 
   _getNodeKeys(node: any) {
     // 3.x变成了getter
     let excludeProperty = [
-      "children", "quat", "node", "components", "parent",
+      "children",
+      "quat",
+      "node",
+      "components",
+      "parent",
       // 生命周期函数
-      "onFocusInEditor", "onRestore", "start", "lateUpdate", "update", "resetInEditor", "onLostFocusInEditor",
-      "onEnable", "onDisable", "onDestroy", "onLoad",
+      "onFocusInEditor",
+      "onRestore",
+      "start",
+      "lateUpdate",
+      "update",
+      "resetInEditor",
+      "onLostFocusInEditor",
+      "onEnable",
+      "onDisable",
+      "onDestroy",
+      "onLoad",
     ];
     const keyHidden = this.getAllPropertyDescriptors(node);
     const keyVisible1 = Object.keys(node); // Object不走原型链
     let keyVisible2: string[] = [];
-    for (let nodeKey in node) {// 走原型链
-      keyVisible2.push(nodeKey)
+    for (let nodeKey in node) {
+      // 走原型链
+      keyVisible2.push(nodeKey);
     }
-    let allKeys: string[] = uniq(keyHidden.concat(keyVisible1, keyVisible2)).sort();
-    allKeys = allKeys.filter(key => {
+    let allKeys: string[] = uniq(
+      keyHidden.concat(keyVisible1, keyVisible2)
+    ).sort();
+    allKeys = allKeys.filter((key) => {
       return !key.startsWith("_") && !excludeProperty.includes(key);
     });
 
-    allKeys = allKeys.filter(key => {
+    allKeys = allKeys.filter((key) => {
       try {
-        return typeof node[key] !== "function"
+        return typeof node[key] !== "function";
       } catch (e) {
         // console.warn(`属性${key}出现异常：\n`, e);
         return false;
       }
-    })
+    });
     return allKeys;
   }
 
-  _getPairProperty(key: string): null | { key: string, values: string[] } {
+  _getPairProperty(key: string): null | { key: string; values: string[] } {
     let pairProperty: Record<string, any> = {
       rotation: ["rotationX", "rotationY"],
       anchor: ["anchorX", "anchorY"],
@@ -274,7 +300,7 @@ class CCInspector {
       if (pairProperty.hasOwnProperty(pairPropertyKey)) {
         let pair = pairProperty[pairPropertyKey];
         if (pair.includes(key) || key === pairPropertyKey) {
-          return {key: pairPropertyKey, values: pair};
+          return { key: pairPropertyKey, values: pair };
         }
       }
     }
@@ -289,15 +315,15 @@ class CCInspector {
     const path: Array<string> = options.path;
 
     if (ctor && value instanceof ctor) {
-      let hasUnOwnProperty = keys.find(key => !value.hasOwnProperty(key))
+      let hasUnOwnProperty = keys.find((key) => !value.hasOwnProperty(key));
       if (!hasUnOwnProperty) {
         for (let key in keys) {
           let propName = keys[key];
           if (value.hasOwnProperty(propName)) {
             let propPath = path.concat(propName);
-            let itemData = this._genInfoData(value, propName, propPath)
+            let itemData = this._genInfoData(value, propName, propPath);
             if (itemData) {
-              data.add(new Property(propName, itemData))
+              data.add(new Property(propName, itemData));
             }
           }
         }
@@ -326,7 +352,12 @@ class CCInspector {
     return null;
   }
 
-  _genInfoData(node: any, key: string | number, path: Array<string>, filterKey = true): Info | null {
+  _genInfoData(
+    node: any,
+    key: string | number,
+    path: Array<string>,
+    filterKey = true
+  ): Info | null {
     let propertyValue = node[key];
     let info = null;
     let invalidType = this._isInvalidValue(propertyValue);
@@ -358,38 +389,43 @@ class CCInspector {
               path: path,
               value: propertyValue,
               keys: keys,
-            })
+            });
           } else {
-            !info && (info = this._buildVecData({
-              // @ts-ignore
-              ctor: cc.Vec3,
-              path: path,
-              data: new Vec3Data(),
-              keys: ["x", "y", "z"],
-              value: propertyValue,
-            }))
-            !info && (info = this._buildVecData({
-              // @ts-ignore
-              ctor: cc.Vec2,
-              path: path,
-              data: new Vec2Data(),
-              keys: ["x", "y"],
-              value: propertyValue
-            }))
-            !info && (info = this._buildImageData({
-              //@ts-ignore
-              ctor: cc.SpriteFrame,
-              data: new ImageData(),
-              path: path,
-              value: propertyValue,
-            }))
+            !info &&
+              (info = this._buildVecData({
+                // @ts-ignore
+                ctor: cc.Vec3,
+                path: path,
+                data: new Vec3Data(),
+                keys: ["x", "y", "z"],
+                value: propertyValue,
+              }));
+            !info &&
+              (info = this._buildVecData({
+                // @ts-ignore
+                ctor: cc.Vec2,
+                path: path,
+                data: new Vec2Data(),
+                keys: ["x", "y"],
+                value: propertyValue,
+              }));
+            !info &&
+              (info = this._buildImageData({
+                //@ts-ignore
+                ctor: cc.SpriteFrame,
+                data: new ImageData(),
+                path: path,
+                value: propertyValue,
+              }));
             if (!info) {
               if (typeof propertyValue === "object") {
                 let ctorName = propertyValue.constructor?.name;
                 if (ctorName) {
-                  if (ctorName.startsWith("cc_") ||
+                  if (
+                    ctorName.startsWith("cc_") ||
                     // 2.4.0
-                    ctorName === "CCClass") {
+                    ctorName === "CCClass"
+                  ) {
                     info = new EngineData();
                     info.engineType = ctorName;
                     info.engineName = propertyValue.name;
@@ -404,7 +440,7 @@ class CCInspector {
                     path: path,
                     value: propertyValue,
                     filterKey: filterKey,
-                  })
+                  });
                 }
               }
             }
@@ -413,7 +449,7 @@ class CCInspector {
       }
     }
     if (info) {
-      info.readonly = this._isReadonly(node, key)
+      info.readonly = this._isReadonly(node, key);
       info.path = path;
     } else {
       console.error(`暂不支持的属性值`, propertyValue);
@@ -421,31 +457,36 @@ class CCInspector {
     return info;
   }
 
-  _buildArrayData({value, path, data, keys}: BuildArrayOptions) {
-    keys = keys.filter(key => !key.toString().startsWith("_"));
+  _buildArrayData({ value, path, data, keys }: BuildArrayOptions) {
+    keys = keys.filter((key) => !key.toString().startsWith("_"));
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i];
       let propPath = path.concat(key.toString());
       let itemData = this._genInfoData(value, key, propPath);
       if (itemData) {
-        data.add(new Property(key.toString(), itemData))
+        data.add(new Property(key.toString(), itemData));
       }
     }
     return data;
   }
 
-  _buildObjectItemData({value, path, data, filterKey}: BuildObjectOptions): Property[] {
+  _buildObjectItemData({
+    value,
+    path,
+    data,
+    filterKey,
+  }: BuildObjectOptions): Property[] {
     let keys = Object.keys(value);
     if (filterKey) {
-      keys = this.filterKeys(keys);// 不再进行开发者定义的数据
+      keys = this.filterKeys(keys); // 不再进行开发者定义的数据
     }
-    let ret: Property[] = []
+    let ret: Property[] = [];
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i];
       let propPath = path.concat(key.toString());
       let itemData = this._genInfoData(value, key, propPath, filterKey);
       if (itemData) {
-        ret.push(new Property(key, itemData))
+        ret.push(new Property(key, itemData));
       }
     }
     return ret;
@@ -453,33 +494,38 @@ class CCInspector {
 
   filterKeys(keys: string[]) {
     // 剔除_开头的属性
-    return keys.filter(key => !key.toString().startsWith("_"));
+    return keys.filter((key) => !key.toString().startsWith("_"));
   }
 
   _isInvalidValue(value: any) {
     // !!Infinity=true
-    if ((value && value !== Infinity) || value === 0 || value === false || value === "") {
+    if (
+      (value && value !== Infinity) ||
+      value === 0 ||
+      value === false ||
+      value === ""
+    ) {
       return false;
     }
 
     if (value === null) {
-      return "null"
+      return "null";
     } else if (value === Infinity) {
-      return "Infinity"
+      return "Infinity";
     } else if (value === undefined) {
-      return "undefined"
+      return "undefined";
     } else if (Number.isNaN(value)) {
       return "NaN";
     } else {
-      debugger
+      debugger;
       return false;
     }
   }
 
-  _buildObjectData({value, path, data, filterKey}: BuildObjectOptions) {
+  _buildObjectData({ value, path, data, filterKey }: BuildObjectOptions) {
     let keys = Object.keys(value);
     if (filterKey) {
-      keys = this.filterKeys(keys)
+      keys = this.filterKeys(keys);
     }
     //  只返回一级key，更深层级的key需要的时候，再获取，防止circle object导致的死循环
     let desc: Record<string, any> = {};
@@ -490,11 +536,10 @@ class CCInspector {
       let keyDesc = "";
       if (Array.isArray(propValue)) {
         // 只收集一级key
-        propValue.forEach(item => {
-
-        })
-        keyDesc = `(${propValue.length}) [...]`
-      } else if (this._isInvalidValue(propValue)) { // 不能改变顺序
+        propValue.forEach((item) => {});
+        keyDesc = `(${propValue.length}) [...]`;
+      } else if (this._isInvalidValue(propValue)) {
+        // 不能改变顺序
         keyDesc = propValue;
       } else if (typeof propValue === "object") {
         keyDesc = `${propValue.constructor.name} {...}`;
@@ -536,14 +581,14 @@ class CCInspector {
     const name = this.getCompName(node);
     let nodeGroup = new Group(name, node.uuid);
     let keys = this._getNodeKeys(node);
-    for (let i = 0; i < keys.length;) {
+    for (let i = 0; i < keys.length; ) {
       let key = keys[i];
       let pair = this._getPairProperty(key);
       if (pair && this._checkKeysValid(node, pair.values)) {
         let bSplice = false;
         // 把这个成对的属性剔除掉
         pair.values.forEach((item: string) => {
-          let index = keys.findIndex(el => el === item);
+          let index = keys.findIndex((el) => el === item);
           if (index !== -1) {
             keys.splice(index, 1);
             if (pair && item === pair.key) {
@@ -607,7 +652,7 @@ class CCInspector {
       const data: NodeInfoData = {
         uuid: uuid,
         group: groupData,
-      }
+      };
       this.sendMsgToContent(Msg.NodeInfo, data);
     } else {
       // 未获取到节点数据
@@ -623,13 +668,13 @@ class CCInspector {
   }
 
   _isReadonly(base: Object, key: string | number): boolean {
-    let ret = Object.getOwnPropertyDescriptor(base, key)
+    let ret = Object.getOwnPropertyDescriptor(base, key);
     if (ret) {
       return !(ret.set || ret.writable);
     } else {
       let proto = Object.getPrototypeOf(base);
       if (proto) {
-        return this._isReadonly(proto, key)
+        return this._isReadonly(proto, key);
       } else {
         return false;
       }
@@ -664,8 +709,8 @@ class CCInspector {
     return false;
   }
 
-
   onMemoryInfo() {
+    const memory = console["memory"];
     this.sendMsgToContent(Msg.MemoryInfo, {
       performance: {
         // @ts-ignore
@@ -675,10 +720,11 @@ class CCInspector {
         // @ts-ignore
         usedJSHeapSize: window.performance.memory.usedJSHeapSize,
       },
+
       console: {
-        jsHeapSizeLimit: console.memory.jsHeapSizeLimit,
-        totalJSHeapSize: console.memory.totalJSHeapSize,
-        usedJSHeapSize: console.memory.usedJSHeapSize,
+        jsHeapSizeLimit: memory.jsHeapSizeLimit,
+        totalJSHeapSize: memory.totalJSHeapSize,
+        usedJSHeapSize: memory.usedJSHeapSize,
       },
     });
   }
@@ -688,7 +734,3 @@ let inspector = new CCInspector();
 inspector.init();
 //@ts-ignore
 window.CCInspector = inspector;
-
-
-
-
