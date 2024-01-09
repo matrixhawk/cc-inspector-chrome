@@ -3,10 +3,10 @@
     <div class="head">
       <div class="name">{{ title }}</div>
       <div style="flex: 1"></div>
-      <el-button
+      <CCButton
         class="el-icon-setting btn"
         @click="onClickOptions"
-      ></el-button>
+      ></CCButton>
     </div>
 
     <div class="wechat">
@@ -43,9 +43,12 @@
 import { defineComponent, onMounted, ref, provide, nextTick } from "vue";
 import CCP from "cc-plugin/src/ccp/entry-render";
 import { ChromeConst } from "cc-plugin/src/chrome/const";
+import ccui from "@xuyanfeng/cc-ui";
+const { CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } =
+  ccui.components;
 export default defineComponent({
   name: "popup",
-  components: {},
+  components: {CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor},
   setup(props, ctx) {
     const title = ref(CCP.manifest.name);
     const version = ref(CCP.manifest.version);

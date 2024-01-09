@@ -1,33 +1,23 @@
 <template>
   <div class="settings">
     <settings-prop label="refresh">
-      <el-select v-model="refreshType" @change="onCommonSave" style="flex: 1">
-        <el-option
-          v-for="item in refreshOptions"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value"
-        >
-        </el-option>
-      </el-select>
+      <CCSelect
+        v-model="refreshType"
+        :data="refreshOptions"
+        @change="onCommonSave"
+        style="flex: 1"
+      >
+      </CCSelect>
     </settings-prop>
     <settings-prop label="refresh time: " v-show="isRefreshAuto()">
-      <el-input-number
+      <CCInputNumber
         style="flex: 1"
         :min="100"
         v-model="refreshTime"
         @change="onCommonSave"
-      ></el-input-number>
+      ></CCInputNumber>
       <span>ms</span>
     </settings-prop>
-
-    <!--        <el-dropdown>-->
-    <!--          <span>refresh</span>-->
-    <!--          <el-dropdown-menu slot="dropdown">-->
-    <!--            <el-dropdown-item>auto</el-dropdown-item>-->
-    <!--            <el-dropdown-item>Manual</el-dropdown-item>-->
-    <!--          </el-dropdown-menu>-->
-    <!--        </el-dropdown>-->
   </div>
 </template>
 
@@ -35,13 +25,24 @@
 import { defineComponent, onMounted, ref, toRaw } from "vue";
 import { RefreshType, settings } from "../settings";
 import SettingsProp from "./settings-prop.vue";
-
+import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
+import ccui from "@xuyanfeng/cc-ui";
+const { CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } =
+  ccui.components;
 export default defineComponent({
   name: "settings",
-  components: { SettingsProp },
+  components: {
+    SettingsProp,
+    CCInput,
+    CCButton,
+    CCInputNumber,
+    CCSelect,
+    CCCheckBox,
+    CCColor,
+  },
   props: {},
   setup(props, ctx) {
-    const refreshOptions = ref<Array<{ label: string; value: RefreshType }>>([
+    const refreshOptions = ref<Array<Option>>([
       { label: "auto", value: RefreshType.Auto },
       { label: "manual", value: RefreshType.Manual },
     ]);

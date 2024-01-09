@@ -8,7 +8,7 @@
     "@types/lodash": "^4.14.176",
     "@types/node": "16.11.12",
     "@types/uuid": "^8.3.1",
-    "@xuyanfeng/cc-ui": "^0.2.14",
+    "@xuyanfeng/cc-ui": "file:.yalc/@xuyanfeng/cc-ui",
     "cc-plugin": "file:.yalc/cc-plugin"
   },
   "name": "cc-plugin-demo",
@@ -25,8 +25,8 @@
   },
   "version": "1.0.0",
   "dependencies": {
-    "uuid": "^8.3.2",
+    "lodash": "^4.17.21",
     "tiny-emitter": "2.1.0",
-    "lodash": "^4.17.21"
+    "uuid": "^8.3.2"
   }
 }

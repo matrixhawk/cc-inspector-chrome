@@ -27,29 +27,30 @@
         >
         </i>
         <div class="text" ref="propText">
-          <el-popover
+          <!-- 使用CCProp -->
+          <!-- <el-popover
             placement="top"
             trigger="hover"
             :disabled="!isShowTooltip()"
           >
             <div>{{ name }}</div>
             <span>{{ name }}</span>
-          </el-popover>
+          </el-popover> -->
         </div>
       </div>
       <div class="value">
-        <div v-if="isInvalid()" class="invalid">
+        <div v-if="value.isInvalid()" class="invalid">
           {{ value.data }}
         </div>
-        <el-input
-          v-if="isString()"
+        <CCInput
+          v-if="value.isString()"
           v-model="value.data"
           :disabled="value.readonly"
           @change="onChangeValue"
         >
-        </el-input>
-        <el-input
-          v-if="isText()"
+        </CCInput>
+        <CCInput
+          v-if="value.isText()"
           type="textarea"
           :autosize="{ minRows: 3, maxRows: 5 }"
           placeholder="请输入内容"
@@ -57,18 +58,18 @@
           @change="onChangeValue"
           v-model="value.data"
         >
-        </el-input>
-        <el-input-number
-          v-if="isNumber()"
+        </CCInput>
+        <CCInputNumber
+          v-if="value.isNumber()"
           style="width: 100%; text-align: left"
           v-model="value.data"
           :step="step"
           :disabled="value.readonly"
           @change="onChangeValue"
           controls-position="right"
-        ></el-input-number>
+        ></CCInputNumber>
 
-        <div v-if="isVec2() || isVec3()" class="vec">
+        <div v-if="value.isVec2() || value.isVec3()" class="vec">
           <ui-prop
             v-for="(vec, index) in value.data"
             :key="index"
@@ -78,47 +79,37 @@
           >
           </ui-prop>
         </div>
-        <el-select
+        <CCSelect
           v-model="value.data"
           :disabled="value.readonly"
-          v-if="isEnum()"
+          :data="getEnumValues(value)"
+          v-if="value.isEnum()"
           style="width: 100%"
           @change="onChangeValue"
         >
-          <el-option
-            v-for="(opt, index) in value.values"
-            :key="index"
-            :label="opt.name"
-            :value="opt.value"
-          >
-          </el-option>
-        </el-select>
-        <el-checkbox
+        </CCSelect>
+        <CCCheckBox
           v-model="value.data"
-          v-if="isBool()"
+          v-if="value.isBool()"
           :disabled="value.readonly"
           @change="onChangeValue"
         >
-        </el-checkbox>
-        <div class="color" v-if="isColor()">
-          <el-color-picker
+        </CCCheckBox>
+        <div class="color" v-if="value.isColor()">
+          <CCColor
             style="position: absolute"
             :disabled="value.readonly"
             v-model="value.data"
             @change="onChangeValue"
           >
-          </el-color-picker>
+          </CCColor>
           <div class="hex" :style="{ color: colorReverse(value.data) }">
             {{ value.data }}
           </div>
         </div>
-        <!--      <div v-if="isArrayOrObject()" class="array-object">-->
-        <!--        <div class="text">-->
-        <!--        </div>-->
-        <!--        <el-button @click="onShowValueInConsole">log</el-button>-->
-        <!--      </div>-->
-        <div v-if="isImage()" class="image-property">
-          <el-popover v-if="isImage()" placement="top" trigger="hover">
+        <div v-if="value.isImage()" class="image-property">
+          <!-- TODO: 适配 -->
+          <div v-if="value.isImage() || true" placement="top" trigger="hover">
             <div
               style="
                 width: 100%;
@@ -136,27 +127,29 @@
               />
             </div>
             <img :src="value.data" style="height: 36px" alt="图片" />
-          </el-popover>
+          </div>
           <div style="flex: 1; display: flex; flex-direction: row-reverse">
-            <el-button @click="onShowValueInConsole">log</el-button>
+            <CCButton @click="onShowValueInConsole">log</CCButton>
           </div>
         </div>
-        <div v-if="isEngine()" class="engine">
+        <div v-if="value.isEngine()" class="engine">
           <div class="head">
             <i class="icon" :class="getEngineTypeIcon()"></i>
-            <div class="type">{{ value.engineType }}</div>
+            <div class="type">{{ value["engineType"] }}</div>
           </div>
-          <div class="name">{{ value.engineName }}</div>
-          <el-button
+          <div class="name">{{ value["engineName"] }}</div>
+          <CCButton
             @click="onPlaceInTree"
             type="primary"
             icon="el-icon-place"
-          ></el-button>
+          ></CCButton>
         </div>
-        <div v-if="isObject() && fold" class="objectDesc">
+        <div v-if="value.isObject() && fold" class="objectDesc">
           {{ value.data }}
         </div>
-        <div v-if="isArray()" class="array">Array({{ value.data.length }})</div>
+        <div v-if="value.isArray()" class="array">
+          Array({{ value.data.length }})
+        </div>
         <div class="slot" v-if="false">
           <slot></slot>
         </div>
@@ -172,7 +165,7 @@
           :key="index"
           :indent="indent + 1"
           :value="arr.value"
-          :name="getName(isArray(), arr)"
+          :name="getName(value.isArray(), arr)"
         >
         </ui-prop>
       </div>
@@ -194,109 +187,98 @@ import { DataType, EngineData, EnumData, Info, Property } from "../data";
 import { connectBackground } from "../connectBackground";
 import { Msg } from "../../../core/types";
 import Bus, { BusMsg } from "../bus";
+import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
+import ccui from "@xuyanfeng/cc-ui";
+const { CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } =
+  ccui.components;
 
 export default defineComponent({
   name: "UiProp",
+  components: {
+    CCInput,
+    CCButton,
+    CCInputNumber,
+    CCSelect,
+    CCCheckBox,
+    CCColor,
+  },
   props: {
-    name: {
-      type: String,
-      default: "",
-    },
-    indent: {
-      type: Number,
-      default: 0,
-    },
-    arrow: {
-      type: Boolean,
-      default: true,
-    },
+    name: { type: String, default: "" },
+    indent: { type: Number, default: 0 },
+    arrow: { type: Boolean, default: true },
+    step: { type: Number, default: 1 },
     value: {
       type: Object as PropType<Info | EngineData | EnumData>,
       default: () => {},
     },
-    step: {
-      type: Number,
-      default: 1,
-    },
   },
-
-  setup(props, ctx) {
+  setup(props, { emit }) {
+    const { value, step } = props;
+    const fold = ref(true);
     let clientX: number = 0;
-
     onMounted(() => {
       watchValue();
     });
     function watchValue() {
-      this.fold = true;
-      if (this.isArray()) {
-        this.subData = this.value.data;
+      fold.value = true;
+      if (value.isArray()) {
+        subData.value = value.data;
       } else {
-        this.subData = null;
+        subData.value = null;
       }
     }
-    const fold = ref(true);
     watch(props.value, () => {
       watchValue();
     });
     const subData = ref<Property[]>([]);
+    const propText = ref<HTMLDivElement>();
 
+    function _onMouseMove(event: MouseEvent) {
+      let x = event.clientX;
+      let calcStep = step || 0;
+      if (x > clientX) {
+        calcStep = Math.abs(calcStep);
+      } else {
+        calcStep = -Math.abs(calcStep);
+      }
+      emit("movestep", calcStep);
+      clientX = x;
+    }
+
+    function _onMouseUp(event: MouseEvent) {
+      document.removeEventListener("mousemove", _onMouseMove);
+      document.removeEventListener("mouseup", _onMouseUp);
+      document.removeEventListener("onselectstart", _onSelect);
+    }
+    function _onSelect() {
+      return false;
+    }
     return {
       fold,
+      propText,
       subData,
-      isInvalid() {
-        return this.value && this.value.type === DataType.Invalid;
-      },
-      isString() {
-        return this.value && this.value.type === DataType.String;
-      },
-      isText() {
-        return this.value && this.value.type === DataType.Text;
-      },
-      isNumber() {
-        return this.value && this.value.type === DataType.Number;
-      },
-      isVec2() {
-        return this.value && this.value.type === DataType.Vec2;
-      },
-      isVec3() {
-        return this.value && this.value.type === DataType.Vec3;
-      },
-      isEnum() {
-        return this.value && this.value.type === DataType.Enum;
-      },
-      isBool() {
-        return this.value && this.value.type === DataType.Bool;
-      },
-      isColor() {
-        return this.value && this.value.type === DataType.Color;
+      getEnumValues(data: any): Option[] {
+        const value: EnumData = data;
+        const ret: Option[] = [];
+        value.values.map((item) => {
+          ret.push({
+            label: item.name,
+            value: item.value,
+          });
+        });
+        return ret;
       },
       isArrayOrObject() {
-        return (
-          this.value &&
-          (this.value.type === DataType.Array ||
-            this.value.type === DataType.Object)
-        );
-      },
-      isObject() {
-        return this.value && this.value.type === DataType.Object;
-      },
-      isArray() {
-        return this.value && this.value.type === DataType.Array;
-      },
-      isImage() {
-        return this.value && this.value.type === DataType.Image;
+        return value && (value.isArray() || value.isObject());
       },
       isImageValid() {
-        return !!this.value.data;
-      },
-      isEngine() {
-        return this.value && this.value.type === DataType.Engine;
+        return !!value.data;
       },
       onPlaceInTree() {
-        Bus.emit(BusMsg.ShowPlace, this.value);
+        Bus.emit(BusMsg.ShowPlace, value);
       },
       isShowTooltip() {
-        const el: HTMLDivElement = this.$refs.propText as HTMLDivElement;
+        const el: HTMLDivElement = propText.value as HTMLDivElement;
         if (el) {
           if (el.scrollWidth > el.offsetWidth) {
             // 出现了省略号
@@ -306,8 +288,7 @@ export default defineComponent({
         return false;
       },
       getEngineTypeIcon() {
-        const value = this.value as EngineData;
-        switch (value.engineType) {
+        switch ((value as EngineData).engineType) {
           case "cc_Sprite": {
             return "el-icon-picture-outline";
           }
@@ -329,21 +310,20 @@ export default defineComponent({
         }
       },
       onClickFold() {
-        if (this.isObject() && this.fold && !this.subData) {
+        if (value.isObject() && fold && !subData) {
           // 请求object的item数据
-          Bus.emit(BusMsg.RequestObjectData, this.value, (info: Property[]) => {
-            this.fold = false;
-            this.subData = info;
+          Bus.emit(BusMsg.RequestObjectData, value, (info: Property[]) => {
+            fold.value = false;
+            subData.value = info;
           });
         } else {
-          this.fold = !this.fold;
+          fold.value = !fold.value;
         }
       },
-
       onShowValueInConsole() {
-        if (Array.isArray(this.value.path)) {
-          let uuid = this.value.path[0];
-          let key = this.value.path[1]; // todo 暂时只支持一级key
+        if (Array.isArray(value.path)) {
+          let uuid = value.path[0];
+          let key = value.path[1]; // todo 暂时只支持一级key
           if (uuid && key) {
             chrome.devtools.inspectedWindow.eval(
               `window.CCInspector.logValue('${uuid}','${key}')`
@@ -351,46 +331,24 @@ export default defineComponent({
           }
         }
       },
-
       onChangeValue() {
-        if (!this.value.readonly) {
-          connectBackground.postMessageToBackground(
-            Msg.SetProperty,
-            this.value
-          );
+        if (!value.readonly) {
+          connectBackground.postMessageToBackground(Msg.SetProperty, value);
         }
       },
       onPropNameMouseDown(event: MouseEvent) {
-        document.addEventListener("mousemove", this._onMouseMove);
-        document.addEventListener("mouseup", this._onMouseUp);
-        document.addEventListener("onselectstart", this._onSelect);
+        document.addEventListener("mousemove", _onMouseMove);
+        document.addEventListener("mouseup", _onMouseUp);
+        document.addEventListener("onselectstart", _onSelect);
       },
-
       colorReverse(OldColorValue: string) {
         OldColorValue = "0x" + OldColorValue.replace(/#/g, "");
         var str = "000000" + (0xffffff - parseInt(OldColorValue)).toString(16);
         return "#" + str.substring(str.length - 6, str.length);
       },
-      _onMouseMove(event: MouseEvent) {
-        let x = event.clientX;
-        let calcStep = this.step || 0;
-        if (x > this.clientX) {
-          calcStep = Math.abs(calcStep);
-        } else {
-          calcStep = -Math.abs(calcStep);
-        }
-        this.$emit("movestep", calcStep);
-        this.clientX = x;
-      },
-
-      _onMouseUp(event: MouseEvent) {
-        document.removeEventListener("mousemove", this._onMouseMove);
-        document.removeEventListener("mouseup", this._onMouseUp);
-        document.removeEventListener("onselectstart", this._onSelect);
-      },
-      _onSelect() {
-        return false;
-      },
+      _onMouseMove,
+      _onMouseUp,
+      _onSelect,
     };
   },
 });

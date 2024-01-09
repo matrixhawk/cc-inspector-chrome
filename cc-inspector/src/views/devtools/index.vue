@@ -7,24 +7,18 @@
         </el-drawer> -->
     <div class="head" v-show="iframes.length > 1">
       <div class="label">inspect target:</div>
-      <el-select
+      <CCSelect
         v-model="frameID"
         placeholder="please select ..."
         @change="onChangeFrame"
+        :data="getFramesData()"
         style="flex: 1"
       >
-        <el-option
-          v-for="item in iframes"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value"
-        >
-        </el-option>
-      </el-select>
+      </CCSelect>
     </div>
     <div v-show="isShowDebug" class="find">
       <div v-if="false">
-        <el-button type="success" @click="onMemoryTest">内存测试</el-button>
+        <CCButton type="success" @click="onMemoryTest">内存测试</CCButton>
       </div>
       <div v-if="false">
         <span>JS堆栈限制: {{ memory.performance.jsHeapSizeLimit }}</span>
@@ -34,30 +28,25 @@
       <div ref="left" class="left">
         <div class="tool-btn">
           <div style="padding-left: 15px; flex: 1">Node Tree</div>
-          <el-button
+          <CCButton
             v-show="isShowRefreshBtn"
             type="success"
             class="el-icon-refresh"
             size="mini"
             @click="onBtnClickUpdateTree"
-          ></el-button>
-          <el-button
-            @click="onClickSettings"
-            class="el-icon-s-tools"
-          ></el-button>
+          ></CCButton>
+          <CCButton @click="onClickSettings" class="el-icon-s-tools"></CCButton>
         </div>
-        <!-- <el-input placeholder="enter keywords to filter" v-model="filterText">
-          <template slot="append">
-            <div class="matchCase">
-              <div
-                class="iconfont el-icon-third-font-size"
-                @click.stop="onChangeCase"
-                title="match case"
-                :style="{ color: matchCase ? 'red' : '' }"
-              ></div>
-            </div>
-          </template>
-        </el-input> -->
+        <CCInput placeholder="enter keywords to filter" :data="filterText">
+          <slot>
+            <div
+              class="matchCase iconfont el-icon-third-font-size"
+              @click.stop="onChangeCase"
+              title="match case"
+              :style="{ color: matchCase ? 'red' : '' }"
+            ></div>
+          </slot>
+        </CCInput>
         <div class="treeList">
           <!-- <el-tree
             :data="treeData"
@@ -91,19 +80,31 @@
     </div>
     <div v-show="!isShowDebug" class="no-find">
       <span>No games created by cocos creator found!</span>
-      <el-button
+      <CCButton
         type="success"
         class="el-icon-refresh"
         @click="onBtnClickUpdatePage"
-        >刷新</el-button
-      >
+        >刷新
+      </CCButton>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref, onMounted, watch } from "vue";
+import {
+  defineComponent,
+  PropType,
+  ref,
+  onMounted,
+  watch,
+  toRaw,
+  nextTick,
+} from "vue";
 import properties from "./ui/propertys.vue";
+import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
+import ccui from "@xuyanfeng/cc-ui";
+const { CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } =
+  ccui.components;
 import { Msg, Page, PluginEvent } from "../../core/types";
 import { connectBackground } from "./connectBackground";
 import {
@@ -120,30 +121,41 @@ import SettingsVue from "./ui/settings.vue";
 import { RefreshType, settings } from "./settings";
 import UiDivider from "./ui/ui-divider.vue";
 
+interface FrameInfo {
+  label: string;
+  value: number;
+}
+
 export default defineComponent({
-  components: { UiDivider, properties, SettingsVue },
-  name: "devtools",
-  props: {
-    isShowDebug: { type: Boolean, default: false },
-    treeItemData: { type: Object as PropType<NodeInfoData>, default: () => {} },
-    isShowRefreshBtn: { type: Boolean, default: false },
-    showSettings: { type: Boolean, default: false },
-    iframes: {
-      type: Array as PropType<Array<{ label: string; value: number }>>,
-      default: () => [],
-    },
-    frameID: { type: Number, default: 0 },
+  components: {
+    UiDivider,
+    properties,
+    SettingsVue,
+    CCInput,
+    CCButton,
+    CCInputNumber,
+    CCSelect,
+    CCCheckBox,
+    CCColor,
   },
+  name: "devtools",
+  props: {},
   setup(props, ctx) {
+    const treeItemData = ref<NodeInfoData | null>({ uuid: "", group: [] });
+    const isShowRefreshBtn = ref<boolean>(false);
+    const showSettings = ref<boolean>(false);
+    const isShowDebug = ref<boolean>(false);
+    const frameID = ref<number>(0);
+    const iframes = ref<Array<FrameInfo>>([]);
     function _checkSelectedUUID() {
-      if (this.selectedUUID) {
-        const b = this._findUuidInTree(this.treeData, this.selectedUUID);
+      if (selectedUUID) {
+        const b = _findUuidInTree(toRaw(treeData.value), selectedUUID);
         if (b) {
           return true;
         }
       }
-      this.selectedUUID = null;
-      this.treeItemData = null;
+      selectedUUID = null;
+      treeItemData.value = null;
       return false;
     }
 
@@ -193,44 +205,42 @@ export default defineComponent({
         }
       }
 
-      circle(this.treeData);
+      circle(treeData);
 
       expandKeys.forEach((key) => {
-        if (!this.expandedKeys.find((el) => el === key)) {
-          this.expandedKeys.push(key);
+        if (!expandedKeys.value.find((el) => el === key)) {
+          expandedKeys.value.push(key);
         }
       });
       // 高亮uuid
     }
 
     function _onMsgNodeInfo(eventData: NodeInfoData) {
-      this.isShowDebug = true;
-      this.treeItemData = eventData;
+      isShowDebug.value = true;
+      treeItemData.value = eventData;
     }
 
     function _onMsgMemoryInfo(eventData: any) {
-      this.memory = eventData;
+      memory.value = eventData;
     }
 
     function _onMsgSupport(isCocosGame: boolean) {
-      this.isShowDebug = isCocosGame;
+      isShowDebug.value = isCocosGame;
       if (isCocosGame) {
         syncSettings();
-        this.onBtnClickUpdateTree();
+        onBtnClickUpdateTree();
       } else {
-        this._clearTimer();
-        this.treeData = [];
-        this.treeItemData = null;
-        this.selectedUUID = null;
+        _clearTimer();
+        treeData.value.length = 0;
+        treeItemData.value = null;
+        selectedUUID = null;
       }
     }
     function _onMsgGetObjectItemData(requestData: ObjectItemRequestData) {
       if (requestData.id !== null) {
-        let findIndex = this.requestList.findIndex(
-          (el) => el.id === requestData.id
-        );
+        let findIndex = requestList.findIndex((el) => el.id === requestData.id);
         if (findIndex > -1) {
-          let del = this.requestList.splice(findIndex, 1)[0];
+          let del = requestList.splice(findIndex, 1)[0];
           del.cb(requestData.data);
         }
       }
@@ -238,17 +248,17 @@ export default defineComponent({
 
     function _onMsgUpdateFrames(details: FrameDetails[]) {
       // 先把iframes里面无效的清空了
-      this.iframes = this.iframes.filter((item) => {
+      iframes.value = iframes.value.filter((item) => {
         details.find((el) => el.frameID === item.value);
       });
 
       // 同步配置
       details.forEach((item) => {
-        let findItem = this.iframes.find((el) => el.value === item.frameID);
+        let findItem = iframes.value.find((el) => el.value === item.frameID);
         if (findItem) {
           findItem.label = item.url;
         } else {
-          this.iframes.push({
+          iframes.value.push({
             label: item.url,
             value: item.frameID,
           });
@@ -256,12 +266,12 @@ export default defineComponent({
       });
       // 第一次获取到frame配置后，自动获取frame数据
       if (
-        this.frameID === null &&
-        this.iframes.length > 0 &&
-        !this.iframes.find((el) => el.value === this.frameID)
+        frameID === null &&
+        iframes.value.length > 0 &&
+        !iframes.value.find((el) => el.value === frameID.value)
       ) {
-        this.frameID = this.iframes[0].value;
-        this.onChangeFrame();
+        frameID.value = iframes[0].value;
+        onChangeFrame();
       }
     }
 
@@ -279,7 +289,7 @@ export default defineComponent({
       }
 
       // 更新指定uuid节点的tree的name
-      circle(this.treeData);
+      circle(treeData.value);
       let ret = treeArray.find((el) => el.uuid === uuid);
       if (ret) {
         if (key === "name") {
@@ -317,29 +327,32 @@ export default defineComponent({
         }
       );
     }
+    const elTree = ref<HTMLElement>();
     function _onMsgTreeInfo(treeData: Array<TreeData>) {
-      this.isShowDebug = true;
+      isShowDebug.value = true;
       if (!Array.isArray(treeData)) {
         treeData = [treeData];
       }
-      this.treeData = treeData;
-      if (this._checkSelectedUUID()) {
-        this.updateNodeInfo();
-        this.$nextTick(() => {
-          //@ts-ignore
-          this.$refs.tree.setCurrentKey(this.selectedUUID);
+      treeData = treeData;
+      if (_checkSelectedUUID()) {
+        updateNodeInfo();
+        nextTick(() => {
+          if (elTree.value) {
+            //@ts-ignore
+            elTree.value.setCurrentKey(selectedUUID);
+          }
         });
       }
     }
     function _initChromeRuntimeConnect() {
       const msgFunctionMap: Record<string, Function> = {};
-      msgFunctionMap[Msg.TreeInfo] = this._onMsgTreeInfo;
-      msgFunctionMap[Msg.Support] = this._onMsgSupport;
-      msgFunctionMap[Msg.NodeInfo] = this._onMsgNodeInfo;
-      msgFunctionMap[Msg.MemoryInfo] = this._onMsgMemoryInfo;
-      msgFunctionMap[Msg.UpdateProperty] = this._onMsgUpdateProperty;
-      msgFunctionMap[Msg.UpdateFrames] = this._onMsgUpdateFrames;
-      msgFunctionMap[Msg.GetObjectItemData] = this._onMsgGetObjectItemData;
+      msgFunctionMap[Msg.TreeInfo] = _onMsgTreeInfo;
+      msgFunctionMap[Msg.Support] = _onMsgSupport;
+      msgFunctionMap[Msg.NodeInfo] = _onMsgNodeInfo;
+      msgFunctionMap[Msg.MemoryInfo] = _onMsgMemoryInfo;
+      msgFunctionMap[Msg.UpdateProperty] = _onMsgUpdateProperty;
+      msgFunctionMap[Msg.UpdateFrames] = _onMsgUpdateFrames;
+      msgFunctionMap[Msg.GetObjectItemData] = _onMsgGetObjectItemData;
       // 接收来自background.js的消息数据
       connectBackground.onBackgroundMessage(
         (data: PluginEvent, sender: any) => {
@@ -418,20 +431,20 @@ export default defineComponent({
 
     function onEnableTreeWatch(watch: boolean, time = 300) {
       if (watch) {
-        this._clearTimer();
-        this.timerID = setInterval(() => {
-          this.onBtnClickUpdateTree();
+        _clearTimer();
+        timerID = setInterval(() => {
+          onBtnClickUpdateTree();
         }, time);
       } else {
-        this._clearTimer();
+        _clearTimer();
       }
     }
-    let timerID: number | null = null;
+    let timerID: NodeJS.Timer | null = null;
 
     function _clearTimer() {
-      if (this.timerID !== null) {
-        clearInterval(this.timerID);
-        this.timerID = null;
+      if (timerID !== null) {
+        clearInterval(timerID);
+        timerID = null;
       }
     }
     function syncSettings() {
@@ -439,46 +452,71 @@ export default defineComponent({
         const { refreshType, refreshTime } = settings.data;
         switch (refreshType) {
           case RefreshType.Auto: {
-            this.isShowRefreshBtn = false;
-            this.onEnableTreeWatch(true, refreshTime);
+            isShowRefreshBtn.value = false;
+            onEnableTreeWatch(true, refreshTime);
             break;
           }
           case RefreshType.Manual: {
-            this.isShowRefreshBtn = true;
-            this.onEnableTreeWatch(false);
+            isShowRefreshBtn.value = true;
+            onEnableTreeWatch(false);
           }
         }
       }
     }
     function updateNodeInfo() {
-      if (this.selectedUUID) {
-        sendMsgToContentScript(Msg.NodeInfo, this.selectedUUID);
+      if (selectedUUID) {
+        sendMsgToContentScript(Msg.NodeInfo, selectedUUID);
       }
     }
     let selectedUUID: string | null = null;
     function updateFilterText(val: any) {
-      (this.$refs?.tree as any)?.filter(val);
+      (elTree.value as any)?.filter(val);
     }
+    function onBtnClickUpdateTree() {
+      sendMsgToContentScript(Msg.TreeInfo, frameID);
+    }
+    function onChangeFrame() {
+      sendMsgToContentScript(Msg.UseFrame, frameID);
+    }
+    const elLeft = ref<HTMLDivElement>();
     return {
+      elTree,
       memory,
       defaultProps,
       filterText,
       matchCase,
+      iframes,
+      isShowDebug,
+      showSettings,
+      isShowRefreshBtn,
       expandedKeys,
       treeData,
+      treeItemData,
+      frameID,
+      getFramesData(): Option[] {
+        const frames: FrameInfo[] = toRaw(iframes.value);
+        const options: Option[] = [];
+        frames.forEach((frame) => {
+          options.push({
+            label: frame.label,
+            value: frame.value,
+          });
+        });
+        return options;
+      },
       onChangeCase() {
-        this.matchCase = !this.matchCase;
-        updateFilterText(this.filterText);
+        matchCase.value = !matchCase.value;
+        updateFilterText(filterText);
       },
       handleNodeClick(data: TreeData) {
-        this.selectedUUID = data.uuid;
-        this.updateNodeInfo();
+        selectedUUID = data.uuid;
+        updateNodeInfo();
       },
       filterNode(value: any, data: any) {
         if (!value) {
           return true;
         } else {
-          if (this.matchCase) {
+          if (matchCase) {
             // 严格匹配大写
             return data?.name?.indexOf(value) !== -1;
           } else {
@@ -489,7 +527,7 @@ export default defineComponent({
         }
       },
       onDividerMove(event: MouseEvent) {
-        const leftDiv: HTMLDivElement = this.$refs.left as HTMLDivElement;
+        const leftDiv: HTMLDivElement = elLeft.value as HTMLDivElement;
         if (leftDiv) {
           let width = leftDiv.clientWidth;
           width += event.movementX;
@@ -498,9 +536,7 @@ export default defineComponent({
           }
         }
       },
-      onBtnClickUpdateTree() {
-        sendMsgToContentScript(Msg.TreeInfo, this.frameID);
-      },
+      onBtnClickUpdateTree,
 
       onBtnClickUpdatePage() {
         sendMsgToContentScript(Msg.Support);
@@ -513,22 +549,19 @@ export default defineComponent({
         sendMsgToContentScript(Msg.MemoryInfo);
       },
       onClickSettings() {
-        this.showSettings = true;
+        showSettings.value = true;
       },
-      onChangeFrame() {
-        sendMsgToContentScript(Msg.UseFrame, this.frameID);
-      },
+      onChangeFrame,
       onNodeExpand(data: TreeData) {
         if (data.hasOwnProperty("uuid") && data.uuid) {
-          this.expandedKeys.push(data.uuid);
+          expandedKeys.value.push(data.uuid);
         }
       },
-
       onNodeCollapse(data: TreeData) {
         if (data.hasOwnProperty("uuid")) {
-          let index = this.expandedKeys.findIndex((el) => el === data.uuid);
+          let index = expandedKeys.value.findIndex((el) => el === data.uuid);
           if (index !== -1) {
-            this.expandedKeys.splice(index, 1);
+            expandedKeys.value.splice(index, 1);
           }
         }
       },
@@ -538,7 +571,6 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
-@import "../../index.less";
 
 #devtools {
   display: flex;

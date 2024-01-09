@@ -13,14 +13,14 @@
       <div style="flex: 1">
         {{ group.name }}
       </div>
-      <el-button
+      <CCButton
         style="margin-right: 10px"
         v-show="showLogBtn"
         type="success"
         icon="el-icon-chat-dot-round"
         @click.stop="onLog"
       >
-      </el-button>
+      </CCButton>
     </div>
     <div class="content" v-show="!fold">
       <ui-prop
@@ -39,10 +39,20 @@ import { defineComponent, ref, PropType } from "vue";
 import { Group } from "../data";
 import UiProp from "./ui-prop.vue";
 import Bus, { BusMsg } from "../bus";
-
+import ccui from "@xuyanfeng/cc-ui";
+const { CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } =
+  ccui.components;
 export default defineComponent({
   name: "property-group",
-  components: { UiProp },
+  components: {
+    UiProp,
+    CCInput,
+    CCButton,
+    CCInputNumber,
+    CCSelect,
+    CCCheckBox,
+    CCColor,
+  },
   props: {
     group: {
       type: Object as PropType<Group>,

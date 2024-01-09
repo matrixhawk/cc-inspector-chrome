@@ -26,9 +26,20 @@ export class Info {
   constructor() {
     this.id = v4();
   }
-  public isEnum(): boolean {
-    return false;
-  }
+  public isEnum(): boolean { return false; }
+  public isVec2(): boolean { return false; }
+  public isVec3(): boolean { return false; }
+  public isBool(): boolean { return false; }
+  public isText(): boolean { return false; }
+  public isString(): boolean { return false; }
+  public isColor(): boolean { return false; }
+  public isInvalid(): boolean { return false; }
+  public isNumber(): boolean { return false; }
+  public isArrayOrObject(): boolean { return false; }
+  public isArray(): boolean { return false; }
+  public isObject(): boolean { return false; }
+  public isImage(): boolean { return false; }
+  public isEngine(): boolean { return false; }
 }
 
 export class TextData extends Info {
@@ -36,6 +47,7 @@ export class TextData extends Info {
     super();
     this.type = DataType.Text;
   }
+  public isText(): boolean { return true; }
 }
 
 export interface ObjectItemRequestData {
@@ -57,6 +69,7 @@ export class EngineData extends Info {
     super();
     this.type = DataType.Engine;
   }
+  public isEngine(): boolean { return true; }
 }
 
 export class ArrayData extends Info {
@@ -71,6 +84,7 @@ export class ArrayData extends Info {
     this.data.push(info);
     return this;
   }
+  public isArray(): boolean { return true; }
 }
 
 export class ObjectDataItem extends Info {
@@ -83,6 +97,7 @@ export class ObjectData extends Info {
     super();
     this.type = DataType.Object;
   }
+  public isObject(): boolean { return true; }
 }
 
 export class InvalidData extends Info {
@@ -93,6 +108,7 @@ export class InvalidData extends Info {
     this.data = data;
     this.type = DataType.Invalid;
   }
+  public isInvalid(): boolean { return true; }
 }
 
 export class ColorData extends Info {
@@ -101,6 +117,7 @@ export class ColorData extends Info {
     this.type = DataType.Color;
     this.data = color;
   }
+  public isColor(): boolean { return true; }
 }
 
 export class StringData extends Info {
@@ -109,6 +126,7 @@ export class StringData extends Info {
     this.type = DataType.String;
     this.data = data;
   }
+  public isString(): boolean { return true; }
 }
 
 export class NumberData extends Info {
@@ -117,6 +135,7 @@ export class NumberData extends Info {
     this.type = DataType.Number;
     this.data = data;
   }
+  public isNumber(): boolean { return true; }
 }
 
 export class BoolData extends Info {
@@ -125,6 +144,7 @@ export class BoolData extends Info {
     this.type = DataType.Bool;
     this.data = bol;
   }
+  public isBool(): boolean { return true; }
 }
 
 export class Vec2Data extends Info {
@@ -140,6 +160,9 @@ export class Vec2Data extends Info {
   add(info: Property) {
     this.data.push(info);
     return this;
+  }
+  public isVec2(): boolean {
+    return true;
   }
 }
 
@@ -157,6 +180,9 @@ export class Vec3Data extends Info {
     this.data.push(info);
     return this;
   }
+  public isVec3(): boolean {
+    return true;
+  }
 }
 
 export class ImageData extends Info {
@@ -168,6 +194,7 @@ export class ImageData extends Info {
     this.data = null;
     return this;
   }
+  public isImage(): boolean { return true; }
 }
 
 export class EnumData extends Info {
