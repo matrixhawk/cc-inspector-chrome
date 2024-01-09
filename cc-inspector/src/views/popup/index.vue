@@ -4,7 +4,7 @@
       <div class="name">{{ title }}</div>
       <div style="flex: 1"></div>
       <CCButton @click="onClickOptions">
-        <i class="iconfont icon_setting"></i>
+        <i class="iconfont icon_settings"></i>
       </CCButton>
     </div>
 
@@ -93,10 +93,6 @@ export default defineComponent({
 </script>
 <style scoped lang="less">
 .popup {
-  widows: 10px;
-  height: 10px;
-  background-color: rebeccapurple;
-
   width: 300px;
   display: flex;
   flex-direction: column;

@@ -1,7 +1,7 @@
 export function injectScript(url: string) {
   if (chrome && chrome.extension && chrome.extension.getURL) {
     let content = chrome.extension.getURL(url)
-    console.log(`[cc-inspector]注入脚本:${content}`);
+    console.log(`[cc-inspector] inject script: ${content}`);
     const script = document.createElement("script")
     script.setAttribute("type", "text/javascript")
     script.setAttribute("src", content)
@@ -11,7 +11,6 @@ export function injectScript(url: string) {
     document.body.appendChild(script)
   }
 }
-
 
 interface LogOptions {
   data: any;

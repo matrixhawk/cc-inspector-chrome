@@ -1,9 +1,9 @@
 // content.js 和原始界面共享DOM，具有操作dom的能力
 // 但是不共享js,要想访问页面js,只能通过注入的方式
-import {injectScript} from "../core/util";
-import {Msg, Page, PluginEvent} from "../core/types";
-
-injectScript("js/inject.js");
+import { injectScript } from "../core/util";
+import { Msg, Page, PluginEvent } from "../core/types";
+import { ChromeConst } from "cc-plugin/src/chrome/const";
+injectScript(ChromeConst.script.inject);
 
 class Content {
   private connect: chrome.runtime.Port | null = null;
@@ -22,7 +22,7 @@ class Content {
 
   // 和background.js保持长连接通讯，background和content的交互也要通过这个链接进行通讯
   private connectToBackground() {
-    this.connect = chrome.runtime.connect({name: Page.Content})
+    this.connect = chrome.runtime.connect({ name: Page.Content })
     this.connect.onMessage.addListener((data: PluginEvent, sender) => {
       if (PluginEvent.check(data, Page.Background, Page.Content)) {
         // console.log(`%c[Connect-Message] ${JSON.stringify(data)}`, "color:green;")
@@ -39,7 +39,7 @@ class Content {
     }
   }
 
-  async run() {
+  run() {
     this.connectToBackground();
     this.checkGame();
   }
