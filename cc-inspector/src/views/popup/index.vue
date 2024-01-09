@@ -3,10 +3,9 @@
     <div class="head">
       <div class="name">{{ title }}</div>
       <div style="flex: 1"></div>
-      <CCButton
-        class="el-icon-setting btn"
-        @click="onClickOptions"
-      ></CCButton>
+      <CCButton @click="onClickOptions">
+        <i class="iconfont icon_setting"></i>
+      </CCButton>
     </div>
 
     <div class="wechat">
@@ -48,7 +47,14 @@ const { CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } =
   ccui.components;
 export default defineComponent({
   name: "popup",
-  components: {CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor},
+  components: {
+    CCInput,
+    CCButton,
+    CCInputNumber,
+    CCSelect,
+    CCCheckBox,
+    CCColor,
+  },
   setup(props, ctx) {
     const title = ref(CCP.manifest.name);
     const version = ref(CCP.manifest.version);
@@ -105,9 +111,6 @@ export default defineComponent({
       user-select: none;
       font-size: 18px;
       font-weight: bold;
-    }
-
-    .btn {
     }
   }
 

@@ -31,20 +31,23 @@
           <CCButton
             v-show="isShowRefreshBtn"
             type="success"
-            class="el-icon-refresh"
             size="mini"
             @click="onBtnClickUpdateTree"
-          ></CCButton>
-          <CCButton @click="onClickSettings" class="el-icon-s-tools"></CCButton>
+          >
+            <i class="iconfont icon_refresh"></i>
+          </CCButton>
+          <CCButton @click="onClickSettings">
+            <i class="iconfont icon_settings"></i>
+          </CCButton>
         </div>
         <CCInput placeholder="enter keywords to filter" :data="filterText">
           <slot>
-            <div
-              class="matchCase iconfont el-icon-third-font-size"
+            <i
+              class="matchCase iconfont icon_font_size"
               @click.stop="onChangeCase"
               title="match case"
               :style="{ color: matchCase ? 'red' : '' }"
-            ></div>
+            ></i>
           </slot>
         </CCInput>
         <div class="treeList">
@@ -80,11 +83,8 @@
     </div>
     <div v-show="!isShowDebug" class="no-find">
       <span>No games created by cocos creator found!</span>
-      <CCButton
-        type="success"
-        class="el-icon-refresh"
-        @click="onBtnClickUpdatePage"
-        >刷新
+      <CCButton type="success" @click="onBtnClickUpdatePage">
+        <i class="iconfont icon_refresh"></i>
       </CCButton>
     </div>
   </div>
@@ -571,7 +571,6 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
-
 #devtools {
   display: flex;
   flex-direction: column;

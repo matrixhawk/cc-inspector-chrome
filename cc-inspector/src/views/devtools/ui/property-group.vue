@@ -7,8 +7,8 @@
       @mouseleave="showLogBtn = false"
     >
       <div style="margin: 0 5px">
-        <i v-if="fold" class="el-icon-caret-right"></i>
-        <i v-if="!fold" class="el-icon-caret-bottom"></i>
+        <i v-if="fold" class="iconfont icon_arrow_right"></i>
+        <i v-if="!fold" class="iconfont icon_arrow_down"></i>
       </div>
       <div style="flex: 1">
         {{ group.name }}
@@ -17,9 +17,9 @@
         style="margin-right: 10px"
         v-show="showLogBtn"
         type="success"
-        icon="el-icon-chat-dot-round"
         @click.stop="onLog"
       >
+        <i class="iconfont icon_print"></i>
       </CCButton>
     </div>
     <div class="content" v-show="!fold">

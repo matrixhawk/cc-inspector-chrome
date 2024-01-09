@@ -19,7 +19,7 @@
         <i
           class="data-arrow"
           v-if="arrow"
-          :class="fold ? 'el-icon-caret-right' : 'el-icon-caret-bottom'"
+          :class="fold ? 'iconfont icon_arrow_right' : 'iconfont icon_arrow_down'"
           :style="{
             visibility: isArrayOrObject() ? 'visible' : 'hidden',
             'margin-left': indent * 10 + 'px',
@@ -138,11 +138,9 @@
             <div class="type">{{ value["engineType"] }}</div>
           </div>
           <div class="name">{{ value["engineName"] }}</div>
-          <CCButton
-            @click="onPlaceInTree"
-            type="primary"
-            icon="el-icon-place"
-          ></CCButton>
+          <CCButton @click="onPlaceInTree" type="primary">
+            <i class="iconfont icon_place"></i>
+          </CCButton>
         </div>
         <div v-if="value.isObject() && fold" class="objectDesc">
           {{ value.data }}
@@ -290,16 +288,16 @@ export default defineComponent({
       getEngineTypeIcon() {
         switch ((value as EngineData).engineType) {
           case "cc_Sprite": {
-            return "el-icon-picture-outline";
+            return "icon_picture";
           }
           case "cc_Label": {
-            return "el-icon-third-text";
+            return "icon_text";
           }
           case "cc_Node": {
-            return "el-icon-third-node";
+            return "icon_node";
           }
         }
-        return "el-icon-third-unknow";
+        return "icon_unknown";
       },
       getName(isArray: boolean, arr: Property) {
         const type = arr.value.type;
