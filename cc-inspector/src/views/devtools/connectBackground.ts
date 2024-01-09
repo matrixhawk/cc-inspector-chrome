@@ -1,4 +1,4 @@
-import {PluginEvent, Page, Msg} from "@/core/types";
+import {PluginEvent, Page, Msg} from "../../core/types";
 
 class ConnectBackground {
   connect: chrome.runtime.Port | null = null;

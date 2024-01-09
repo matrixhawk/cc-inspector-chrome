@@ -1,78 +1,116 @@
 <template>
   <div id="ui-prop">
-    <div class="normal-data" style="display: flex;flex-direction: row;align-items: center;min-height: 30px;margin: 0;">
-      <div @mousedown="onPropNameMouseDown" class="key"
-           @click="onClickFold"
-           :style="{'cursor':isArrayOrObject()?'pointer':''}"
+    <div
+      class="normal-data"
+      style="
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        min-height: 30px;
+        margin: 0;
+      "
+    >
+      <div
+        @mousedown="onPropNameMouseDown"
+        class="key"
+        @click="onClickFold"
+        :style="{ cursor: isArrayOrObject() ? 'pointer' : '' }"
       >
-        <i class="data-arrow"
-           v-if="arrow"
-           :class="fold?'el-icon-caret-right':'el-icon-caret-bottom'"
-           :style="{'visibility':isArrayOrObject()?'visible':'hidden','margin-left':indent*10+'px'}">
+        <i
+          class="data-arrow"
+          v-if="arrow"
+          :class="fold ? 'el-icon-caret-right' : 'el-icon-caret-bottom'"
+          :style="{
+            visibility: isArrayOrObject() ? 'visible' : 'hidden',
+            'margin-left': indent * 10 + 'px',
+          }"
+        >
         </i>
         <div class="text" ref="propText">
-          <el-popover placement="top" trigger="hover" :disabled="!isShowTooltip()">
+          <el-popover
+            placement="top"
+            trigger="hover"
+            :disabled="!isShowTooltip()"
+          >
             <div>{{ name }}</div>
-            <span slot="reference">{{ name }}</span>
+            <span>{{ name }}</span>
           </el-popover>
         </div>
-
       </div>
       <div class="value">
         <div v-if="isInvalid()" class="invalid">
           {{ value.data }}
         </div>
-        <el-input v-if="isString()" v-model="value.data"
-                  :disabled="value.readonly"
-                  @change="onChangeValue">
+        <el-input
+          v-if="isString()"
+          v-model="value.data"
+          :disabled="value.readonly"
+          @change="onChangeValue"
+        >
         </el-input>
-        <el-input v-if="isText()"
-                  type="textarea"
-                  :autosize="{minRows:3,maxRows:5}"
-                  placeholder="请输入内容"
-                  :disabled="value.readonly"
-                  @change="onChangeValue"
-                  v-model="value.data">
+        <el-input
+          v-if="isText()"
+          type="textarea"
+          :autosize="{ minRows: 3, maxRows: 5 }"
+          placeholder="请输入内容"
+          :disabled="value.readonly"
+          @change="onChangeValue"
+          v-model="value.data"
+        >
         </el-input>
-        <el-input-number v-if="isNumber()"
-                         style="width: 100%;text-align: left"
-                         v-model="value.data"
-                         :step="step"
-                         :disabled="value.readonly"
-                         @change="onChangeValue"
-                         controls-position="right"
+        <el-input-number
+          v-if="isNumber()"
+          style="width: 100%; text-align: left"
+          v-model="value.data"
+          :step="step"
+          :disabled="value.readonly"
+          @change="onChangeValue"
+          controls-position="right"
         ></el-input-number>
 
-        <div v-if="isVec2()||isVec3()" class="vec">
-          <ui-prop v-for="(vec, index) in value.data"
-                   :key="index"
-                   :arrow="false"
-                   :value="vec.value"
-                   :name="vec.name">
-
+        <div v-if="isVec2() || isVec3()" class="vec">
+          <ui-prop
+            v-for="(vec, index) in value.data"
+            :key="index"
+            :arrow="false"
+            :value="vec.value"
+            :name="vec.name"
+          >
           </ui-prop>
         </div>
-        <el-select v-model="value.data"
-                   :disabled="value.readonly"
-                   v-if="isEnum()" style="width: 100%;"
-                   @change="onChangeValue">
-          <el-option v-for="(opt, index) in value.values"
-                     :key="index"
-                     :label="opt.name"
-                     :value="opt.value">
+        <el-select
+          v-model="value.data"
+          :disabled="value.readonly"
+          v-if="isEnum()"
+          style="width: 100%"
+          @change="onChangeValue"
+        >
+          <el-option
+            v-for="(opt, index) in value.values"
+            :key="index"
+            :label="opt.name"
+            :value="opt.value"
+          >
           </el-option>
         </el-select>
-        <el-checkbox v-model="value.data"
-                     v-if="isBool()"
-                     :disabled="value.readonly"
-                     @change="onChangeValue">
+        <el-checkbox
+          v-model="value.data"
+          v-if="isBool()"
+          :disabled="value.readonly"
+          @change="onChangeValue"
+        >
         </el-checkbox>
         <div class="color" v-if="isColor()">
-          <el-color-picker style="position: absolute;"
-                           :disabled="value.readonly"
-                           v-model="value.data" @change="onChangeValue">
+          <el-color-picker
+            style="position: absolute"
+            :disabled="value.readonly"
+            v-model="value.data"
+            @change="onChangeValue"
+          >
           </el-color-picker>
-          <div class="hex" :style="{color:colorReverse(value.data)}">{{ value.data }}</div>
+          <div class="hex" :style="{ color: colorReverse(value.data) }">
+            {{ value.data }}
+          </div>
         </div>
         <!--      <div v-if="isArrayOrObject()" class="array-object">-->
         <!--        <div class="text">-->
@@ -82,12 +120,24 @@
         <div v-if="isImage()" class="image-property">
           <el-popover v-if="isImage()" placement="top" trigger="hover">
             <div
-                style="width: 100%;height: 100%;display: flex;flex-direction: row;align-items: center;justify-content: center;">
-              <img :src="value.data" alt="图片" style="max-width: 100px;max-height: 100px;object-fit: contain;">
+              style="
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+              "
+            >
+              <img
+                :src="value.data"
+                alt="图片"
+                style="max-width: 100px; max-height: 100px; object-fit: contain"
+              />
             </div>
-            <img :src="value.data" slot="reference" style="height: 36px;" alt="图片">
+            <img :src="value.data" style="height: 36px" alt="图片" />
           </el-popover>
-          <div style="flex:1;display: flex; flex-direction: row-reverse;">
+          <div style="flex: 1; display: flex; flex-direction: row-reverse">
             <el-button @click="onShowValueInConsole">log</el-button>
           </div>
         </div>
@@ -97,26 +147,32 @@
             <div class="type">{{ value.engineType }}</div>
           </div>
           <div class="name">{{ value.engineName }}</div>
-          <el-button @click="onPlaceInTree" type="primary" icon="el-icon-place"></el-button>
+          <el-button
+            @click="onPlaceInTree"
+            type="primary"
+            icon="el-icon-place"
+          ></el-button>
         </div>
-        <div v-if="isObject()&&fold" class="objectDesc">
+        <div v-if="isObject() && fold" class="objectDesc">
           {{ value.data }}
         </div>
-        <div v-if="isArray()" class="array">
-          Array({{ value.data.length }})
-        </div>
+        <div v-if="isArray()" class="array">Array({{ value.data.length }})</div>
         <div class="slot" v-if="false">
           <slot></slot>
         </div>
       </div>
     </div>
     <div v-if="isArrayOrObject()">
-      <div v-show="!fold&&subData" style="display: flex;flex-direction: column;">
-        <ui-prop v-for="(arr,index) in subData"
-                 :key="index"
-                 :indent="indent+1"
-                 :value="arr.value"
-                 :name="getName(isArray(),arr)"
+      <div
+        v-show="!fold && subData"
+        style="display: flex; flex-direction: column"
+      >
+        <ui-prop
+          v-for="(arr, index) in subData"
+          :key="index"
+          :indent="indent + 1"
+          :value="arr.value"
+          :name="getName(isArray(), arr)"
         >
         </ui-prop>
       </div>
@@ -125,224 +181,219 @@
 </template>
 
 <script lang="ts">
+import {
+  defineComponent,
+  ref,
+  toRaw,
+  watch,
+  onUnmounted,
+  onMounted,
+  PropType,
+} from "vue";
+import { DataType, EngineData, EnumData, Info, Property } from "../data";
+import { connectBackground } from "../connectBackground";
+import { Msg } from "../../../core/types";
+import Bus, { BusMsg } from "../bus";
 
-import Vue from "vue"
-import {Component, Prop, Watch} from "vue-property-decorator"
-import {DataType, EngineData, Info, Property} from "../data"
-import {connectBackground} from "@/devtools/connectBackground";
-import {Msg} from "@/core/types";
-import Bus, {BusMsg} from "../bus"
-
-@Component({
+export default defineComponent({
   name: "UiProp",
-  components: {}
-})
-export default class UiProp extends Vue {
-  @Prop({default: ""})
-  name: string | undefined;
+  props: {
+    name: {
+      type: String,
+      default: "",
+    },
+    indent: {
+      type: Number,
+      default: 0,
+    },
+    arrow: {
+      type: Boolean,
+      default: true,
+    },
+    value: {
+      type: Object as PropType<Info | EngineData | EnumData>,
+      default: () => {},
+    },
+    step: {
+      type: Number,
+      default: 1,
+    },
+  },
 
-  @Prop({default: 0})
-  indent!: number;
+  setup(props, ctx) {
+    let clientX: number = 0;
 
-  @Prop({default: true})
-  arrow!: boolean;
-
-  @Prop()
-  value!: Info;
-
-  @Watch("value")
-  watchValue() {
-    this.fold = true;
-    if (this.isArray()) {
-      this.subData = this.value.data;
-    } else {
-      this.subData = null;
-    }
-  }
-
-  isInvalid() {
-    return this.value && (this.value.type === DataType.Invalid);
-  }
-
-  isString() {
-    return this.value && (this.value.type === DataType.String);
-  }
-
-  isText() {
-    return this.value && (this.value.type === DataType.Text);
-  }
-
-  isNumber() {
-    return this.value && (this.value.type === DataType.Number);
-  }
-
-  isVec2() {
-    return this.value && (this.value.type === DataType.Vec2);
-  }
-
-  isVec3() {
-    return this.value && (this.value.type === DataType.Vec3);
-  }
-
-  isEnum() {
-    return this.value && (this.value.type === DataType.Enum);
-  }
-
-  isBool() {
-    return this.value && (this.value.type === DataType.Bool);
-  }
-
-  isColor() {
-    return this.value && (this.value.type === DataType.Color);
-  }
-
-  isArrayOrObject() {
-    return this.value && (this.value.type === DataType.Array || this.value.type === DataType.Object)
-  }
-
-  isObject() {
-    return this.value && (this.value.type === DataType.Object)
-  }
-
-  isArray() {
-    return this.value && (this.value.type === DataType.Array)
-  }
-
-  isImage() {
-    return this.value && (this.value.type === DataType.Image)
-  }
-
-  isImageValid() {
-    return !!this.value.data;
-  }
-
-  isEngine() {
-    return this.value && (this.value.type === DataType.Engine)
-  }
-
-  onPlaceInTree() {
-    Bus.$emit(BusMsg.ShowPlace, this.value);
-  }
-
-  created() {
-
-  }
-
-  mounted() {
-    this.watchValue();
-  }
-
-  isShowTooltip() {
-    const el: HTMLDivElement = this.$refs.propText as HTMLDivElement;
-    if (el) {
-      if (el.scrollWidth > el.offsetWidth) {
-        // 出现了省略号
-        return true;
+    onMounted(() => {
+      watchValue();
+    });
+    function watchValue() {
+      this.fold = true;
+      if (this.isArray()) {
+        this.subData = this.value.data;
+      } else {
+        this.subData = null;
       }
     }
-    return false;
-  }
+    const fold = ref(true);
+    watch(props.value, () => {
+      watchValue();
+    });
+    const subData = ref<Property[]>([]);
 
-  getEngineTypeIcon() {
-    const value = this.value as EngineData;
-    switch (value.engineType) {
-      case "cc_Sprite": {
-        return "el-icon-picture-outline";
-      }
-      case "cc_Label": {
-        return "el-icon-third-text";
-      }
-      case "cc_Node": {
-        return "el-icon-third-node"
-      }
-    }
-    return "el-icon-third-unknow";
-  }
+    return {
+      fold,
+      subData,
+      isInvalid() {
+        return this.value && this.value.type === DataType.Invalid;
+      },
+      isString() {
+        return this.value && this.value.type === DataType.String;
+      },
+      isText() {
+        return this.value && this.value.type === DataType.Text;
+      },
+      isNumber() {
+        return this.value && this.value.type === DataType.Number;
+      },
+      isVec2() {
+        return this.value && this.value.type === DataType.Vec2;
+      },
+      isVec3() {
+        return this.value && this.value.type === DataType.Vec3;
+      },
+      isEnum() {
+        return this.value && this.value.type === DataType.Enum;
+      },
+      isBool() {
+        return this.value && this.value.type === DataType.Bool;
+      },
+      isColor() {
+        return this.value && this.value.type === DataType.Color;
+      },
+      isArrayOrObject() {
+        return (
+          this.value &&
+          (this.value.type === DataType.Array ||
+            this.value.type === DataType.Object)
+        );
+      },
+      isObject() {
+        return this.value && this.value.type === DataType.Object;
+      },
+      isArray() {
+        return this.value && this.value.type === DataType.Array;
+      },
+      isImage() {
+        return this.value && this.value.type === DataType.Image;
+      },
+      isImageValid() {
+        return !!this.value.data;
+      },
+      isEngine() {
+        return this.value && this.value.type === DataType.Engine;
+      },
+      onPlaceInTree() {
+        Bus.emit(BusMsg.ShowPlace, this.value);
+      },
+      isShowTooltip() {
+        const el: HTMLDivElement = this.$refs.propText as HTMLDivElement;
+        if (el) {
+          if (el.scrollWidth > el.offsetWidth) {
+            // 出现了省略号
+            return true;
+          }
+        }
+        return false;
+      },
+      getEngineTypeIcon() {
+        const value = this.value as EngineData;
+        switch (value.engineType) {
+          case "cc_Sprite": {
+            return "el-icon-picture-outline";
+          }
+          case "cc_Label": {
+            return "el-icon-third-text";
+          }
+          case "cc_Node": {
+            return "el-icon-third-node";
+          }
+        }
+        return "el-icon-third-unknow";
+      },
+      getName(isArray: boolean, arr: Property) {
+        const type = arr.value.type;
+        if (isArray) {
+          return `[${arr.name}]`;
+        } else {
+          return arr.name;
+        }
+      },
+      onClickFold() {
+        if (this.isObject() && this.fold && !this.subData) {
+          // 请求object的item数据
+          Bus.emit(BusMsg.RequestObjectData, this.value, (info: Property[]) => {
+            this.fold = false;
+            this.subData = info;
+          });
+        } else {
+          this.fold = !this.fold;
+        }
+      },
 
-  getName(isArray: boolean, arr: UiProp) {
-    const type = arr.value.type;
-    if (isArray) {
-      return `[${arr.name}]`
-    } else {
-      return arr.name;
-    }
-  }
+      onShowValueInConsole() {
+        if (Array.isArray(this.value.path)) {
+          let uuid = this.value.path[0];
+          let key = this.value.path[1]; // todo 暂时只支持一级key
+          if (uuid && key) {
+            chrome.devtools.inspectedWindow.eval(
+              `window.CCInspector.logValue('${uuid}','${key}')`
+            );
+          }
+        }
+      },
 
-  private fold = true;
+      onChangeValue() {
+        if (!this.value.readonly) {
+          connectBackground.postMessageToBackground(
+            Msg.SetProperty,
+            this.value
+          );
+        }
+      },
+      onPropNameMouseDown(event: MouseEvent) {
+        document.addEventListener("mousemove", this._onMouseMove);
+        document.addEventListener("mouseup", this._onMouseUp);
+        document.addEventListener("onselectstart", this._onSelect);
+      },
 
-  private subData: Property[] | null = null;
+      colorReverse(OldColorValue: string) {
+        OldColorValue = "0x" + OldColorValue.replace(/#/g, "");
+        var str = "000000" + (0xffffff - parseInt(OldColorValue)).toString(16);
+        return "#" + str.substring(str.length - 6, str.length);
+      },
+      _onMouseMove(event: MouseEvent) {
+        let x = event.clientX;
+        let calcStep = this.step || 0;
+        if (x > this.clientX) {
+          calcStep = Math.abs(calcStep);
+        } else {
+          calcStep = -Math.abs(calcStep);
+        }
+        this.$emit("movestep", calcStep);
+        this.clientX = x;
+      },
 
-  onClickFold() {
-    if (this.isObject() && this.fold && !this.subData) {
-      // 请求object的item数据
-      Bus.$emit(BusMsg.RequestObjectData, this.value, (info: Property[]) => {
-
-        this.fold = false;
-        this.subData = info;
-      })
-    } else {
-      this.fold = !this.fold;
-    }
-  }
-
-  onShowValueInConsole() {
-    if (Array.isArray(this.value.path)) {
-      let uuid = this.value.path[0];
-      let key = this.value.path[1]; // todo 暂时只支持一级key
-      if (uuid && key) {
-        chrome.devtools.inspectedWindow.eval(`window.CCInspector.logValue('${uuid}','${key}')`)
-      }
-    }
-  }
-
-  onChangeValue() {
-    if (!this.value.readonly) {
-      connectBackground.postMessageToBackground(Msg.SetProperty, this.value);
-    }
-  }
-
-  @Prop({default: 1})
-  step: number | undefined;
-
-
-  clientX: number = 0;
-
-  onPropNameMouseDown(event: MouseEvent) {
-    document.addEventListener("mousemove", this._onMouseMove);
-    document.addEventListener("mouseup", this._onMouseUp);
-    document.addEventListener("onselectstart", this._onSelect);
-  }
-
-  colorReverse(OldColorValue: string) {
-    OldColorValue = "0x" + OldColorValue.replace(/#/g, "");
-    var str = "000000" + (0xFFFFFF - parseInt(OldColorValue)).toString(16);
-    return "#" + str.substring(str.length - 6, str.length);
-  }
-
-  _onSelect() {
-    return false;
-  }
-
-  _onMouseMove(event: MouseEvent) {
-    let x = event.clientX;
-    let calcStep = this.step || 0;
-    if (x > this.clientX) {
-      calcStep = Math.abs(calcStep);
-    } else {
-      calcStep = -Math.abs(calcStep);
-    }
-    this.$emit("movestep", calcStep);
-    this.clientX = x;
-  }
-
-  _onMouseUp(event: MouseEvent) {
-    document.removeEventListener("mousemove", this._onMouseMove);
-    document.removeEventListener("mouseup", this._onMouseUp);
-    document.removeEventListener("onselectstart", this._onSelect);
-  }
-
-
-};
+      _onMouseUp(event: MouseEvent) {
+        document.removeEventListener("mousemove", this._onMouseMove);
+        document.removeEventListener("mouseup", this._onMouseUp);
+        document.removeEventListener("onselectstart", this._onSelect);
+      },
+      _onSelect() {
+        return false;
+      },
+    };
+  },
+});
 </script>
 
 <style scoped lang="less">
@@ -361,7 +412,6 @@ export default class UiProp extends Vue {
     display: flex;
     flex-direction: row;
     align-items: center;
-
 
     .key {
       flex: 1;
@@ -436,7 +486,7 @@ export default class UiProp extends Vue {
       .engine {
         display: flex;
         flex-direction: row;
-        border: solid #409EFF 1px;
+        border: solid #409eff 1px;
         border-radius: 5px;
         align-items: center;
         align-content: center;
@@ -462,7 +512,6 @@ export default class UiProp extends Vue {
             margin: 0 5px;
           }
         }
-
 
         .name {
           flex: 1;

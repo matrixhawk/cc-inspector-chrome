@@ -1,4 +1,4 @@
-import Vue from "vue"
+import { TinyEmitter } from 'tiny-emitter';
 
 export enum BusMsg {
   ShowPlace = "ShowPlace",
@@ -7,4 +7,4 @@ export enum BusMsg {
   FoldAllGroup = "FoldAllGroup"
 }
 
-export default new Vue();
+export default new TinyEmitter();

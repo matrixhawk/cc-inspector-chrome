@@ -1,13 +1,23 @@
 <template>
   <div class="settings">
     <settings-prop label="refresh">
-      <el-select v-model="refreshType" @change="onCommonSave" style="flex:1;">
-        <el-option v-for="item in refreshOptions" :key="item.value" :label="item.label" :value="item.value">
+      <el-select v-model="refreshType" @change="onCommonSave" style="flex: 1">
+        <el-option
+          v-for="item in refreshOptions"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"
+        >
         </el-option>
       </el-select>
     </settings-prop>
     <settings-prop label="refresh time: " v-show="isRefreshAuto()">
-      <el-input-number style="flex:1;" :min=100 v-model="refreshTime" @change="onCommonSave"></el-input-number>
+      <el-input-number
+        style="flex: 1"
+        :min="100"
+        v-model="refreshTime"
+        @change="onCommonSave"
+      ></el-input-number>
       <span>ms</span>
     </settings-prop>
 
@@ -22,54 +32,42 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import Component from "vue-class-component";
-import {Prop} from "vue-property-decorator";
-import {RefreshAuto, RefreshManual, settings} from "@/devtools/settings";
-import SettingsProp from "@/devtools/ui/settings-prop.vue";
+import { defineComponent, onMounted, ref, toRaw } from "vue";
+import { RefreshType, settings } from "../settings";
+import SettingsProp from "./settings-prop.vue";
 
-
-@Component({
-  name: "Settings",
-  components: {SettingsProp}
-})
-export default class Settings extends Vue {
-  name: string = "settings";
-  refreshOptions = [
-    {label: "auto", value: RefreshAuto},
-    {label: "manual", value: RefreshManual}
-  ]
-  refreshType = "";
-  refreshTime = 500;
-
-  isRefreshAuto() {
-    return this.refreshType === RefreshAuto;
-  }
-
-  created() {
-    this.refreshType = settings.data?.refreshType || "";
-    this.refreshTime = settings.data?.refreshTime || 500;
-  }
-
-  onChangeRefreshType() {
-
-  }
-
-  onCommonSave() {
-    if (settings.data) {
-      settings.data.refreshType = this.refreshType;
-      settings.data.refreshTime = this.refreshTime;
-      settings.save();
-    }
-  }
-
-  mounted() {
-  }
-}
+export default defineComponent({
+  name: "settings",
+  components: { SettingsProp },
+  props: {},
+  setup(props, ctx) {
+    const refreshOptions = ref<Array<{ label: string; value: RefreshType }>>([
+      { label: "auto", value: RefreshType.Auto },
+      { label: "manual", value: RefreshType.Manual },
+    ]);
+    const refreshType = ref(settings.data?.refreshType || "");
+    const refreshTime = ref(settings.data?.refreshTime || 500);
+    return {
+      refreshType,
+      refreshTime,
+      refreshOptions,
+      isRefreshAuto() {
+        return refreshType.value === RefreshType.Auto;
+      },
+      onChangeRefreshType() {},
+      onCommonSave() {
+        if (settings.data) {
+          settings.data.refreshType = toRaw(refreshType.value);
+          settings.data.refreshTime = toRaw(refreshTime.value);
+          settings.save();
+        }
+      },
+    };
+  },
+});
 </script>
 
 <style scoped lang="less">
 .settings {
-
 }
 </style>

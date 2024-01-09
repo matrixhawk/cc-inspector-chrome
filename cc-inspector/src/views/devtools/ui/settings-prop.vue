@@ -6,24 +6,17 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import Component from "vue-class-component";
-import {Prop} from "vue-property-decorator";
+import { defineComponent } from "vue";
 
-@Component({
+export default defineComponent({
   name: "SettingsProp",
-  components: {}
-})
-export default class SettingsProp extends Vue {
-  @Prop()
-  label!: string;
-
-  created() {
-  }
-
-  mounted() {
-  }
-}
+  props: {
+    label: {
+      type: String,
+      default: "",
+    },
+  },
+});
 </script>
 
 <style scoped lang="less">

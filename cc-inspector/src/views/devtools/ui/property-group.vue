@@ -1,67 +1,75 @@
 <template>
   <div class="property-group">
-    <div class="header" @click="onClickHeader"
-         @mouseenter="showLogBtn=true"
-         @mouseleave="showLogBtn=false">
-      <div style="margin: 0 5px;">
+    <div
+      class="header"
+      @click="onClickHeader"
+      @mouseenter="showLogBtn = true"
+      @mouseleave="showLogBtn = false"
+    >
+      <div style="margin: 0 5px">
         <i v-if="fold" class="el-icon-caret-right"></i>
         <i v-if="!fold" class="el-icon-caret-bottom"></i>
       </div>
-      <div style="flex:1;">
+      <div style="flex: 1">
         {{ group.name }}
       </div>
-      <el-button style="margin-right: 10px;"
-                 v-show="showLogBtn"
-                 type="success" icon="el-icon-chat-dot-round" @click.stop="onLog">
+      <el-button
+        style="margin-right: 10px"
+        v-show="showLogBtn"
+        type="success"
+        icon="el-icon-chat-dot-round"
+        @click.stop="onLog"
+      >
       </el-button>
     </div>
     <div class="content" v-show="!fold">
-      <ui-prop v-for="(item, index) in group.data" :key="index"
-               :name="item.name" :value="item.value">
+      <ui-prop
+        v-for="(item, index) in group.data"
+        :key="index"
+        :name="item.name"
+        :value="item.value"
+      >
       </ui-prop>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import Component from "vue-class-component";
-import {Prop} from "vue-property-decorator";
-import {Group} from "@/devtools/data";
-import UiProp from "@/devtools/ui/ui-prop.vue";
-import Bus, {BusMsg} from "@/devtools/bus";
+import { defineComponent, ref, PropType } from "vue";
+import { Group } from "../data";
+import UiProp from "./ui-prop.vue";
+import Bus, { BusMsg } from "../bus";
 
-@Component({
+export default defineComponent({
   name: "property-group",
-  components: {UiProp}
-})
-export default class PropertyGroup extends Vue {
-  private fold = false;
-  private showLogBtn = false;
-  @Prop({
-    default: () => {
-      return new Group("test")
-    }
-  })
-  group!: Group;
+  components: { UiProp },
+  props: {
+    group: {
+      type: Object as PropType<Group>,
+      default: () => {
+        return new Group("test");
+      },
+    },
+  },
+  setup(props, context) {
+    Bus.on(BusMsg.FoldAllGroup, (b: boolean) => {
+      fold.value = b;
+    });
+    const fold = ref(false);
+    const showLogBtn = ref(false);
+    return {
+      showLogBtn,
+      fold,
+      onLog() {
+        Bus.emit(BusMsg.LogData, [props.group.id]);
+      },
 
-  created() {
-    Bus.$on(BusMsg.FoldAllGroup, (b: boolean) => {
-      this.fold = b;
-    })
-  }
-
-  mounted() {
-  }
-
-  onLog() {
-    Bus.$emit(BusMsg.LogData, [this.group.id]);
-  }
-
-  onClickHeader() {
-    this.fold = !this.fold;
-  }
-}
+      onClickHeader() {
+        fold.value = !fold.value;
+      },
+    };
+  },
+});
 </script>
 
 <style scoped lang="less">

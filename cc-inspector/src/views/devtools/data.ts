@@ -1,21 +1,20 @@
-// @ts-ignore
-import {v4} from "uuid"
+import { v4 } from "uuid"
 
 export enum DataType {
-  Number,
-  String,
-  Text,
-  Vec2,
-  Vec3,
-  Enum,
-  Bool,
-  Color,
-  Invalid,
-  Array, // 暂时在控制台打印下
-  Object,
-  ObjectItem,
-  Image, // 图片
-  Engine,// 引擎的类型：cc.Node, cc.Sprite, cc.Label等。。。
+  Number = 'Number',
+  String = 'String',
+  Text = 'Text',
+  Vec2 = 'Vec2',
+  Vec3 = 'Vec3',
+  Enum = 'Enum',
+  Bool = 'Bool',
+  Color = 'Color',
+  Invalid = 'Invalid',
+  Array = 'Array', // 暂时在控制台打印下
+  Object = 'Object',
+  ObjectItem = 'ObjectItem',
+  Image = 'Image', // 图片
+  Engine = 'Engine',// 引擎的类型：cc.Node, cc.Sprite, cc.Label等。。。
 }
 
 export class Info {
@@ -26,6 +25,9 @@ export class Info {
   public path: Array<string> = [];// 属性对应的路径
   constructor() {
     this.id = v4();
+  }
+  public isEnum(): boolean {
+    return false;
   }
 }
 
@@ -169,9 +171,13 @@ export class ImageData extends Info {
 }
 
 export class EnumData extends Info {
+  public values: Array<{ name: string, value: any }> = [];
   constructor() {
     super();
     this.type = DataType.Enum;
+  }
+  public isEnum(): boolean {
+    return this.type === DataType.Enum;
   }
 }
 
@@ -197,9 +203,9 @@ export class Group {
   public name: string = "group";
   public data: Array<Property> = [];
 
-  constructor(name: string,id?:string) {
+  constructor(name: string, id?: string) {
     this.name = name;
-    this.id=id||'';
+    this.id = id || '';
   }
 
   addProperty(property: Property) {

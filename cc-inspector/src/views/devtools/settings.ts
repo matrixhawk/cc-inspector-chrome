@@ -1,7 +1,9 @@
 const Key = "settings";
 
-export const RefreshManual = "manual";
-export const RefreshAuto = "auto";
+export const enum RefreshType{
+  Auto = "auto",
+  Manual = "manual",
+}
 
 interface SettingsData {
   refreshType: string;
@@ -10,7 +12,7 @@ interface SettingsData {
 
 let defaultData: SettingsData = {
   refreshTime: 500,
-  refreshType: RefreshManual,
+  refreshType: RefreshType.Manual,
 }
 
 class Settings {
@@ -33,7 +35,7 @@ class Settings {
   }
 
   isManualRefresh() {
-    return this.data?.refreshType === RefreshManual;
+    return this.data?.refreshType === RefreshType.Manual;
   }
 
   save() {
