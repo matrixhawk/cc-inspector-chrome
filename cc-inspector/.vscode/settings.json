@@ -8,7 +8,8 @@
     "editor.defaultFormatter": "vscode.typescript-language-features"
   },
   "[vue]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2
   },
   "files.refactoring.autoSave": false,
   "search.exclude": {
@@ -18,5 +19,6 @@
     "chrome": true,
     "yarn-error.log": true,
     "yarn.lock": true
-  }
+  },
+  "prettier.printWidth": 1000
 }

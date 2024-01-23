@@ -7,47 +7,23 @@
         </el-drawer> -->
     <div class="head" v-show="iframes.length > 1">
       <div class="label">inspect target:</div>
-      <CCSelect
-        v-model="frameID"
-        placeholder="please select ..."
-        @change="onChangeFrame"
-        :data="getFramesData()"
-        style="flex: 1"
-      >
-      </CCSelect>
+      <CCSelect v-model="frameID" placeholder="please select ..." @change="onChangeFrame" :data="getFramesData()" style="flex: 1"> </CCSelect>
     </div>
     <div v-show="isShowDebug" class="find">
       <div v-if="false">
         <CCButton type="success" @click="onMemoryTest">内存测试</CCButton>
-      </div>
-      <div v-if="false">
         <span>JS堆栈限制: {{ memory.performance.jsHeapSizeLimit }}</span>
         <span>JS堆栈大小: {{ memory.performance.totalJSHeapSize }}</span>
         <span>JS堆栈使用: {{ memory.performance.usedJSHeapSize }}</span>
       </div>
-      <div ref="left" class="left">
+      <div class="left">
         <div class="tool-btn">
-          <div style="padding-left: 15px; flex: 1">Node Tree</div>
-          <CCButton
-            v-show="isShowRefreshBtn"
-            type="success"
-            size="mini"
-            @click="onBtnClickUpdateTree"
-          >
-            <i class="iconfont icon_refresh"></i>
-          </CCButton>
-          <CCButton @click="onClickSettings">
-            <i class="iconfont icon_settings"></i>
-          </CCButton>
+          <div style="padding-left: 5px; flex: 1; user-select: none">Node Tree</div>
+          <CCButtonGroup :items="buttonGroup" :recover="true"></CCButtonGroup>
         </div>
         <CCInput placeholder="enter keywords to filter" :data="filterText">
           <slot>
-            <i
-              class="matchCase iconfont icon_font_size"
-              @click.stop="onChangeCase"
-              title="match case"
-              :style="{ color: matchCase ? 'red' : '' }"
-            ></i>
+            <i class="matchCase iconfont icon_font_size" @click.stop="onChangeCase" title="match case" :style="{ color: matchCase ? 'red' : '' }"></i>
           </slot>
         </CCInput>
         <div class="treeList">
@@ -76,8 +52,8 @@
           </el-tree> -->
         </div>
       </div>
-      <ui-divider ref="divider" @move="onDividerMove"></ui-divider>
-      <div ref="right" class="right">
+      <CCDivider></CCDivider>
+      <div class="right">
         <properties v-if="treeItemData" :data="treeItemData"></properties>
       </div>
     </div>
@@ -91,62 +67,50 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  PropType,
-  ref,
-  onMounted,
-  watch,
-  toRaw,
-  nextTick,
-} from "vue";
+import { defineComponent, reactive, PropType, ref, onMounted, watch, toRaw, nextTick } from "vue";
 import properties from "./ui/propertys.vue";
 import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
 import ccui from "@xuyanfeng/cc-ui";
-const { CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } =
-  ccui.components;
+const { CCInput, CCButton, CCInputNumber, CCSelect, CCButtonGroup, CCCheckBox, CCColor, CCDivider } = ccui.components;
 import { Msg, Page, PluginEvent } from "../../core/types";
 import { connectBackground } from "./connectBackground";
-import {
-  EngineData,
-  FrameDetails,
-  Info,
-  NodeInfoData,
-  ObjectData,
-  ObjectItemRequestData,
-  TreeData,
-} from "./data";
+import { EngineData, FrameDetails, Info, NodeInfoData, ObjectData, ObjectItemRequestData, TreeData } from "./data";
 import Bus, { BusMsg } from "./bus";
 import SettingsVue from "./ui/settings.vue";
 import { RefreshType, settings } from "./settings";
-import UiDivider from "./ui/ui-divider.vue";
-
+import { ButtonGroupItem } from "@xuyanfeng/cc-ui/types/cc-button-group/const";
 interface FrameInfo {
   label: string;
   value: number;
 }
 
 export default defineComponent({
-  components: {
-    UiDivider,
-    properties,
-    SettingsVue,
-    CCInput,
-    CCButton,
-    CCInputNumber,
-    CCSelect,
-    CCCheckBox,
-    CCColor,
-  },
+  components: { CCDivider, CCButtonGroup, properties, SettingsVue, CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor },
   name: "devtools",
   props: {},
   setup(props, ctx) {
     const treeItemData = ref<NodeInfoData | null>({ uuid: "", group: [] });
-    const isShowRefreshBtn = ref<boolean>(false);
     const showSettings = ref<boolean>(false);
-    const isShowDebug = ref<boolean>(false);
+    const isShowDebug = ref<boolean>(true);
     const frameID = ref<number>(0);
     const iframes = ref<Array<FrameInfo>>([]);
+
+    const btnRefresh: ButtonGroupItem = reactive<ButtonGroupItem>({
+      icon: "icon_refresh",
+      click: () => {
+        onBtnClickUpdateTree();
+      },
+      visible: true,
+    });
+    const buttonGroup = ref<ButtonGroupItem[]>([
+      btnRefresh,
+      {
+        icon: "icon_settings",
+        click: () => {
+          showSettings.value = true;
+        },
+      },
+    ]);
     function _checkSelectedUUID() {
       if (selectedUUID) {
         const b = _findUuidInTree(toRaw(treeData.value), selectedUUID);
@@ -265,11 +229,7 @@ export default defineComponent({
         }
       });
       // 第一次获取到frame配置后，自动获取frame数据
-      if (
-        frameID === null &&
-        iframes.value.length > 0 &&
-        !iframes.value.find((el) => el.value === frameID.value)
-      ) {
+      if (frameID === null && iframes.value.length > 0 && !iframes.value.find((el) => el.value === frameID.value)) {
         frameID.value = iframes[0].value;
         onChangeFrame();
       }
@@ -304,28 +264,21 @@ export default defineComponent({
     function _executeScript(para: Object) {
       let tabID = chrome.devtools.inspectedWindow.tabId;
       //@ts-ignore
-      chrome.tabs.executeScript(
-        tabID,
-        { code: `var CCInspectorPara='${JSON.stringify(para)}';` },
-        () => {
-          //@ts-ignore
-          chrome.tabs.executeScript(tabID, { file: "js/execute.js" });
-        }
-      );
+      chrome.tabs.executeScript(tabID, { code: `var CCInspectorPara='${JSON.stringify(para)}';` }, () => {
+        //@ts-ignore
+        chrome.tabs.executeScript(tabID, { file: "js/execute.js" });
+      });
     }
 
     function _inspectedCode() {
       let injectCode = "";
-      chrome.devtools.inspectedWindow.eval(
-        injectCode,
-        (result, isException) => {
-          if (isException) {
-            console.error(isException);
-          } else {
-            console.log(`执行结果：${result}`);
-          }
+      chrome.devtools.inspectedWindow.eval(injectCode, (result, isException) => {
+        if (isException) {
+          console.error(isException);
+        } else {
+          console.log(`执行结果：${result}`);
         }
-      );
+      });
     }
     const elTree = ref<HTMLElement>();
     function _onMsgTreeInfo(treeData: Array<TreeData>) {
@@ -354,26 +307,24 @@ export default defineComponent({
       msgFunctionMap[Msg.UpdateFrames] = _onMsgUpdateFrames;
       msgFunctionMap[Msg.GetObjectItemData] = _onMsgGetObjectItemData;
       // 接收来自background.js的消息数据
-      connectBackground.onBackgroundMessage(
-        (data: PluginEvent, sender: any) => {
-          if (!data) {
-            return;
-          }
-          if (data.target === Page.Devtools) {
-            console.log("[Devtools]", data);
-            PluginEvent.finish(data);
-            const { msg } = data;
-            if (msg) {
-              const func = msgFunctionMap[msg];
-              if (func) {
-                func(data.data);
-              } else {
-                console.warn(`没有${msg}消息的函数`);
-              }
+      connectBackground.onBackgroundMessage((data: PluginEvent, sender: any) => {
+        if (!data) {
+          return;
+        }
+        if (data.target === Page.Devtools) {
+          console.log("[Devtools]", data);
+          PluginEvent.finish(data);
+          const { msg } = data;
+          if (msg) {
+            const func = msgFunctionMap[msg];
+            if (func) {
+              func(data.data);
+            } else {
+              console.warn(`没有${msg}消息的函数`);
             }
           }
         }
-      );
+      });
     }
     if (chrome && chrome.runtime) {
       _initChromeRuntimeConnect();
@@ -452,12 +403,12 @@ export default defineComponent({
         const { refreshType, refreshTime } = settings.data;
         switch (refreshType) {
           case RefreshType.Auto: {
-            isShowRefreshBtn.value = false;
+            btnRefresh.visible = false;
             onEnableTreeWatch(true, refreshTime);
             break;
           }
           case RefreshType.Manual: {
-            isShowRefreshBtn.value = true;
+            btnRefresh.visible = true;
             onEnableTreeWatch(false);
           }
         }
@@ -480,6 +431,7 @@ export default defineComponent({
     }
     const elLeft = ref<HTMLDivElement>();
     return {
+      buttonGroup,
       elTree,
       memory,
       defaultProps,
@@ -488,7 +440,6 @@ export default defineComponent({
       iframes,
       isShowDebug,
       showSettings,
-      isShowRefreshBtn,
       expandedKeys,
       treeData,
       treeItemData,
@@ -520,22 +471,11 @@ export default defineComponent({
             // 严格匹配大写
             return data?.name?.indexOf(value) !== -1;
           } else {
-            return (
-              data?.name?.toLowerCase().indexOf(value.toLowerCase()) !== -1
-            );
+            return data?.name?.toLowerCase().indexOf(value.toLowerCase()) !== -1;
           }
         }
       },
-      onDividerMove(event: MouseEvent) {
-        const leftDiv: HTMLDivElement = elLeft.value as HTMLDivElement;
-        if (leftDiv) {
-          let width = leftDiv.clientWidth;
-          width += event.movementX;
-          if (width >= 300 && width < document.body.clientWidth - 100) {
-            leftDiv.style.width = `${width}px`;
-          }
-        }
-      },
+
       onBtnClickUpdateTree,
 
       onBtnClickUpdatePage() {
@@ -548,9 +488,7 @@ export default defineComponent({
       onMemoryTest() {
         sendMsgToContentScript(Msg.MemoryInfo);
       },
-      onClickSettings() {
-        showSettings.value = true;
-      },
+
       onChangeFrame,
       onNodeExpand(data: TreeData) {
         if (data.hasOwnProperty("uuid") && data.uuid) {
@@ -611,6 +549,7 @@ export default defineComponent({
     .left {
       display: flex;
       flex-direction: column;
+      min-width: 200px;
       width: 300px;
 
       .tool-btn {
@@ -666,7 +605,6 @@ export default defineComponent({
 
     .right {
       flex: 1;
-      background: #e5e9f2;
       overflow-x: hidden;
       overflow-y: overlay;
 
