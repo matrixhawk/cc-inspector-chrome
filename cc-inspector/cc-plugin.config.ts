@@ -57,7 +57,7 @@ const options: CocosPluginOptions = {
   server: {
     enabled: true,
     port: 2022,
-    https: false,
+    https: true,
     writeToDisk: true,
   },
   watchBuild: true,
