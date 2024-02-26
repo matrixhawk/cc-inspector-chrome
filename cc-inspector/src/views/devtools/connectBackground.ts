@@ -24,7 +24,13 @@ class ConnectBackground {
       });
     }
   }
-
+  sendMsgToContentScript(msg: Msg, data?: any) {
+    if (!chrome || !chrome.devtools) {
+      console.log("环境异常，无法执行函数");
+      return;
+    }
+    this.postMessageToBackground(msg, data);
+  }
   postMessageToBackground(msg: Msg, data?: any) {
     if (this.connect) {
       let sendData = new PluginEvent(Page.Devtools, Page.Background, msg, data)

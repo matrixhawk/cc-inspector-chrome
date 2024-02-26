@@ -26,8 +26,14 @@ export class PluginEvent {
   msg: Msg | null = null;
   data: any = null;
 
-  source: Page | null = null; // 事件发送的源头
-  target: Page | null = null; // 事件要发送的目标
+  /**
+   * 事件发送的源头
+   */
+  source: Page | null = null;
+  /**
+   * 事件要发送的目标
+   */
+  target: Page | null = null; 
 
   static check(event: PluginEvent, source: Page, target: Page) {
     return event && source && target && event.source === source && event.target === target;
@@ -40,6 +46,9 @@ export class PluginEvent {
     }
   }
 
+  /**
+   * 
+   */
   static finish(event: PluginEvent) {
     event.source = event.target = null;
   }

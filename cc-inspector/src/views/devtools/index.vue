@@ -7,7 +7,7 @@
         </el-drawer> -->
     <div class="head" v-show="iframes.length > 1">
       <div class="label">inspect target:</div>
-      <CCSelect v-model="frameID" placeholder="please select ..." @change="onChangeFrame" :data="getFramesData()" style="flex: 1"> </CCSelect>
+      <CCSelect v-model:value="frameID" placeholder="please select ..." @change="onChangeFrame" :data="getFramesData()"> </CCSelect>
     </div>
     <div v-show="isShowDebug" class="find">
       <div v-if="false">
@@ -27,6 +27,7 @@
           </slot>
         </CCInput>
         <div class="treeList">
+          <CCTree></CCTree>
           <!-- <el-tree
             :data="treeData"
             ref="tree"
@@ -71,7 +72,7 @@ import { defineComponent, reactive, PropType, ref, onMounted, watch, toRaw, next
 import properties from "./ui/propertys.vue";
 import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
 import ccui from "@xuyanfeng/cc-ui";
-const { CCInput, CCButton, CCInputNumber, CCSelect, CCButtonGroup, CCCheckBox, CCColor, CCDivider } = ccui.components;
+const { CCTree, CCInput, CCButton, CCInputNumber, CCSelect, CCButtonGroup, CCCheckBox, CCColor, CCDivider } = ccui.components;
 import { Msg, Page, PluginEvent } from "../../core/types";
 import { connectBackground } from "./connectBackground";
 import { EngineData, FrameDetails, Info, NodeInfoData, ObjectData, ObjectItemRequestData, TreeData } from "./data";
@@ -79,13 +80,14 @@ import Bus, { BusMsg } from "./bus";
 import SettingsVue from "./ui/settings.vue";
 import { RefreshType, settings } from "./settings";
 import { ButtonGroupItem } from "@xuyanfeng/cc-ui/types/cc-button-group/const";
+import { ITreeData } from "@xuyanfeng/cc-ui/types/cc-tree/const";
 interface FrameInfo {
   label: string;
   value: number;
 }
 
 export default defineComponent({
-  components: { CCDivider, CCButtonGroup, properties, SettingsVue, CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor },
+  components: { CCTree, CCDivider, CCButtonGroup, properties, SettingsVue, CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor },
   name: "devtools",
   props: {},
   setup(props, ctx) {
@@ -94,7 +96,6 @@ export default defineComponent({
     const isShowDebug = ref<boolean>(true);
     const frameID = ref<number>(0);
     const iframes = ref<Array<FrameInfo>>([]);
-
     const btnRefresh: ButtonGroupItem = reactive<ButtonGroupItem>({
       icon: "icon_refresh",
       click: () => {
@@ -140,13 +141,6 @@ export default defineComponent({
       return circle(data);
     }
 
-    function sendMsgToContentScript(msg: Msg, data?: any) {
-      if (!chrome || !chrome.devtools) {
-        console.log("环境异常，无法执行函数");
-        return;
-      }
-      connectBackground.postMessageToBackground(msg, data);
-    }
     const requestList: Array<{ id: string; cb: Function }> = [];
 
     function _expand(uuid: string) {
@@ -262,12 +256,9 @@ export default defineComponent({
     }
     // 问题：没有上下文的权限，只能操作DOM
     function _executeScript(para: Object) {
-      let tabID = chrome.devtools.inspectedWindow.tabId;
-      //@ts-ignore
-      chrome.tabs.executeScript(tabID, { code: `var CCInspectorPara='${JSON.stringify(para)}';` }, () => {
-        //@ts-ignore
-        chrome.tabs.executeScript(tabID, { file: "js/execute.js" });
-      });
+      // chrome.tabs.executeScript()//v2版本使用的函数
+      const tabID = chrome.devtools.inspectedWindow.tabId;
+      chrome.scripting.executeScript({ files: ["js/execute.js"], target: { tabId: tabID } }, (results: chrome.scripting.InjectionResult[]) => {});
     }
 
     function _inspectedCode() {
@@ -282,6 +273,7 @@ export default defineComponent({
     }
     const elTree = ref<HTMLElement>();
     function _onMsgTreeInfo(treeData: Array<TreeData>) {
+      console.log("treeData");
       isShowDebug.value = true;
       if (!Array.isArray(treeData)) {
         treeData = [treeData];
@@ -332,7 +324,7 @@ export default defineComponent({
 
     window.addEventListener(
       "message",
-      function (event) {
+      (event) => {
         console.log("on vue:" + JSON.stringify(event));
       },
       false
@@ -346,10 +338,10 @@ export default defineComponent({
         return;
       }
       requestList.push({ id: data.id, cb });
-      sendMsgToContentScript(Msg.GetObjectItemData, data);
+      connectBackground.sendMsgToContentScript(Msg.GetObjectItemData, data);
     });
     Bus.on(BusMsg.LogData, (data: string[]) => {
-      sendMsgToContentScript(Msg.LogData, data);
+      connectBackground.sendMsgToContentScript(Msg.LogData, data);
     });
     onMounted(() => {
       syncSettings();
@@ -416,7 +408,7 @@ export default defineComponent({
     }
     function updateNodeInfo() {
       if (selectedUUID) {
-        sendMsgToContentScript(Msg.NodeInfo, selectedUUID);
+        connectBackground.sendMsgToContentScript(Msg.NodeInfo, selectedUUID);
       }
     }
     let selectedUUID: string | null = null;
@@ -424,10 +416,10 @@ export default defineComponent({
       (elTree.value as any)?.filter(val);
     }
     function onBtnClickUpdateTree() {
-      sendMsgToContentScript(Msg.TreeInfo, frameID);
+      connectBackground.sendMsgToContentScript(Msg.TreeInfo, frameID);
     }
     function onChangeFrame() {
-      sendMsgToContentScript(Msg.UseFrame, frameID);
+      connectBackground.sendMsgToContentScript(Msg.UseFrame, frameID);
     }
     const elLeft = ref<HTMLDivElement>();
     return {
@@ -476,17 +468,15 @@ export default defineComponent({
         }
       },
 
-      onBtnClickUpdateTree,
-
       onBtnClickUpdatePage() {
-        sendMsgToContentScript(Msg.Support);
+        connectBackground.sendMsgToContentScript(Msg.Support);
       },
       onCloseSettings() {
         syncSettings();
       },
 
       onMemoryTest() {
-        sendMsgToContentScript(Msg.MemoryInfo);
+        connectBackground.sendMsgToContentScript(Msg.MemoryInfo);
       },
 
       onChangeFrame,

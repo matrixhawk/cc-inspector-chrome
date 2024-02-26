@@ -41,7 +41,7 @@ class CCInspector {
         clearInterval(timer);
         // @ts-ignore
         cc.director.on(cc.Director.EVENT_AFTER_SCENE_LAUNCH, () => {
-          let isCocosGame = this._isCocosGame();
+          const isCocosGame = this._isCocosGame();
           this.notifySupportGame(isCocosGame);
         });
       }
@@ -126,10 +126,7 @@ class CCInspector {
 
   sendMsgToContent(msg: Msg, data: any) {
     // 发送给content.js处理，也会导致发送给了自身，死循环
-    window.postMessage(
-      new PluginEvent(Page.Inject, Page.Content, msg, data),
-      "*"
-    );
+    window.postMessage(new PluginEvent(Page.Inject, Page.Content, msg, data), "*");
   }
 
   notifySupportGame(b: boolean) {
@@ -536,7 +533,7 @@ class CCInspector {
       let keyDesc = "";
       if (Array.isArray(propValue)) {
         // 只收集一级key
-        propValue.forEach((item) => {});
+        propValue.forEach((item) => { });
         keyDesc = `(${propValue.length}) [...]`;
       } else if (this._isInvalidValue(propValue)) {
         // 不能改变顺序
@@ -581,7 +578,7 @@ class CCInspector {
     const name = this.getCompName(node);
     let nodeGroup = new Group(name, node.uuid);
     let keys = this._getNodeKeys(node);
-    for (let i = 0; i < keys.length; ) {
+    for (let i = 0; i < keys.length;) {
       let key = keys[i];
       let pair = this._getPairProperty(key);
       if (pair && this._checkKeysValid(node, pair.values)) {
@@ -730,7 +727,7 @@ class CCInspector {
   }
 }
 
-let inspector = new CCInspector();
+const inspector = new CCInspector();
 inspector.init();
 //@ts-ignore
 window.CCInspector = inspector;

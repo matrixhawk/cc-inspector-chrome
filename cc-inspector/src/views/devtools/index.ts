@@ -1,5 +1,4 @@
 import { createApp } from "vue";
-// 用的是ui/index.vue
 import App from "./index.vue";
 import CCP from "cc-plugin/src/ccp/entry-render";
 import pluginConfig from "../../../cc-plugin.config";
