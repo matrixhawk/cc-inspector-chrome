@@ -1,6 +1,6 @@
 const Key = "settings";
 
-export const enum RefreshType{
+export const enum RefreshType {
   Auto = "auto",
   Manual = "manual",
 }

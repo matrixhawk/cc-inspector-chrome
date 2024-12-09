@@ -5,7 +5,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, ref, provide, nextTick } from "vue";
+import { defineComponent, nextTick, onMounted, provide, ref } from "vue";
 export default defineComponent({
   name: "options",
   components: {},

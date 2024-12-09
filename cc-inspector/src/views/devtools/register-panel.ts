@@ -1,7 +1,7 @@
-import { ChromeConst } from "cc-plugin/src/chrome/const";
-import { connectBackground } from "./connectBackground";
-import { PluginEvent, Msg, Page } from "../../core/types";
 import CCP from "cc-plugin/src/ccp/entry-render";
+import { ChromeConst } from "cc-plugin/src/chrome/const";
+import { Msg, Page, PluginEvent } from "../../core/types";
+import { connectBackground } from "./connectBackground";
 export function init() {
   if (chrome && chrome.devtools) {
     // 对应的是Elements面板的边栏

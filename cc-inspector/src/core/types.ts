@@ -33,7 +33,7 @@ export class PluginEvent {
   /**
    * 事件要发送的目标
    */
-  target: Page | null = null; 
+  target: Page | null = null;
 
   static check(event: PluginEvent, source: Page, target: Page) {
     return event && source && target && event.source === source && event.target === target;

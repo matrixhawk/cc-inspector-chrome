@@ -5,16 +5,16 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, ref, provide, nextTick } from 'vue';
-import PluginConfig from '../../cc-plugin.config';
-import ccui from '@xuyanfeng/cc-ui';
+import ccui from "@xuyanfeng/cc-ui";
+import { defineComponent, nextTick, onMounted, provide, ref } from "vue";
+import PluginConfig from "../../cc-plugin.config";
 const { CCInput, CCButton } = ccui.components;
 export default defineComponent({
-  name: 'index',
+  name: "index",
   components: { CCButton },
   setup(props, { emit }) {
     onMounted(() => {
-      console.log('hi ~~~');
+      console.log("hi ~~~");
     });
     const msg = ref(PluginConfig.manifest.name);
     const count = ref(0);
@@ -23,7 +23,7 @@ export default defineComponent({
       count,
       onClickBtn() {
         count.value++;
-        console.log('click btn');
+        console.log("click btn");
       },
     };
   },

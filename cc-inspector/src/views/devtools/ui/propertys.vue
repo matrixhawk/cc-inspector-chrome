@@ -1,19 +1,15 @@
 <template>
   <div id="prop">
-    <PropertyGroup
-      v-for="(group, index) in data.group"
-      :key="index"
-      :group="group"
-    ></PropertyGroup>
+    <PropertyGroup v-for="(group, index) in data.group" :key="index" :group="group"></PropertyGroup>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType, watch } from "vue";
-import UiProp from "./ui-prop.vue";
+import Bus, { BusMsg } from "../bus";
 import { Group, NodeInfoData } from "../data";
 import PropertyGroup from "../ui/property-group.vue";
-import Bus, { BusMsg } from "../bus";
+import UiProp from "./ui-prop.vue";
 
 export default defineComponent({
   components: { PropertyGroup, UiProp },

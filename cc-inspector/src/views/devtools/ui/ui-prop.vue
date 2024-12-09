@@ -1,21 +1,7 @@
 <template>
   <div id="ui-prop">
-    <div
-      class="normal-data"
-      style="
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        min-height: 30px;
-        margin: 0;
-      "
-    >
-      <div
-        @mousedown="onPropNameMouseDown"
-        class="key"
-        @click="onClickFold"
-        :style="{ cursor: isArrayOrObject() ? 'pointer' : '' }"
-      >
+    <div class="normal-data" style="display: flex; flex-direction: row; align-items: center; min-height: 30px; margin: 0">
+      <div @mousedown="onPropNameMouseDown" class="key" @click="onClickFold" :style="{ cursor: isArrayOrObject() ? 'pointer' : '' }">
         <i
           class="data-arrow"
           v-if="arrow"
@@ -42,67 +28,17 @@
         <div v-if="value.isInvalid()" class="invalid">
           {{ value.data }}
         </div>
-        <CCInput
-          v-if="value.isString()"
-          v-model="value.data"
-          :disabled="value.readonly"
-          @change="onChangeValue"
-        >
-        </CCInput>
-        <CCInput
-          v-if="value.isText()"
-          type="textarea"
-          :autosize="{ minRows: 3, maxRows: 5 }"
-          placeholder="请输入内容"
-          :disabled="value.readonly"
-          @change="onChangeValue"
-          v-model="value.data"
-        >
-        </CCInput>
-        <CCInputNumber
-          v-if="value.isNumber()"
-          style="width: 100%; text-align: left"
-          v-model="value.data"
-          :step="step"
-          :disabled="value.readonly"
-          @change="onChangeValue"
-          controls-position="right"
-        ></CCInputNumber>
+        <CCInput v-if="value.isString()" v-model="value.data" :disabled="value.readonly" @change="onChangeValue"> </CCInput>
+        <CCInput v-if="value.isText()" type="textarea" :autosize="{ minRows: 3, maxRows: 5 }" placeholder="请输入内容" :disabled="value.readonly" @change="onChangeValue" v-model="value.data"> </CCInput>
+        <CCInputNumber v-if="value.isNumber()" style="width: 100%; text-align: left" v-model="value.data" :step="step" :disabled="value.readonly" @change="onChangeValue" controls-position="right"></CCInputNumber>
 
         <div v-if="value.isVec2() || value.isVec3()" class="vec">
-          <ui-prop
-            v-for="(vec, index) in value.data"
-            :key="index"
-            :arrow="false"
-            :value="vec.value"
-            :name="vec.name"
-          >
-          </ui-prop>
+          <ui-prop v-for="(vec, index) in value.data" :key="index" :arrow="false" :value="vec.value" :name="vec.name"> </ui-prop>
         </div>
-        <CCSelect
-          v-model="value.data"
-          :disabled="value.readonly"
-          :data="getEnumValues(value)"
-          v-if="value.isEnum()"
-          style="width: 100%"
-          @change="onChangeValue"
-        >
-        </CCSelect>
-        <CCCheckBox
-          v-model="value.data"
-          v-if="value.isBool()"
-          :disabled="value.readonly"
-          @change="onChangeValue"
-        >
-        </CCCheckBox>
+        <CCSelect v-model="value.data" :disabled="value.readonly" :data="getEnumValues(value)" v-if="value.isEnum()" style="width: 100%" @change="onChangeValue"> </CCSelect>
+        <CCCheckBox v-model="value.data" v-if="value.isBool()" :disabled="value.readonly" @change="onChangeValue"> </CCCheckBox>
         <div class="color" v-if="value.isColor()">
-          <CCColor
-            style="position: absolute"
-            :disabled="value.readonly"
-            v-model="value.data"
-            @change="onChangeValue"
-          >
-          </CCColor>
+          <CCColor style="position: absolute" :disabled="value.readonly" v-model="value.data" @change="onChangeValue"> </CCColor>
           <div class="hex" :style="{ color: colorReverse(value.data) }">
             {{ value.data }}
           </div>
@@ -110,21 +46,8 @@
         <div v-if="value.isImage()" class="image-property">
           <!-- TODO: 适配 -->
           <div v-if="value.isImage() || true" placement="top" trigger="hover">
-            <div
-              style="
-                width: 100%;
-                height: 100%;
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                justify-content: center;
-              "
-            >
-              <img
-                :src="value.data"
-                alt="图片"
-                style="max-width: 100px; max-height: 100px; object-fit: contain"
-              />
+            <div style="width: 100%; height: 100%; display: flex; flex-direction: row; align-items: center; justify-content: center">
+              <img :src="value.data" alt="图片" style="max-width: 100px; max-height: 100px; object-fit: contain" />
             </div>
             <img :src="value.data" style="height: 36px" alt="图片" />
           </div>
@@ -145,50 +68,29 @@
         <div v-if="value.isObject() && fold" class="objectDesc">
           {{ value.data }}
         </div>
-        <div v-if="value.isArray()" class="array">
-          Array({{ value.data.length }})
-        </div>
+        <div v-if="value.isArray()" class="array">Array({{ value.data.length }})</div>
         <div class="slot" v-if="false">
           <slot></slot>
         </div>
       </div>
     </div>
     <div v-if="isArrayOrObject()">
-      <div
-        v-show="!fold && subData"
-        style="display: flex; flex-direction: column"
-      >
-        <ui-prop
-          v-for="(arr, index) in subData"
-          :key="index"
-          :indent="indent + 1"
-          :value="arr.value"
-          :name="getName(value.isArray(), arr)"
-        >
-        </ui-prop>
+      <div v-show="!fold && subData" style="display: flex; flex-direction: column">
+        <ui-prop v-for="(arr, index) in subData" :key="index" :indent="indent + 1" :value="arr.value" :name="getName(value.isArray(), arr)"> </ui-prop>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  ref,
-  toRaw,
-  watch,
-  onUnmounted,
-  onMounted,
-  PropType,
-} from "vue";
-import { DataType, EngineData, EnumData, Info, Property } from "../data";
-import { connectBackground } from "../connectBackground";
+import ccui from "@xuyanfeng/cc-ui";
+import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
+import { defineComponent, onMounted, onUnmounted, PropType, ref, toRaw, watch } from "vue";
 import { Msg } from "../../../core/types";
 import Bus, { BusMsg } from "../bus";
-import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
-import ccui from "@xuyanfeng/cc-ui";
-const { CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } =
-  ccui.components;
+import { connectBackground } from "../connectBackground";
+import { DataType, EngineData, EnumData, Info, Property } from "../data";
+const { CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } = ccui.components;
 
 export default defineComponent({
   name: "UiProp",
@@ -323,9 +225,7 @@ export default defineComponent({
           let uuid = value.path[0];
           let key = value.path[1]; // todo 暂时只支持一级key
           if (uuid && key) {
-            chrome.devtools.inspectedWindow.eval(
-              `window.CCInspector.logValue('${uuid}','${key}')`
-            );
+            chrome.devtools.inspectedWindow.eval(`window.CCInspector.logValue('${uuid}','${key}')`);
           }
         }
       },

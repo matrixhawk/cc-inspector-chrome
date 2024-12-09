@@ -24,10 +24,7 @@
       <a href="https://tidys.gitee.io/doc/#" target="_blank">
         <img class="icon" src="./res/tiezi.png" alt="" />
       </a>
-      <a
-        href="https://github.com/tidys/CocosCreatorPlugins/tree/master/CocosCreatorInspector"
-        target="_blank"
-      >
+      <a href="https://github.com/tidys/CocosCreatorPlugins/tree/master/CocosCreatorInspector" target="_blank">
         <img class="icon" src="./res/github.png" alt="" />
       </a>
       <a href="https://jq.qq.com/?_wv=1027&k=5SdPdy2" target="_blank">
@@ -39,12 +36,11 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, ref, provide, nextTick } from "vue";
+import ccui from "@xuyanfeng/cc-ui";
 import CCP from "cc-plugin/src/ccp/entry-render";
 import { ChromeConst } from "cc-plugin/src/chrome/const";
-import ccui from "@xuyanfeng/cc-ui";
-const { CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } =
-  ccui.components;
+import { defineComponent, nextTick, onMounted, provide, ref } from "vue";
+const { CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } = ccui.components;
 export default defineComponent({
   name: "popup",
   components: {

@@ -1,4 +1,6 @@
 // eval 注入脚本的代码,变量尽量使用var,后来发现在import之后,let会自动变为var
+import { uniq } from "lodash";
+import { Msg, Page, PluginEvent } from "../../core/types";
 import {
   ArrayData,
   BoolData,
@@ -19,15 +21,13 @@ import {
   Vec2Data,
   Vec3Data,
 } from "../../views/devtools/data";
-import { Msg, Page, PluginEvent } from "../../core/types";
+import { getValue, trySetValueWithConfig } from "./setValue";
 import {
   BuildArrayOptions,
   BuildImageOptions,
   BuildObjectOptions,
   BuildVecOptions,
 } from "./types";
-import { uniq } from "lodash";
-import { trySetValueWithConfig, getValue } from "./setValue";
 import { isHasProperty } from "./util";
 
 declare const cc: any;

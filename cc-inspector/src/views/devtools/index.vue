@@ -68,19 +68,19 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, PropType, ref, onMounted, watch, toRaw, nextTick } from "vue";
-import properties from "./ui/propertys.vue";
-import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
 import ccui from "@xuyanfeng/cc-ui";
-const { CCTree, CCInput, CCButton, CCInputNumber, CCSelect, CCButtonGroup, CCCheckBox, CCColor, CCDivider } = ccui.components;
+import { ButtonGroupItem } from "@xuyanfeng/cc-ui/types/cc-button-group/const";
+import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
+import { ITreeData } from "@xuyanfeng/cc-ui/types/cc-tree/const";
+import { defineComponent, nextTick, onMounted, PropType, reactive, ref, toRaw, watch } from "vue";
 import { Msg, Page, PluginEvent } from "../../core/types";
+import Bus, { BusMsg } from "./bus";
 import { connectBackground } from "./connectBackground";
 import { EngineData, FrameDetails, Info, NodeInfoData, ObjectData, ObjectItemRequestData, TreeData } from "./data";
-import Bus, { BusMsg } from "./bus";
-import SettingsVue from "./ui/settings.vue";
 import { RefreshType, settings } from "./settings";
-import { ButtonGroupItem } from "@xuyanfeng/cc-ui/types/cc-button-group/const";
-import { ITreeData } from "@xuyanfeng/cc-ui/types/cc-tree/const";
+import properties from "./ui/propertys.vue";
+import SettingsVue from "./ui/settings.vue";
+const { CCTree, CCInput, CCButton, CCInputNumber, CCSelect, CCButtonGroup, CCCheckBox, CCColor, CCDivider } = ccui.components;
 interface FrameInfo {
   label: string;
   value: number;

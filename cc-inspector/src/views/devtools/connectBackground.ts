@@ -1,4 +1,4 @@
-import {PluginEvent, Page, Msg} from "../../core/types";
+import { Msg, Page, PluginEvent } from "../../core/types";
 
 class ConnectBackground {
   connect: chrome.runtime.Port | null = null;
@@ -9,7 +9,7 @@ class ConnectBackground {
 
   private _initConnect() {
     if (chrome && chrome.runtime) {
-      this.connect = chrome.runtime.connect({name: Page.Devtools});
+      this.connect = chrome.runtime.connect({ name: Page.Devtools });
       this.connect.onDisconnect.addListener(() => {
         console.log(`%c[Connect-Dis]`, "color:red;")
         this.connect = null;

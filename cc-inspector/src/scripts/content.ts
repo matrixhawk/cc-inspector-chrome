@@ -1,8 +1,8 @@
 // content.js 和原始界面共享DOM，具有操作dom的能力
 // 但是不共享js,要想访问页面js,只能通过注入的方式
-import { injectScript } from "../core/util";
-import { Msg, Page, PluginEvent } from "../core/types";
 import { ChromeConst } from "cc-plugin/src/chrome/const";
+import { Msg, Page, PluginEvent } from "../core/types";
+import { injectScript } from "../core/util";
 injectScript(ChromeConst.script.inject);
 
 class Content {

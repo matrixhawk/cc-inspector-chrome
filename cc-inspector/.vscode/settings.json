@@ -5,11 +5,13 @@
   "[typescript]": {
     "editor.tabSize": 2,
     "editor.formatOnSave": true,
+    "prettier.printWidth": 800,
     "editor.defaultFormatter": "vscode.typescript-language-features"
   },
   "[vue]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.tabSize": 2
+    "editor.tabSize": 2,
+    "prettier.printWidth": 800
   },
   "files.refactoring.autoSave": false,
   "search.exclude": {
@@ -18,7 +20,17 @@
     "**/*.code-search": true,
     "chrome": true,
     "yarn-error.log": true,
-    "yarn.lock": true
+    "yarn.lock": true,
+    ".yalc/": true
+  },
+  "files.exclude": {
+    ".yalc/": false,
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true
   },
   "prettier.printWidth": 1000
 }

@@ -1,11 +1,6 @@
 <template>
   <div class="property-group">
-    <div
-      class="header"
-      @click="onClickHeader"
-      @mouseenter="showLogBtn = true"
-      @mouseleave="showLogBtn = false"
-    >
+    <div class="header" @click="onClickHeader" @mouseenter="showLogBtn = true" @mouseleave="showLogBtn = false">
       <div style="margin: 0 5px">
         <i v-if="fold" class="iconfont icon_arrow_right"></i>
         <i v-if="!fold" class="iconfont icon_arrow_down"></i>
@@ -13,35 +8,23 @@
       <div style="flex: 1">
         {{ group.name }}
       </div>
-      <CCButton
-        style="margin-right: 10px"
-        v-show="showLogBtn"
-        type="success"
-        @click.stop="onLog"
-      >
+      <CCButton style="margin-right: 10px" v-show="showLogBtn" type="success" @click.stop="onLog">
         <i class="iconfont icon_print"></i>
       </CCButton>
     </div>
     <div class="content" v-show="!fold">
-      <ui-prop
-        v-for="(item, index) in group.data"
-        :key="index"
-        :name="item.name"
-        :value="item.value"
-      >
-      </ui-prop>
+      <ui-prop v-for="(item, index) in group.data" :key="index" :name="item.name" :value="item.value"> </ui-prop>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, PropType } from "vue";
+import ccui from "@xuyanfeng/cc-ui";
+import { defineComponent, PropType, ref } from "vue";
+import Bus, { BusMsg } from "../bus";
 import { Group } from "../data";
 import UiProp from "./ui-prop.vue";
-import Bus, { BusMsg } from "../bus";
-import ccui from "@xuyanfeng/cc-ui";
-const { CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } =
-  ccui.components;
+const { CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } = ccui.components;
 export default defineComponent({
   name: "property-group",
   components: {

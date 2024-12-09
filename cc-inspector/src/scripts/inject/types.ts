@@ -1,10 +1,10 @@
-import {ArrayData, ImageData, ObjectData, Vec2Data, Vec3Data} from "../../views/devtools/data";
+import { ArrayData, ImageData, ObjectData, Vec2Data, Vec3Data } from "../../views/devtools/data";
 
 export interface BuildObjectOptions {
   path: string[];
   value: Object;
   data: ObjectData;
-  filterKey:boolean;
+  filterKey: boolean;
 }
 
 export interface BuildArrayOptions {
