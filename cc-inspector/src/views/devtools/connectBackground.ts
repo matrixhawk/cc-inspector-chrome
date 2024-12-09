@@ -1,19 +1,22 @@
+import CCP from "cc-plugin/src/ccp/entry-render";
 import { Msg, Page, PluginEvent } from "../../core/types";
+import { TestClient, testServer, TestServer } from "./test/server";
 export type BackgroundCallback = (data: PluginEvent, sender: any) => void;
-class ConnectBackground {
+class ConnectBackground implements TestClient {
   connect: chrome.runtime.Port | null = null;
-
   constructor() {
     this._initConnect();
   }
 
   private _initConnect() {
-    if (chrome && chrome.runtime) {
+    if (CCP.Adaptation.Env.isChromeRuntime) {
       this.connect = chrome.runtime.connect({ name: Page.Devtools });
       this.connect.onDisconnect.addListener(() => {
         console.log(`%c[Connect-Dis]`, "color:red;")
         this.connect = null;
       })
+    } else {
+      testServer.add(this);
     }
   }
   /**
@@ -28,16 +31,20 @@ class ConnectBackground {
       });
     }
   }
-  testMessage(data: PluginEvent) {
+  recv(event: PluginEvent): void {
+    this.doCallback(event);
+  }
+  doCallback(data: PluginEvent) {
     if (this.callback) {
       this.callback(data, null);
     }
   }
   sendMsgToContentScript(msg: Msg, data?: any) {
-    if (!chrome || !chrome.devtools) {
-      return;
+    if (CCP.Adaptation.Env.isChromeDevtools) {
+      this.postMessageToBackground(msg, data);
+    } else {
+      testServer.recv(msg, data);
     }
-    this.postMessageToBackground(msg, data);
   }
   postMessageToBackground(msg: Msg, data?: any) {
     if (this.connect) {

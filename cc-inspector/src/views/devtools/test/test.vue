@@ -11,9 +11,10 @@
 import ccui from "@xuyanfeng/cc-ui";
 import { ITreeData } from "@xuyanfeng/cc-ui/types/cc-tree/const";
 import { defineComponent, ref } from "vue";
-import { Msg, Page, PluginEvent } from "../../core/types";
-import { connectBackground } from "./connectBackground";
-import { TreeData } from "./data";
+import { Msg, Page, PluginEvent } from "../../../core/types";
+import { connectBackground } from "../connectBackground";
+import { TreeData } from "../data";
+import { TestServer } from "./server";
 const { CCButton, CCSection } = ccui.components;
 export default defineComponent({
   name: "test",
@@ -40,7 +41,7 @@ export default defineComponent({
           children: [],
         };
         const event = new PluginEvent(Page.Inject, Page.Devtools, Msg.TreeInfo, data);
-        connectBackground.testMessage(event);
+        connectBackground.doCallback(event);
       },
     };
   },

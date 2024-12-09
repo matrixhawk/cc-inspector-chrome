@@ -259,6 +259,12 @@ export class Group {
 }
 
 export interface NodeInfoData {
-  uuid: string;// 节点的uuid
+  /**
+   * 节点的uuid
+   */
+  uuid: string;
+  /**
+   * 组件数据
+   */
   group: Group[];
 }

@@ -23,7 +23,7 @@
           </slot>
         </CCInput>
         <div class="treeList">
-          <CCTree :value="treeData"></CCTree>
+          <CCTree :value="treeData" @node-click="handleNodeClick"></CCTree>
           <!-- <el-tree
             :data="treeData"
             ref="tree"
@@ -78,10 +78,10 @@ import Bus, { BusMsg } from "./bus";
 import { connectBackground } from "./connectBackground";
 import { EngineData, FrameDetails, Info, NodeInfoData, ObjectData, ObjectItemRequestData, TreeData } from "./data";
 import { appStore, RefreshType } from "./store";
-import Test from "./test.vue";
-ccui.components.CCAd;
+import Test from "./test/test.vue";
 import properties from "./ui/propertys.vue";
 import SettingsVue from "./ui/settings.vue";
+ccui.components.CCAd;
 const { CCTree, CCFootBar, CCDialog, CCInput, CCButton, CCInputNumber, CCSelect, CCButtonGroup, CCCheckBox, CCColor, CCDivider } = ccui.components;
 interface FrameInfo {
   label: string;
