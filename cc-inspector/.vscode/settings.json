@@ -5,8 +5,15 @@
   "[typescript]": {
     "editor.tabSize": 2,
     "editor.formatOnSave": true,
-    "prettier.printWidth": 800,
+    "prettier.printWidth": 1800,
     "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[json]": {
+    "editor.quickSuggestions": {
+      "strings": true
+    },
+    "editor.suggest.insertMode": "replace",
+    "editor.tabSize": 2
   },
   "[vue]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",

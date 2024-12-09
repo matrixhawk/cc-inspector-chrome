@@ -1,10 +1,6 @@
 <template>
   <div id="devtools">
-    <!-- <el-drawer title="settings" direction="btt" @close="onCloseSettings" :visible.sync="showSettings">
-            <div>
-                <SettingsVue></SettingsVue>
-            </div>
-        </el-drawer> -->
+    <Test @valid-game="testValidGame"> </Test>
     <div class="head" v-show="iframes.length > 1">
       <div class="label">inspect target:</div>
       <CCSelect v-model:value="frameID" placeholder="please select ..." @change="onChangeFrame" :data="getFramesData()"> </CCSelect>
@@ -64,6 +60,8 @@
         <i class="iconfont icon_refresh"></i>
       </CCButton>
     </div>
+    <CCDialog></CCDialog>
+    <CCFootBar :version="version"></CCFootBar>
   </div>
 </template>
 
@@ -72,27 +70,31 @@ import ccui from "@xuyanfeng/cc-ui";
 import { ButtonGroupItem } from "@xuyanfeng/cc-ui/types/cc-button-group/const";
 import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
 import { ITreeData } from "@xuyanfeng/cc-ui/types/cc-tree/const";
-import { defineComponent, nextTick, onMounted, PropType, reactive, ref, toRaw, watch } from "vue";
+import { _UnwrapAll, Store, storeToRefs } from "pinia";
+import { defineComponent, nextTick, onMounted, PropType, reactive, Ref, ref, toRaw, watch } from "vue";
+import PluginConfig from "../../../cc-plugin.config";
 import { Msg, Page, PluginEvent } from "../../core/types";
 import Bus, { BusMsg } from "./bus";
 import { connectBackground } from "./connectBackground";
 import { EngineData, FrameDetails, Info, NodeInfoData, ObjectData, ObjectItemRequestData, TreeData } from "./data";
-import { RefreshType, settings } from "./settings";
+import { appStore, RefreshType } from "./store";
+import Test from "./test.vue";
 import properties from "./ui/propertys.vue";
 import SettingsVue from "./ui/settings.vue";
-const { CCTree, CCInput, CCButton, CCInputNumber, CCSelect, CCButtonGroup, CCCheckBox, CCColor, CCDivider } = ccui.components;
+const { CCTree, CCFootBar, CCDialog, CCInput, CCButton, CCInputNumber, CCSelect, CCButtonGroup, CCCheckBox, CCColor, CCDivider } = ccui.components;
 interface FrameInfo {
   label: string;
   value: number;
 }
 
 export default defineComponent({
-  components: { CCTree, CCDivider, CCButtonGroup, properties, SettingsVue, CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor },
+  components: { Test, CCFootBar, CCDialog, CCTree, CCDivider, CCButtonGroup, properties, SettingsVue, CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor },
   name: "devtools",
   props: {},
   setup(props, ctx) {
+    appStore().init();
+    const { config } = storeToRefs(appStore());
     const treeItemData = ref<NodeInfoData | null>({ uuid: "", group: [] });
-    const showSettings = ref<boolean>(false);
     const isShowDebug = ref<boolean>(true);
     const frameID = ref<number>(0);
     const iframes = ref<Array<FrameInfo>>([]);
@@ -108,7 +110,10 @@ export default defineComponent({
       {
         icon: "icon_settings",
         click: () => {
-          showSettings.value = true;
+          ccui.dialog.showDialog({
+            comp: SettingsVue,
+            title: "Settings",
+          });
         },
       },
     ]);
@@ -391,18 +396,16 @@ export default defineComponent({
       }
     }
     function syncSettings() {
-      if (settings.data) {
-        const { refreshType, refreshTime } = settings.data;
-        switch (refreshType) {
-          case RefreshType.Auto: {
-            btnRefresh.visible = false;
-            onEnableTreeWatch(true, refreshTime);
-            break;
-          }
-          case RefreshType.Manual: {
-            btnRefresh.visible = true;
-            onEnableTreeWatch(false);
-          }
+      const { refreshType, refreshTime } = config.value;
+      switch (refreshType) {
+        case RefreshType.Auto: {
+          btnRefresh.visible = false;
+          onEnableTreeWatch(true, refreshTime);
+          break;
+        }
+        case RefreshType.Manual: {
+          btnRefresh.visible = true;
+          onEnableTreeWatch(false);
         }
       }
     }
@@ -422,7 +425,9 @@ export default defineComponent({
       connectBackground.sendMsgToContentScript(Msg.UseFrame, frameID);
     }
     const elLeft = ref<HTMLDivElement>();
+    const version = ref(PluginConfig.manifest.version);
     return {
+      version,
       buttonGroup,
       elTree,
       memory,
@@ -431,11 +436,13 @@ export default defineComponent({
       matchCase,
       iframes,
       isShowDebug,
-      showSettings,
       expandedKeys,
       treeData,
       treeItemData,
       frameID,
+      testValidGame(b: boolean) {
+        isShowDebug.value = !!b;
+      },
       getFramesData(): Option[] {
         const frames: FrameInfo[] = toRaw(iframes.value);
         const options: Option[] = [];
@@ -471,10 +478,6 @@ export default defineComponent({
       onBtnClickUpdatePage() {
         connectBackground.sendMsgToContentScript(Msg.Support);
       },
-      onCloseSettings() {
-        syncSettings();
-      },
-
       onMemoryTest() {
         connectBackground.sendMsgToContentScript(Msg.MemoryInfo);
       },

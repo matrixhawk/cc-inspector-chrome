@@ -1,26 +1,26 @@
 <template>
   <div class="settings">
-    <settings-prop label="refresh">
-      <CCSelect v-model="refreshType" :data="refreshOptions" @change="onCommonSave" style="flex: 1"> </CCSelect>
-    </settings-prop>
-    <settings-prop label="refresh time: " v-show="isRefreshAuto()">
-      <CCInputNumber style="flex: 1" :min="100" v-model="refreshTime" @change="onCommonSave"></CCInputNumber>
-      <span>ms</span>
-    </settings-prop>
+    <CCProp name="refresh">
+      <CCSelect :value="config.refreshType" :data="refreshOptions" @change="onChangeRefreshType" style="flex: 1"> </CCSelect>
+    </CCProp>
+    <CCProp name="refresh time: " v-show="isRefreshAuto()">
+      <CCInputNumber style="flex: 1" :min="100" :value="config.refreshTime" @change="onChangeRefreshTime"></CCInputNumber>
+      <span style="margin: 0 3px">ms</span>
+    </CCProp>
   </div>
 </template>
 
 <script lang="ts">
 import ccui from "@xuyanfeng/cc-ui";
 import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
+import { storeToRefs } from "pinia";
 import { defineComponent, onMounted, ref, toRaw } from "vue";
-import { RefreshType, settings } from "../settings";
-import SettingsProp from "./settings-prop.vue";
-const { CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } = ccui.components;
+import { appStore, RefreshType } from "../store";
+const { CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCProp, CCColor } = ccui.components;
 export default defineComponent({
   name: "settings",
   components: {
-    SettingsProp,
+    CCProp,
     CCInput,
     CCButton,
     CCInputNumber,
@@ -34,22 +34,22 @@ export default defineComponent({
       { label: "auto", value: RefreshType.Auto },
       { label: "manual", value: RefreshType.Manual },
     ]);
-    const refreshType = ref(settings.data?.refreshType || "");
-    const refreshTime = ref(settings.data?.refreshTime || 500);
+    const { config } = storeToRefs(appStore());
     return {
-      refreshType,
-      refreshTime,
+      config,
       refreshOptions,
       isRefreshAuto() {
-        return refreshType.value === RefreshType.Auto;
+        return config.value.refreshType === RefreshType.Auto;
       },
-      onChangeRefreshType() {},
-      onCommonSave() {
-        if (settings.data) {
-          settings.data.refreshType = toRaw(refreshType.value);
-          settings.data.refreshTime = toRaw(refreshTime.value);
-          settings.save();
-        }
+      onChangeRefreshType(type: RefreshType) {
+        const store = appStore();
+        store.config.refreshType = type;
+        store.save();
+      },
+      onChangeRefreshTime(v: number) {
+        const store = appStore();
+        store.config.refreshTime = v;
+        store.save();
       },
     };
   },
@@ -58,5 +58,7 @@ export default defineComponent({
 
 <style scoped lang="less">
 .settings {
+  color: white;
+  background-color: #4d4d4d;
 }
 </style>

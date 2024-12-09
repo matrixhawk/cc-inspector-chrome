@@ -1,5 +1,5 @@
 <template>
-  <div id="prop">
+  <div class="prop">
     <PropertyGroup v-for="(group, index) in data.group" :key="index" :group="group"></PropertyGroup>
   </div>
 </template>
@@ -41,6 +41,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
-#prop {
+.prop {
+  color: white;
 }
 </style>
