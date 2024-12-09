@@ -8,22 +8,52 @@ export enum Page {
 }
 
 export enum Msg {
-  NodeInfo = "node-info",// 具体的节点信息
-  TreeInfo = "tree-info",// 节点树信息
-  Support = "game-support",// 游戏支持信息
+  /**
+   * 具体的节点信息
+   */
+  NodeInfo = "node-info",
+  /**
+   * 节点树信息
+   */
+  TreeInfo = "tree-info",
+  /**
+   * 游戏支持信息
+   */
+  Support = "game-support",// 
   MemoryInfo = "memory-info",//
-  TabsInfo = "tabs_info", // 当前页面信息
-  GetTabID = "GetTabID", // 获取页面ID
-  UpdateFrames = "UpdateFrames", // 更新页面的frame
+  /**
+   * 当前页面信息
+   */
+  TabsInfo = "tabs_info",
+  /**
+   * 获取页面ID
+   */
+  GetTabID = "GetTabID",
+  /**
+   * 更新页面的frame
+   */
+  UpdateFrames = "UpdateFrames",
   UseFrame = "UseFrame",
   GetObjectItemData = "GetObjectItemData",
   LogData = "LogData",
-  SetProperty = "set-property", // 设置node属性
-  UpdateProperty = "update-property", // 更新属性
+  /**
+   * 设置node属性
+   */
+  SetProperty = "set-property",
+  /**
+   * 更新属性
+   */
+  UpdateProperty = "update-property",
 }
 
 export class PluginEvent {
+  /**
+   * 消息的类型
+   */
   msg: Msg | null = null;
+  /**
+   * 携带的数据
+   */
   data: any = null;
 
   /**

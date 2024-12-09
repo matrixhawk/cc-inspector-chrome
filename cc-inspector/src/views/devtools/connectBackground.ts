@@ -1,5 +1,5 @@
 import { Msg, Page, PluginEvent } from "../../core/types";
-
+export type BackgroundCallback = (data: PluginEvent, sender: any) => void;
 class ConnectBackground {
   connect: chrome.runtime.Port | null = null;
 
@@ -16,17 +16,25 @@ class ConnectBackground {
       })
     }
   }
-
-  onBackgroundMessage(cb: Function) {
+  /**
+   * 把callback保存为变量，方便测试
+   */
+  private callback: BackgroundCallback | null = null;
+  onBackgroundMessage(cb: BackgroundCallback) {
+    this.callback = cb;
     if (this.connect) {
       this.connect.onMessage.addListener((event, sender) => {
         cb && cb(event, sender)
       });
     }
   }
+  testMessage(data: PluginEvent) {
+    if (this.callback) {
+      this.callback(data, null);
+    }
+  }
   sendMsgToContentScript(msg: Msg, data?: any) {
     if (!chrome || !chrome.devtools) {
-      console.log("环境异常，无法执行函数");
       return;
     }
     this.postMessageToBackground(msg, data);

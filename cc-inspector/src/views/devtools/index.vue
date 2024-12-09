@@ -23,7 +23,7 @@
           </slot>
         </CCInput>
         <div class="treeList">
-          <CCTree></CCTree>
+          <CCTree :value="treeData"></CCTree>
           <!-- <el-tree
             :data="treeData"
             ref="tree"
@@ -79,6 +79,7 @@ import { connectBackground } from "./connectBackground";
 import { EngineData, FrameDetails, Info, NodeInfoData, ObjectData, ObjectItemRequestData, TreeData } from "./data";
 import { appStore, RefreshType } from "./store";
 import Test from "./test.vue";
+ccui.components.CCAd;
 import properties from "./ui/propertys.vue";
 import SettingsVue from "./ui/settings.vue";
 const { CCTree, CCFootBar, CCDialog, CCInput, CCButton, CCInputNumber, CCSelect, CCButtonGroup, CCCheckBox, CCColor, CCDivider } = ccui.components;
@@ -133,7 +134,7 @@ export default defineComponent({
       function circle(tree: TreeData[]) {
         for (let i = 0; i < tree.length; i++) {
           let item: TreeData = tree[i];
-          if (item.uuid === targetUUID) {
+          if (item.id === targetUUID) {
             return true;
           }
           if (circle(item.children)) {
@@ -178,87 +179,6 @@ export default defineComponent({
       // 高亮uuid
     }
 
-    function _onMsgNodeInfo(eventData: NodeInfoData) {
-      isShowDebug.value = true;
-      treeItemData.value = eventData;
-    }
-
-    function _onMsgMemoryInfo(eventData: any) {
-      memory.value = eventData;
-    }
-
-    function _onMsgSupport(isCocosGame: boolean) {
-      isShowDebug.value = isCocosGame;
-      if (isCocosGame) {
-        syncSettings();
-        onBtnClickUpdateTree();
-      } else {
-        _clearTimer();
-        treeData.value.length = 0;
-        treeItemData.value = null;
-        selectedUUID = null;
-      }
-    }
-    function _onMsgGetObjectItemData(requestData: ObjectItemRequestData) {
-      if (requestData.id !== null) {
-        let findIndex = requestList.findIndex((el) => el.id === requestData.id);
-        if (findIndex > -1) {
-          let del = requestList.splice(findIndex, 1)[0];
-          del.cb(requestData.data);
-        }
-      }
-    }
-
-    function _onMsgUpdateFrames(details: FrameDetails[]) {
-      // 先把iframes里面无效的清空了
-      iframes.value = iframes.value.filter((item) => {
-        details.find((el) => el.frameID === item.value);
-      });
-
-      // 同步配置
-      details.forEach((item) => {
-        let findItem = iframes.value.find((el) => el.value === item.frameID);
-        if (findItem) {
-          findItem.label = item.url;
-        } else {
-          iframes.value.push({
-            label: item.url,
-            value: item.frameID,
-          });
-        }
-      });
-      // 第一次获取到frame配置后，自动获取frame数据
-      if (frameID === null && iframes.value.length > 0 && !iframes.value.find((el) => el.value === frameID.value)) {
-        frameID.value = iframes[0].value;
-        onChangeFrame();
-      }
-    }
-
-    function _onMsgUpdateProperty(data: Info) {
-      const uuid = data.path[0];
-      const key = data.path[1];
-      const value = data.data;
-      let treeArray: Array<TreeData> = [];
-
-      function circle(array: Array<TreeData>) {
-        array.forEach((item) => {
-          treeArray.push(item);
-          circle(item.children);
-        });
-      }
-
-      // 更新指定uuid节点的tree的name
-      circle(treeData.value);
-      let ret = treeArray.find((el) => el.uuid === uuid);
-      if (ret) {
-        if (key === "name") {
-          ret.name = value;
-        }
-        if (key === "active") {
-          ret.active = !!value;
-        }
-      }
-    }
     // 问题：没有上下文的权限，只能操作DOM
     function _executeScript(para: Object) {
       // chrome.tabs.executeScript()//v2版本使用的函数
@@ -277,32 +197,103 @@ export default defineComponent({
       });
     }
     const elTree = ref<HTMLElement>();
-    function _onMsgTreeInfo(treeData: Array<TreeData>) {
-      console.log("treeData");
-      isShowDebug.value = true;
-      if (!Array.isArray(treeData)) {
-        treeData = [treeData];
-      }
-      treeData = treeData;
-      if (_checkSelectedUUID()) {
-        updateNodeInfo();
-        nextTick(() => {
-          if (elTree.value) {
-            //@ts-ignore
-            elTree.value.setCurrentKey(selectedUUID);
-          }
-        });
-      }
-    }
+
     function _initChromeRuntimeConnect() {
       const msgFunctionMap: Record<string, Function> = {};
-      msgFunctionMap[Msg.TreeInfo] = _onMsgTreeInfo;
-      msgFunctionMap[Msg.Support] = _onMsgSupport;
-      msgFunctionMap[Msg.NodeInfo] = _onMsgNodeInfo;
-      msgFunctionMap[Msg.MemoryInfo] = _onMsgMemoryInfo;
-      msgFunctionMap[Msg.UpdateProperty] = _onMsgUpdateProperty;
-      msgFunctionMap[Msg.UpdateFrames] = _onMsgUpdateFrames;
-      msgFunctionMap[Msg.GetObjectItemData] = _onMsgGetObjectItemData;
+      msgFunctionMap[Msg.TreeInfo] = (data: Array<TreeData>) => {
+        isShowDebug.value = true;
+        if (!Array.isArray(data)) {
+          data = [data];
+        }
+        console.log(data);
+        treeData.value = data;
+        if (_checkSelectedUUID()) {
+          updateNodeInfo();
+          nextTick(() => {
+            if (elTree.value) {
+              //@ts-ignore
+              elTree.value.setCurrentKey(selectedUUID);
+            }
+          });
+        }
+      };
+      msgFunctionMap[Msg.Support] = (isCocosGame: boolean) => {
+        isShowDebug.value = isCocosGame;
+        if (isCocosGame) {
+          syncSettings();
+          onBtnClickUpdateTree();
+        } else {
+          _clearTimer();
+          treeData.value.length = 0;
+          treeItemData.value = null;
+          selectedUUID = null;
+        }
+      };
+      msgFunctionMap[Msg.NodeInfo] = (eventData: NodeInfoData) => {
+        isShowDebug.value = true;
+        treeItemData.value = eventData;
+      };
+      msgFunctionMap[Msg.MemoryInfo] = (eventData: any) => {
+        memory.value = eventData;
+      };
+      msgFunctionMap[Msg.UpdateProperty] = (data: Info) => {
+        const uuid = data.path[0];
+        const key = data.path[1];
+        const value = data.data;
+        let treeArray: Array<TreeData> = [];
+
+        function circle(array: Array<TreeData>) {
+          array.forEach((item) => {
+            treeArray.push(item);
+            circle(item.children);
+          });
+        }
+
+        // 更新指定uuid节点的tree的name
+        circle(treeData.value);
+        let ret = treeArray.find((el) => el.id === uuid);
+        if (ret) {
+          if (key === "name") {
+            ret.text = value;
+          }
+          if (key === "active") {
+            ret.active = !!value;
+          }
+        }
+      };
+      msgFunctionMap[Msg.UpdateFrames] = (details: FrameDetails[]) => {
+        // 先把iframes里面无效的清空了
+        iframes.value = iframes.value.filter((item) => {
+          details.find((el) => el.frameID === item.value);
+        });
+
+        // 同步配置
+        details.forEach((item) => {
+          let findItem = iframes.value.find((el) => el.value === item.frameID);
+          if (findItem) {
+            findItem.label = item.url;
+          } else {
+            iframes.value.push({
+              label: item.url,
+              value: item.frameID,
+            });
+          }
+        });
+        // 第一次获取到frame配置后，自动获取frame数据
+        if (frameID === null && iframes.value.length > 0 && !iframes.value.find((el) => el.value === frameID.value)) {
+          frameID.value = iframes[0].value;
+          onChangeFrame();
+        }
+      };
+      msgFunctionMap[Msg.GetObjectItemData] = (requestData: ObjectItemRequestData) => {
+        if (requestData.id !== null) {
+          let findIndex = requestList.findIndex((el) => el.id === requestData.id);
+          if (findIndex > -1) {
+            let del = requestList.splice(findIndex, 1)[0];
+            del.cb(requestData.data);
+          }
+        }
+      };
       // 接收来自background.js的消息数据
       connectBackground.onBackgroundMessage((data: PluginEvent, sender: any) => {
         if (!data) {
@@ -323,10 +314,7 @@ export default defineComponent({
         }
       });
     }
-    if (chrome && chrome.runtime) {
-      _initChromeRuntimeConnect();
-    }
-
+    _initChromeRuntimeConnect();
     window.addEventListener(
       "message",
       (event) => {
@@ -351,7 +339,7 @@ export default defineComponent({
     onMounted(() => {
       syncSettings();
     });
-    const treeData = ref<Array<TreeData>>([]);
+    const treeData = ref<TreeData[]>([]);
     const expandedKeys = ref<Array<string>>([]);
     const memory = ref<{
       performance: {
@@ -459,7 +447,7 @@ export default defineComponent({
         updateFilterText(filterText);
       },
       handleNodeClick(data: TreeData) {
-        selectedUUID = data.uuid;
+        selectedUUID = data.id;
         updateNodeInfo();
       },
       filterNode(value: any, data: any) {
@@ -484,13 +472,13 @@ export default defineComponent({
 
       onChangeFrame,
       onNodeExpand(data: TreeData) {
-        if (data.hasOwnProperty("uuid") && data.uuid) {
-          expandedKeys.value.push(data.uuid);
+        if (data.hasOwnProperty("uuid") && data.id) {
+          expandedKeys.value.push(data.id);
         }
       },
       onNodeCollapse(data: TreeData) {
         if (data.hasOwnProperty("uuid")) {
-          let index = expandedKeys.value.findIndex((el) => el === data.uuid);
+          let index = expandedKeys.value.findIndex((el) => el === data.id);
           if (index !== -1) {
             expandedKeys.value.splice(index, 1);
           }

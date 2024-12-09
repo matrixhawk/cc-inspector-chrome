@@ -191,8 +191,8 @@ class CCInspector {
 
   // 收集节点信息
   getNodeChildren(node: any, data: TreeData) {
-    data.uuid = node.uuid;
-    data.name = node.name;
+    data.id = node.uuid;
+    data.text = node.name;
     // @ts-ignore
     if (node instanceof cc.Scene) {
       // 场景不允许获取active，引擎会报错

@@ -1,5 +1,5 @@
+import { ITreeData } from '@xuyanfeng/cc-ui/types/cc-tree/const';
 import { v4 } from "uuid";
-
 export enum DataType {
   Number = 'Number',
   String = 'String',
@@ -208,11 +208,11 @@ export class EnumData extends Info {
   }
 }
 
-export class TreeData {
+export class TreeData implements ITreeData {
+  id: string = "";
   active: boolean = true;
-  uuid: string = "";
-  name: string = "";
-  children: Array<TreeData> = [];
+  text: string = "";
+  children: TreeData[] = [];
 }
 
 export class Property {

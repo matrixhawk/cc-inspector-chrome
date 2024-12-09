@@ -3,12 +3,17 @@
     <CCSection name="功能测试">
       <CCButton @click="onClickHasCocosGame">Has CocosGame</CCButton>
       <CCButton @click="onClickNoCocosGame">No CocosGame</CCButton>
+      <CCButton @click="onTestTree">init tree data</CCButton>
     </CCSection>
   </div>
 </template>
 <script lang="ts">
 import ccui from "@xuyanfeng/cc-ui";
+import { ITreeData } from "@xuyanfeng/cc-ui/types/cc-tree/const";
 import { defineComponent, ref } from "vue";
+import { Msg, Page, PluginEvent } from "../../core/types";
+import { connectBackground } from "./connectBackground";
+import { TreeData } from "./data";
 const { CCButton, CCSection } = ccui.components;
 export default defineComponent({
   name: "test",
@@ -26,6 +31,16 @@ export default defineComponent({
       },
       onClickNoCocosGame() {
         emit("validGame", false);
+      },
+      onTestTree() {
+        const data: TreeData = {
+          id: "1",
+          text: "root",
+          active: true,
+          children: [],
+        };
+        const event = new PluginEvent(Page.Inject, Page.Devtools, Msg.TreeInfo, data);
+        connectBackground.testMessage(event);
       },
     };
   },
