@@ -51,7 +51,7 @@
       </div>
       <CCDivider></CCDivider>
       <div class="right">
-        <properties v-if="treeItemData" :data="treeItemData"></properties>
+        <Properties v-if="treeItemData" :data="treeItemData"></Properties>
       </div>
     </div>
     <div v-show="!isShowDebug" class="no-find">
@@ -79,7 +79,7 @@ import { connectBackground } from "./connectBackground";
 import { EngineData, FrameDetails, Info, NodeInfoData, ObjectData, ObjectItemRequestData, TreeData } from "./data";
 import { appStore, RefreshType } from "./store";
 import Test from "./test/test.vue";
-import properties from "./ui/propertys.vue";
+import Properties from "./ui/propertys.vue";
 import SettingsVue from "./ui/settings.vue";
 ccui.components.CCAd;
 const { CCTree, CCFootBar, CCDialog, CCInput, CCButton, CCInputNumber, CCSelect, CCButtonGroup, CCCheckBox, CCColor, CCDivider } = ccui.components;
@@ -89,7 +89,7 @@ interface FrameInfo {
 }
 
 export default defineComponent({
-  components: { Test, CCFootBar, CCDialog, CCTree, CCDivider, CCButtonGroup, properties, SettingsVue, CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor },
+  components: { Test, CCFootBar, CCDialog, CCTree, CCDivider, CCButtonGroup, Properties, SettingsVue, CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor },
   name: "devtools",
   props: {},
   setup(props, ctx) {
@@ -333,6 +333,9 @@ export default defineComponent({
       requestList.push({ id: data.id, cb });
       connectBackground.sendMsgToContentScript(Msg.GetObjectItemData, data);
     });
+    Bus.on(BusMsg.UpdateSettings, () => {
+      syncSettings();
+    });
     Bus.on(BusMsg.LogData, (data: string[]) => {
       connectBackground.sendMsgToContentScript(Msg.LogData, data);
     });
@@ -496,7 +499,8 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   overflow: hidden;
-
+  background-color: #5c5c5c;
+  color: white;
   .head {
     display: flex;
     flex-direction: row;

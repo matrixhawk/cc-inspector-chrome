@@ -1,20 +1,14 @@
 <template>
   <div class="property-group">
-    <div class="header" @click="onClickHeader" @mouseenter="showLogBtn = true" @mouseleave="showLogBtn = false">
-      <div style="margin: 0 5px">
-        <i v-if="fold" class="iconfont icon_arrow_right"></i>
-        <i v-if="!fold" class="iconfont icon_arrow_down"></i>
+    <CCSection :expand="!fold" :name="group.name" :expand-by-full-header="true" :auto-slot-header="true">
+      <template v-slot:header>
+        <div style="flex: 1"></div>
+        <i style="" @click.stop="onLog" class="print iconfont icon_print"></i>
+      </template>
+      <div>
+        <UiProp v-for="(item, index) in group.data" :key="index" :name="item.name" :value="item.value"> </UiProp>
       </div>
-      <div style="flex: 1">
-        {{ group.name }}
-      </div>
-      <CCButton style="margin-right: 10px" v-show="showLogBtn" type="success" @click.stop="onLog">
-        <i class="iconfont icon_print"></i>
-      </CCButton>
-    </div>
-    <div class="content" v-show="!fold">
-      <ui-prop v-for="(item, index) in group.data" :key="index" :name="item.name" :value="item.value"> </ui-prop>
-    </div>
+    </CCSection>
   </div>
 </template>
 
@@ -24,11 +18,12 @@ import { defineComponent, PropType, ref } from "vue";
 import Bus, { BusMsg } from "../bus";
 import { Group } from "../data";
 import UiProp from "./ui-prop.vue";
-const { CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } = ccui.components;
+const { CCInput, CCSection, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } = ccui.components;
 export default defineComponent({
   name: "property-group",
   components: {
     UiProp,
+    CCSection,
     CCInput,
     CCButton,
     CCInputNumber,
@@ -49,16 +44,10 @@ export default defineComponent({
       fold.value = b;
     });
     const fold = ref(false);
-    const showLogBtn = ref(false);
     return {
-      showLogBtn,
       fold,
       onLog() {
         Bus.emit(BusMsg.LogData, [props.group.id]);
-      },
-
-      onClickHeader() {
-        fold.value = !fold.value;
       },
     };
   },
@@ -67,23 +56,14 @@ export default defineComponent({
 
 <style scoped lang="less">
 .property-group {
-  .header {
-    height: 40px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    user-select: none;
-    cursor: pointer;
-    border-bottom: 1px #6d6d6d solid;
-    background-color: #1da1f7;
-  }
-
-  .header:hover {
-    color: #6d6d6d;
-  }
-
-  .content {
-    padding: 0 5px;
+  .print {
+    margin-right: 10px;
+    &:hover {
+      color: #ffffff;
+    }
+    &:active {
+      color: #ffaa00;
+    }
   }
 }
 </style>
