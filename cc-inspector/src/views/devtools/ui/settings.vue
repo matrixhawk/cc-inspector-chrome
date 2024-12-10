@@ -15,6 +15,7 @@ import ccui from "@xuyanfeng/cc-ui";
 import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
 import { storeToRefs } from "pinia";
 import { defineComponent, onMounted, ref, toRaw } from "vue";
+import bus, { BusMsg } from "../bus";
 import { appStore, RefreshType } from "../store";
 const { CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCProp, CCColor } = ccui.components;
 export default defineComponent({
@@ -45,11 +46,13 @@ export default defineComponent({
         const store = appStore();
         store.config.refreshType = type;
         store.save();
+        bus.emit(BusMsg.UpdateSettings);
       },
       onChangeRefreshTime(v: number) {
         const store = appStore();
         store.config.refreshTime = v;
         store.save();
+        bus.emit(BusMsg.UpdateSettings);
       },
     };
   },
