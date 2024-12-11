@@ -4,7 +4,8 @@ export enum BusMsg {
   ShowPlace = "ShowPlace",
   RequestObjectData = "RequestObjectData",
   LogData = "LogData",
-  FoldAllGroup = "FoldAllGroup"
+  FoldAllGroup = "FoldAllGroup",
+  UpdateSettings = "UpdateSettings",
 }
 
 export default new TinyEmitter();

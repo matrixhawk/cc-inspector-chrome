@@ -6,6 +6,7 @@ export enum DataType {
   Text = 'Text',
   Vec2 = 'Vec2',
   Vec3 = 'Vec3',
+  Vec4 = 'Vec4',
   Enum = 'Enum',
   Bool = 'Bool',
   Color = 'Color',
@@ -29,6 +30,7 @@ export class Info {
   public isEnum(): boolean { return false; }
   public isVec2(): boolean { return false; }
   public isVec3(): boolean { return false; }
+  public isVec4(): boolean { return false; }
   public isBool(): boolean { return false; }
   public isText(): boolean { return false; }
   public isString(): boolean { return false; }
@@ -43,15 +45,19 @@ export class Info {
 }
 
 export class TextData extends Info {
-  constructor() {
+  constructor(data: string = "") {
     super();
     this.type = DataType.Text;
+    this.data = data;
   }
   public isText(): boolean { return true; }
 }
 
 export interface ObjectItemRequestData {
   id: string | null;
+  /**
+   * 该对象拥有的所有属性
+   */
   data: Property[];
 }
 
@@ -60,6 +66,9 @@ export interface FrameDetails {
   url: string;
 }
 
+/**
+ * 组件里面定义了引擎类型的数据，比如 `@property(cc.Label)`
+ */
 export class EngineData extends Info {
   public engineType: string = "";
   public engineUUID: string = "";
@@ -85,6 +94,7 @@ export class ArrayData extends Info {
     return this;
   }
   public isArray(): boolean { return true; }
+  public isArrayOrObject(): boolean { return true; }
 }
 
 export class ObjectDataItem extends Info {
@@ -98,6 +108,7 @@ export class ObjectData extends Info {
     this.type = DataType.Object;
   }
   public isObject(): boolean { return true; }
+  public isArrayOrObject(): boolean { return true; }
 }
 
 export class InvalidData extends Info {
@@ -184,7 +195,24 @@ export class Vec3Data extends Info {
     return true;
   }
 }
+export class Vec4Data extends Vec2Data {
+  data: Array<Property> = [];
 
+  constructor() {
+    super();
+    this.type = DataType.Vec4;
+    this.data = [];
+    return this;
+  }
+
+  add(info: Property) {
+    this.data.push(info);
+    return this;
+  }
+  public isVec4(): boolean {
+    return true;
+  }
+}
 export class ImageData extends Info {
   data: string | null = null;
 
@@ -226,6 +254,9 @@ export class Property {
 }
 
 export class Group {
+  /**
+   * 节点的UUID
+   */
   public id: string = "";
   public name: string = "group";
   public data: Array<Property> = [];

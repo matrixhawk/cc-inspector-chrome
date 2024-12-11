@@ -137,7 +137,7 @@ export default defineComponent({
           if (item.id === targetUUID) {
             return true;
           }
-          if (circle(item.children)) {
+          if (circle(item.children || [])) {
             return true;
           }
         }
@@ -147,6 +147,9 @@ export default defineComponent({
       return circle(data);
     }
 
+    /**
+     * 请求属性的列表，如果一个属性请求失败，会阻断后续的相同请求，因为都已经失败了，就没必要再响应请求了
+     */
     const requestList: Array<{ id: string; cb: Function }> = [];
 
     function _expand(uuid: string) {
@@ -205,7 +208,6 @@ export default defineComponent({
         if (!Array.isArray(data)) {
           data = [data];
         }
-        console.log(data);
         treeData.value = data;
         if (_checkSelectedUUID()) {
           updateNodeInfo();

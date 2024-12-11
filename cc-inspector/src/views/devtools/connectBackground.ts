@@ -47,13 +47,17 @@ class ConnectBackground implements TestClient {
     }
   }
   postMessageToBackground(msg: Msg, data?: any) {
-    if (this.connect) {
-      let sendData = new PluginEvent(Page.Devtools, Page.Background, msg, data)
-      this.connect.postMessage(sendData)
+    if (CCP.Adaptation.Env.isChromeDevtools) {
+      if (this.connect) {
+        let sendData = new PluginEvent(Page.Devtools, Page.Background, msg, data)
+        this.connect.postMessage(sendData)
+      } else {
+        console.warn("重新和background建立链接")
+        this._initConnect();
+        this.postMessageToBackground(msg, data)
+      }
     } else {
-      console.warn("重新和background建立链接")
-      this._initConnect();
-      this.postMessageToBackground(msg, data)
+      testServer.recv(msg, data);
     }
   }
 
