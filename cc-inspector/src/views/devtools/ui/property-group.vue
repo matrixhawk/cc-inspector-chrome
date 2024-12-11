@@ -5,7 +5,7 @@
         <div style="flex: 1"></div>
         <i style="" @click.stop="onLog" class="print iconfont icon_print"></i>
       </template>
-      <div>
+      <div style="padding-left: 6px">
         <UiProp v-for="(item, index) in group.data" :key="index" :name="item.name" :value="item.value"> </UiProp>
       </div>
     </CCSection>

@@ -78,6 +78,12 @@ export class EngineData extends Info {
     super();
     this.type = DataType.Engine;
   }
+  init(name: string, type: string, uuid: string) {
+    this.engineName = name;
+    this.engineType = type;
+    this.engineUUID = uuid;
+    return this;
+  }
   public isEngine(): boolean { return true; }
 }
 
@@ -93,6 +99,11 @@ export class ArrayData extends Info {
     this.data.push(info);
     return this;
   }
+  test() {
+    this.add(new Property("item1", new TextData("text")));
+    this.add(new Property("item2", new BoolData(true)));
+    return this;
+  }
   public isArray(): boolean { return true; }
   public isArrayOrObject(): boolean { return true; }
 }
@@ -102,10 +113,33 @@ export class ObjectDataItem extends Info {
 }
 
 export class ObjectData extends Info {
-  data: string = "";// object的简单描述快照，类似chrome的console，{a:'fff',b:xxx}
+  /**
+   * object的简单描述快照，类似chrome的console，{a:'fff',b:xxx}
+   * 主要是为了防止Object的数据过大，无限递归
+   */
+  data: string = "";
   constructor() {
     super();
     this.type = DataType.Object;
+  }
+
+  test() {
+    this.data = JSON.stringify({ fack: 'test' });
+    return this;
+  }
+  testProperty(): Property[] {
+    const obj: Object = JSON.parse(this.data);
+    const properties: Property[] = [];
+    for (let key in obj) {
+      if (typeof obj[key] === 'string') {
+        properties.push(new Property(key, new StringData(obj[key])));
+      } else if (typeof obj[key] === 'number') {
+        properties.push(new Property(key, new NumberData(obj[key])));
+      } else if (typeof obj[key] === 'boolean') {
+        properties.push(new Property(key, new BoolData(obj[key])));
+      }
+    }
+    return properties;
   }
   public isObject(): boolean { return true; }
   public isArrayOrObject(): boolean { return true; }
@@ -172,6 +206,11 @@ export class Vec2Data extends Info {
     this.data.push(info);
     return this;
   }
+  test() {
+    this.add(new Property("x", new NumberData(100)));
+    this.add(new Property("y", new NumberData(200)));
+    return this;
+  }
   public isVec2(): boolean {
     return true;
   }
@@ -191,11 +230,17 @@ export class Vec3Data extends Info {
     this.data.push(info);
     return this;
   }
+  test() {
+    this.add(new Property("x", new NumberData(100)));
+    this.add(new Property("y", new NumberData(200)));
+    this.add(new Property("z", new NumberData(300)));
+    return this;
+  }
   public isVec3(): boolean {
     return true;
   }
 }
-export class Vec4Data extends Vec2Data {
+export class Vec4Data extends Info {
   data: Array<Property> = [];
 
   constructor() {
@@ -207,6 +252,13 @@ export class Vec4Data extends Vec2Data {
 
   add(info: Property) {
     this.data.push(info);
+    return this;
+  }
+  test() {
+    this.add(new Property("x", new NumberData(100)));
+    this.add(new Property("y", new NumberData(200)));
+    this.add(new Property("z", new NumberData(300)));
+    this.add(new Property("w", new NumberData(400)));
     return this;
   }
   public isVec4(): boolean {
@@ -234,6 +286,11 @@ export class EnumData extends Info {
   public isEnum(): boolean {
     return this.type === DataType.Enum;
   }
+  test() {
+    this.values.push({ name: "1", value: 1 });
+    this.values.push({ name: "2", value: 2 });
+    return this;
+  }
 }
 
 export class TreeData implements ITreeData {
@@ -241,6 +298,10 @@ export class TreeData implements ITreeData {
   active: boolean = true;
   text: string = "";
   children: TreeData[] = [];
+  constructor(id: string = "", text: string = "") {
+    this.id = id;
+    this.text = text;
+  }
 }
 
 export class Property {
@@ -268,6 +329,11 @@ export class Group {
 
   addProperty(property: Property) {
     this.data.push(property)
+  }
+  buildProperty(name: string, info: Info) {
+    const property = new Property(name, info);
+    this.addProperty(property);
+    return this;
   }
 
   sort() {

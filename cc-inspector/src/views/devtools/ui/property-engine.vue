@@ -29,7 +29,6 @@ export default defineComponent({
         Bus.emit(BusMsg.ShowPlace, props.data);
       },
       getEngineTypeIcon() {
-        console.log(props.data.engineType);
         switch (props.data.engineType) {
           case "cc_Sprite": {
             return "icon_picture";

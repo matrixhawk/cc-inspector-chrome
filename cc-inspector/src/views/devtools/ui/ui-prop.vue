@@ -145,8 +145,6 @@ export default defineComponent({
 
 <style scoped lang="less">
 .ui-prop {
-  min-height: 30px;
-  margin: 1px 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
