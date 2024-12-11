@@ -29,12 +29,16 @@ export default defineComponent({
         console.log(code);
       }
     }
-    watch(props.data, (newValue: NodeInfoData, oldValue: NodeInfoData) => {
-      if (newValue.uuid !== oldValue.uuid) {
-        // 切换node，全部展开属性
-        Bus.emit(BusMsg.FoldAllGroup, false);
+    watch(
+      () => props.data,
+      (newValue: NodeInfoData, oldValue: NodeInfoData) => {
+        // console.log(newValue);
+        if (newValue.uuid !== oldValue.uuid) {
+          // 切换node，全部展开属性
+          Bus.emit(BusMsg.FoldAllGroup, false);
+        }
       }
-    });
+    );
     return {};
   },
 });

@@ -14,7 +14,7 @@
 
 <script lang="ts">
 import ccui from "@xuyanfeng/cc-ui";
-import { defineComponent, PropType, ref } from "vue";
+import { defineComponent, PropType, ref, watch } from "vue";
 import Bus, { BusMsg } from "../bus";
 import { Group } from "../data";
 import UiProp from "./ui-prop.vue";
@@ -44,6 +44,12 @@ export default defineComponent({
       fold.value = b;
     });
     const fold = ref(false);
+    watch(
+      () => props.group,
+      (v) => {
+        // console.log(v);
+      }
+    );
     return {
       fold,
       onLog() {
@@ -57,6 +63,7 @@ export default defineComponent({
 <style scoped lang="less">
 .property-group {
   .print {
+    cursor: pointer;
     margin-right: 10px;
     &:hover {
       color: #ffffff;

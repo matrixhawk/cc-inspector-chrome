@@ -1,6 +1,6 @@
 import { v4 } from "uuid";
 import { Msg, Page, PluginEvent } from "../../../core/types";
-import { ArrayData, BoolData, ColorData, EngineData, EnumData, Group, Info, NodeInfoData, NumberData, ObjectData, ObjectItemRequestData, Property, StringData, TextData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../data";
+import { ArrayData, BoolData, ColorData, EngineData, EnumData, Group, ImageData, Info, NodeInfoData, NumberData, ObjectData, ObjectItemRequestData, Property, StringData, TextData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../data";
 export class TestClient {
   recv(event: PluginEvent) {
 
@@ -90,20 +90,28 @@ export class TestServer {
       .buildProperty("string", new StringData("string"))
       .buildProperty("enum", new EnumData().test())
       .buildProperty("color", new ColorData('#f00'))
-      .buildProperty("array", new ArrayData().test())
-      .buildProperty("object", new ObjectData().test())
-      ;
+      .buildProperty("image", new ImageData().test())
     this.testData.buildChild('vec').buildComponent('group2')
       .buildProperty("number", new NumberData(200))
       .buildProperty("vec2", new Vec2Data().test())
       .buildProperty("vec3", new Vec3Data().test())
       .buildProperty("vec4", new Vec4Data().test())
-
-    this.testData.buildChild("engine").buildComponent("group3")
+    this.testData.buildChild("obj/arr").buildComponent("group3")
+      .buildProperty("array", new ArrayData().test())
+      .buildProperty("object", new ObjectData().test())
+      .buildProperty("arr_arr", new ArrayData().testSub())
+    this.testData.buildChild("engine").buildComponent("group4")
       .buildProperty("node", new EngineData().init('name', 'cc_Node', 'uuid'))
       .buildProperty("sprite", new EngineData().init('name', 'cc_Sprite', 'uuid'))
       .buildProperty("label", new EngineData().init('name', 'cc_Label', 'uuid'))
       .buildProperty("un_known", new EngineData().init('name', 'un_known', 'uuid'))
+
+    const c = this.testData.buildChild("str1")
+    c.buildComponent("group51").buildProperty("str1", new StringData("str1"))
+    c.buildComponent("group52").buildProperty("num", new NumberData(200))
+
+    this.testData.buildChild("str2").buildComponent("group6")
+      .buildProperty("str2", new StringData("str2"))
   }
   add(client: TestClient) {
     this.clients.push(client);

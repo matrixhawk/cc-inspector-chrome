@@ -1,7 +1,7 @@
 <template>
   <div class="ui-prop">
-    <CCProp :name="name" :icon="icon" :head-width="headWidth" v-model:expand="expand" :arrow="value.isArrayOrObject()" :slide="value.isNumber()" :indent="indent * 10" @change-expand="onClickFold">
-      <div class="prop-value">
+    <CCProp :name="name" :icon="icon" :head-width="headWidth" v-model:expand="expand" :arrow="value && value.isArrayOrObject()" :slide="value && value.isNumber()" :indent="indent * 10" @change-expand="onClickFold">
+      <div class="prop-value" v-if="value">
         <div v-if="value.isInvalid()" class="invalid">
           {{ value.data }}
         </div>
@@ -14,24 +14,13 @@
         <CCSelect v-if="value.isEnum()" v-model:value="value.data" :disabled="value.readonly" :data="getEnumValues(value)" @change="onChangeValue"> </CCSelect>
         <CCCheckBox v-if="value.isBool()" v-model:value="value.data" :disabled="value.readonly" @change="onChangeValue"> </CCCheckBox>
         <CCColor v-if="value.isColor()" :show-color-text="true" :disabled="value.readonly" v-model:color="value.data" @change="onChangeValue"> </CCColor>
-        <div v-if="value.isImage()" class="image-property">
-          <!-- TODO: 适配 -->
-          <div v-if="value.isImage() || true" placement="top" trigger="hover">
-            <div style="width: 100%; height: 100%; display: flex; flex-direction: row; align-items: center; justify-content: center">
-              <img :src="value.data" alt="图片" style="max-width: 100px; max-height: 100px; object-fit: contain" />
-            </div>
-            <img :src="value.data" style="height: 36px" alt="图片" />
-          </div>
-          <div style="flex: 1; display: flex; flex-direction: row-reverse">
-            <CCButton @click="onShowValueInConsole">log</CCButton>
-          </div>
-        </div>
+        <PropertyImage v-if="value.isImage()" v-model:data="(value as ImageData)"></PropertyImage>
         <Engine v-if="value.isEngine()" v-model:data="(value as EngineData)"> </Engine>
         <div v-if="value.isObject() && !expand" class="objectDesc">{{ value.data }}</div>
         <div v-if="value.isArray()" class="array">Array[{{ value.data.length }}]</div>
       </div>
     </CCProp>
-    <div v-if="value.isArrayOrObject()">
+    <div v-if="value && value.isArrayOrObject()">
       <div v-show="expand && subData">
         <UiProp v-for="(arr, index) in subData" :key="index" :indent="indent + 1" :value="arr.value" :name="getName(value.isArray(), arr)"> </UiProp>
       </div>
@@ -42,16 +31,18 @@
 <script lang="ts">
 import ccui from "@xuyanfeng/cc-ui";
 import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
+import { nextTick } from "process";
 import { defineComponent, onMounted, onUnmounted, PropType, ref, toRaw, watch } from "vue";
 import { Msg } from "../../../core/types";
 import Bus, { BusMsg } from "../bus";
 import { connectBackground } from "../connectBackground";
-import { DataType, EngineData, EnumData, Info, NumberData, Property, StringData, TextData, Vec2Data, Vec3Data } from "../data";
+import { DataType, EngineData, EnumData, ImageData, Info, NumberData, Property, StringData, TextData, Vec2Data, Vec3Data } from "../data";
 import Engine from "./property-engine.vue";
+import PropertyImage from "./property-image.vue";
 const { CCInput, CCTextarea, CCProp, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } = ccui.components;
 export default defineComponent({
   name: "ui-prop",
-  components: { CCProp, Engine, CCTextarea, CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor },
+  components: { PropertyImage, CCProp, Engine, CCTextarea, CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor },
   props: {
     name: { type: String, default: "" },
     indent: { type: Number, default: 0 },
@@ -60,28 +51,31 @@ export default defineComponent({
     arrow: { type: Boolean, default: false },
     step: { type: Number, default: 1 },
     value: {
-      type: Object as PropType<Info | EngineData | EnumData | NumberData | StringData | TextData | Vec2Data | Vec3Data>,
-      default: () => {},
+      type: Object as PropType<Info | EngineData | EnumData | NumberData | StringData | TextData | Vec2Data | Vec3Data | ImageData>,
+      default: () => new Info(),
     },
   },
   setup(props, { emit }) {
-    const { value, step } = props;
     const expand = ref(false);
-
     onMounted(() => {
-      watchValue();
-    });
-    function watchValue() {
-      // fold.value = true;
-      if (value.isArray()) {
-        subData.value = value.data;
+      expand.value = false;
+      if (props.value.isArray()) {
+        subData.value = props.value.data;
       } else {
         subData.value = null;
       }
-    }
-    watch(props.value, () => {
-      watchValue();
     });
+    watch(
+      () => props.value,
+      (v) => {
+        expand.value = false;
+        if (v.isArray()) {
+          subData.value = v.data;
+        } else {
+          subData.value = null;
+        }
+      }
+    );
     const subData = ref<Array<Property> | null>(null);
 
     return {
@@ -100,10 +94,14 @@ export default defineComponent({
       },
 
       isImageValid() {
-        return !!value.data;
+        return !!props.value.data;
       },
 
       getName(isArray: boolean, arr: Property) {
+        if (!arr || !arr.value) {
+          // debugger;
+          return "xxx";
+        }
         const type = arr.value.type;
         if (isArray) {
           return arr.name;
@@ -112,30 +110,22 @@ export default defineComponent({
         }
       },
       onClickFold(v: boolean) {
-        if (value.isArray()) {
+        if (props.value.isArray()) {
           return;
         }
         const s = toRaw(subData.value);
         const e = toRaw(expand.value);
-        if (value.isObject() && s === null && e === true) {
+        const rawValue = toRaw(props.value);
+        if (rawValue && rawValue.isObject() && s === null && e === true) {
           // 请求object的item数据
-          Bus.emit(BusMsg.RequestObjectData, toRaw(value), (info: Property[]) => {
+          Bus.emit(BusMsg.RequestObjectData, rawValue, (info: Property[]) => {
             subData.value = info;
           });
         }
       },
-      onShowValueInConsole() {
-        if (Array.isArray(value.path)) {
-          let uuid = value.path[0];
-          let key = value.path[1]; // todo 暂时只支持一级key
-          if (uuid && key) {
-            chrome.devtools.inspectedWindow.eval(`window.CCInspector.logValue('${uuid}','${key}')`);
-          }
-        }
-      },
       onChangeValue() {
-        if (!value.readonly) {
-          connectBackground.postMessageToBackground(Msg.SetProperty, toRaw(value));
+        if (!props.value.readonly) {
+          connectBackground.postMessageToBackground(Msg.SetProperty, toRaw(props.value));
         }
       },
     };
@@ -205,14 +195,6 @@ export default defineComponent({
       display: flex;
       flex-direction: row;
       align-items: center;
-    }
-
-    .image-property {
-      display: flex;
-      flex-direction: row;
-      align-content: center;
-      align-items: center;
-      height: 36px;
     }
 
     .slot {
