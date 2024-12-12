@@ -4,6 +4,7 @@
       <CCButton @click="onClickHasCocosGame">Has CocosGame</CCButton>
       <CCButton @click="onClickNoCocosGame">No CocosGame</CCButton>
       <CCButton @click="onTestTree">init tree data</CCButton>
+      <CCButton @click="onFrames">test frame</CCButton>
     </CCSection>
   </div>
 </template>
@@ -13,8 +14,8 @@ import { ITreeData } from "@xuyanfeng/cc-ui/types/cc-tree/const";
 import { defineComponent, ref } from "vue";
 import { Msg, Page, PluginEvent } from "../../../core/types";
 import { connectBackground } from "../connectBackground";
-import { TreeData } from "../data";
-import { TestServer } from "./server";
+import { FrameDetails, TreeData } from "../data";
+import { testServer, TestServer } from "./server";
 const { CCButton, CCSection } = ccui.components;
 export default defineComponent({
   name: "test",
@@ -42,6 +43,14 @@ export default defineComponent({
         };
         const event = new PluginEvent(Page.Inject, Page.Devtools, Msg.TreeInfo, data);
         connectBackground.doCallback(event);
+      },
+      onFrames() {
+        const data: FrameDetails[] = [
+          { url: "url1", frameID: 1 },
+          { url: "url2", frameID: 2 },
+        ];
+        const event = new PluginEvent(Page.Background, Page.Devtools, Msg.UpdateFrames, data);
+        testServer.send(event);
       },
     };
   },

@@ -107,6 +107,7 @@ export class TestServer {
       .buildProperty("un_known", new EngineData().init('name', 'un_known', 'uuid'))
 
     const c = this.testData.buildChild("str1")
+    c.active = false;
     c.buildComponent("group51").buildProperty("str1", new StringData("str1"))
     c.buildComponent("group52").buildProperty("num", new NumberData(200))
 

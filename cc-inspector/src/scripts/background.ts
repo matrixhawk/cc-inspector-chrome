@@ -60,18 +60,13 @@ class PortMan {
   }
 
   _updateFrames() {
-    let data: FrameDetails[] = this.content.map((item) => {
+    const data: FrameDetails[] = this.content.map((item) => {
       return {
         url: item.sender?.url || "",
         frameID: item.sender?.frameId || 0,
       };
     });
-    let event = new PluginEvent(
-      Page.Background,
-      Page.Devtools,
-      Msg.UpdateFrames,
-      data
-    );
+    const event = new PluginEvent(Page.Background, Page.Devtools, Msg.UpdateFrames, data);
     this.sendDevtoolMsg(event);
   }
 

@@ -3,7 +3,7 @@
     <Test @valid-game="testValidGame"> </Test>
     <div class="head" v-show="iframes.length > 1">
       <div class="label">inspect target:</div>
-      <CCSelect v-model:value="frameID" placeholder="please select ..." @change="onChangeFrame" :data="getFramesData()"> </CCSelect>
+      <CCSelect v-model:value="frameID" @change="onChangeFrame" :data="getFramesData()"> </CCSelect>
     </div>
     <div v-show="isShowDebug" class="find">
       <div v-if="false">
@@ -14,40 +14,15 @@
       </div>
       <div class="left">
         <div class="tool-btn">
-          <div style="padding-left: 5px; flex: 1; user-select: none">Node Tree</div>
+          <div class="text">Node Tree</div>
           <CCButtonGroup :items="buttonGroup" :recover="true"></CCButtonGroup>
         </div>
-        <CCInput placeholder="enter keywords to filter" :data="filterText">
+        <CCInput style="flex: none" placeholder="enter keywords to filter" :data="filterText" v-if="false">
           <slot>
             <i class="matchCase iconfont icon_font_size" @click.stop="onChangeCase" title="match case" :style="{ color: matchCase ? 'red' : '' }"></i>
           </slot>
         </CCInput>
-        <div class="treeList">
-          <CCTree :value="treeData" @node-click="handleNodeClick"></CCTree>
-          <!-- <el-tree
-            :data="treeData"
-            ref="tree"
-            style="display: inline-block"
-            :props="defaultProps"
-            :highlight-current="true"
-            :default-expand-all="false"
-            :default-expanded-keys="expandedKeys"
-            :filter-node-method="filterNode"
-            :expand-on-click-node="false"
-            node-key="uuid"
-            @node-expand="onNodeExpand"
-            @node-collapse="onNodeCollapse"
-            @node-click="handleNodeClick"
-          >
-            <span
-              slot-scope="{ node, data }"
-              class="leaf"
-              :class="data.active ? 'leaf-show' : 'leaf-hide'"
-            >
-              <span>{{ node.label }}</span>
-            </span>
-          </el-tree> -->
-        </div>
+        <CCTree style="flex: 1" ref="elTree" :expand-keys="expandedKeys" :default-expand-all="false" :value="treeData" @node-expand="onNodeExpand" @node-collapse="onNodeCollapse" @node-click="handleNodeClick"></CCTree>
       </div>
       <CCDivider></CCDivider>
       <div class="right">
@@ -55,10 +30,8 @@
       </div>
     </div>
     <div v-show="!isShowDebug" class="no-find">
-      <span>No games created by cocos creator found!</span>
-      <CCButton type="success" @click="onBtnClickUpdatePage">
-        <i class="iconfont icon_refresh"></i>
-      </CCButton>
+      <span>no games created by cocos creator found!</span>
+      <i class="fresh iconfont icon_refresh" @click="onBtnClickUpdatePage"></i>
     </div>
     <CCDialog></CCDialog>
     <CCFootBar :version="version"></CCFootBar>
@@ -213,7 +186,6 @@ export default defineComponent({
           updateNodeInfo();
           nextTick(() => {
             if (elTree.value) {
-              //@ts-ignore
               elTree.value.setCurrentKey(selectedUUID);
             }
           });
@@ -455,6 +427,7 @@ export default defineComponent({
         selectedUUID = data.id;
         updateNodeInfo();
       },
+      // TODO: 暂时这个版本先不实现
       filterNode(value: any, data: any) {
         if (!value) {
           return true;
@@ -477,16 +450,18 @@ export default defineComponent({
 
       onChangeFrame,
       onNodeExpand(data: TreeData) {
-        if (data.hasOwnProperty("uuid") && data.id) {
+        if (data.id) {
           expandedKeys.value.push(data.id);
         }
       },
       onNodeCollapse(data: TreeData) {
-        if (data.hasOwnProperty("uuid")) {
-          let index = expandedKeys.value.findIndex((el) => el === data.id);
+        if (data.id) {
+          const keys = toRaw(expandedKeys.value);
+          const index = keys.findIndex((el) => el === data.id);
           if (index !== -1) {
-            expandedKeys.value.splice(index, 1);
+            keys.splice(index, 1);
           }
+          expandedKeys.value = keys;
         }
       },
     };
@@ -503,15 +478,20 @@ export default defineComponent({
   overflow: hidden;
   background-color: #5c5c5c;
   color: white;
+
   .head {
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 1px 0;
+    padding: 2px 0;
     border-bottom: solid 1px grey;
 
     .label {
+      color: white;
+      font-size: 12px;
       margin: 0 3px;
+      margin-right: 5px;
+      user-select: none;
     }
   }
 
@@ -521,9 +501,27 @@ export default defineComponent({
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    user-select: none;
 
     span {
       margin-right: 20px;
+      color: white;
+      font-size: 20px;
+      user-select: none;
+    }
+
+    .fresh {
+      cursor: pointer;
+      color: white;
+      font-size: 20px;
+
+      &:hover {
+        color: #cef57b;
+      }
+
+      &:active {
+        color: #ffaa00;
+      }
     }
   }
 
@@ -544,6 +542,14 @@ export default defineComponent({
         flex-direction: row;
         align-items: center;
         justify-content: center;
+
+        .text {
+          padding-left: 5px;
+          flex: 1;
+          user-select: none;
+          font-size: 12px;
+          color: white;
+        }
       }
 
       .matchCase {
@@ -553,40 +559,6 @@ export default defineComponent({
         flex-direction: row;
         align-items: center;
         justify-content: center;
-      }
-
-      .treeList {
-        margin-top: 3px;
-        height: 100%;
-        border-radius: 4px;
-        min-height: 20px;
-        overflow: auto;
-        width: 100%;
-
-        .leaf {
-          width: 100%;
-        }
-
-        .leaf-show {
-          color: black;
-        }
-
-        .leaf-hide {
-          color: #c7bbbb;
-          text-decoration: line-through;
-        }
-
-        &::-webkit-scrollbar {
-          width: 6px;
-          height: 6px;
-          background: #999;
-          border-radius: 2px;
-        }
-
-        &::-webkit-scrollbar-thumb {
-          background-color: #333;
-          border-radius: 2px;
-        }
       }
     }
 
