@@ -1,14 +1,16 @@
 export function injectScript(url: string) {
-  if (chrome && chrome.extension && chrome.extension.getURL) {
-    let content = chrome.extension.getURL(url)
-    console.log(`[cc-inspector] inject script: ${content}`);
+  if (chrome && chrome.runtime && chrome.runtime.getURL) {
+    let content = chrome.runtime.getURL(url)
     const script = document.createElement("script")
     script.setAttribute("type", "text/javascript")
     script.setAttribute("src", content)
     script.onload = function () {
-      document.body.removeChild(script);
+      document.head.removeChild(script);
     }
-    document.body.appendChild(script)
+    document.head.appendChild(script)
+    console.log(`inject script success: ${content}`);
+  } else {
+    console.log("inject script failed")
   }
 }
 
