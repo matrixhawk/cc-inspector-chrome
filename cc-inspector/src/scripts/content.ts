@@ -9,6 +9,7 @@ class Content {
   private connect: chrome.runtime.Port | null = null;
 
   constructor() {
+    console.log("init content");
     // 接受来自inject.js的消息数据,然后中转到background.js
     window.addEventListener("message", (event) => {
       let data: PluginEvent = event.data;

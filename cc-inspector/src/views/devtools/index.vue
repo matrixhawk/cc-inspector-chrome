@@ -69,7 +69,7 @@ export default defineComponent({
     appStore().init();
     const { config } = storeToRefs(appStore());
     const treeItemData = ref<NodeInfoData | null>({ uuid: "", group: [] });
-    const isShowDebug = ref<boolean>(true);
+    const isShowDebug = ref<boolean>(false);
     const frameID = ref<number>(0);
     const iframes = ref<Array<FrameInfo>>([]);
     const btnRefresh: ButtonGroupItem = reactive<ButtonGroupItem>({
@@ -172,8 +172,7 @@ export default defineComponent({
         }
       });
     }
-    const elTree = ref<HTMLElement>();
-
+    const elTree = ref<typeof CCTree>();
     function _initChromeRuntimeConnect() {
       const msgFunctionMap: Record<string, Function> = {};
       msgFunctionMap[Msg.TreeInfo] = (data: Array<TreeData>) => {
@@ -186,7 +185,7 @@ export default defineComponent({
           updateNodeInfo();
           nextTick(() => {
             if (elTree.value) {
-              elTree.value.setCurrentKey(selectedUUID);
+              elTree.value.handChoose(selectedUUID);
             }
           });
         }
@@ -423,9 +422,13 @@ export default defineComponent({
         matchCase.value = !matchCase.value;
         updateFilterText(filterText);
       },
-      handleNodeClick(data: TreeData) {
-        selectedUUID = data.id;
-        updateNodeInfo();
+      handleNodeClick(data: TreeData | null) {
+        if (data) {
+          selectedUUID = data.id;
+          updateNodeInfo();
+        } else {
+          selectedUUID = null;
+        }
       },
       // TODO: 暂时这个版本先不实现
       filterNode(value: any, data: any) {

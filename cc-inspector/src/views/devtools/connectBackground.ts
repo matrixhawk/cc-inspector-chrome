@@ -2,6 +2,9 @@ import CCP from "cc-plugin/src/ccp/entry-render";
 import { Msg, Page, PluginEvent } from "../../core/types";
 import { TestClient, testServer, TestServer } from "./test/server";
 export type BackgroundCallback = (data: PluginEvent, sender: any) => void;
+if (chrome.devtools) {
+  console.log("chrome devtools")
+}
 class ConnectBackground implements TestClient {
   connect: chrome.runtime.Port | null = null;
   constructor() {

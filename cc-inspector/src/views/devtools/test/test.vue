@@ -1,6 +1,6 @@
 <template>
   <div v-if="show" class="test">
-    <CCSection name="功能测试">
+    <CCSection name="功能测试" :expand="false">
       <CCButton @click="onClickHasCocosGame">Has CocosGame</CCButton>
       <CCButton @click="onClickNoCocosGame">No CocosGame</CCButton>
       <CCButton @click="onTestTree">init tree data</CCButton>
