@@ -1,22 +1,22 @@
 import { ChromeConst } from "cc-plugin/src/chrome/const";
 import { Msg, Page, PluginEvent } from "../core/types";
-
-// @ts-ignore
-// import * as UA from "universal-analytics";
-import { v4 } from "uuid";
 import { FrameDetails } from "../views/devtools/data";
-
-// 统计服务
-const userID = localStorage.getItem("userID") || v4();
-// UA("UA-134924925-3", userID);
-
-console.log("on background");
-
+import { Terminal } from "./terminal";
+const terminal: Terminal = new Terminal("background");
 class PortMan {
   public currentUseContentFrameID = 0;
-  public content: Array<chrome.runtime.Port> = []; // 因为iframe的原因，可能对应多个，主iframe的id===0
+  /**
+   * 因为iframe的原因，可能对应多个，主iframe的id===0
+   */
+  public content: Array<chrome.runtime.Port> = [];
+  /**
+   * devtools的链接，方便background转发到devtools
+   */
   public devtools: chrome.runtime.Port | null = null;
-  public id: number | null = null; // tab.id作为唯一标识
+  /**
+   * tab.id作为唯一标识
+   */
+  public id: number | null = null;
   public title: string = "";
   public url: string = "";
   private mgr: PortManagement | null = null;
@@ -28,12 +28,8 @@ class PortMan {
     this.title = title;
   }
 
-  private onPortConnect(
-    port: chrome.runtime.Port,
-    onMsg: Function,
-    onDisconnect: Function
-  ) {
-    console.log(`%c[Connect] ${port.name}`, "color:green");
+  private onPortConnect(port: chrome.runtime.Port, onMsg: Function, onDisconnect: Function) {
+    terminal.connect(port.name);
     port.onMessage.addListener((data: any, sender: any) => {
       console.log(
         `%c[Connect-Message] ${sender.name}\n${JSON.stringify(data)}`,
@@ -50,13 +46,12 @@ class PortMan {
   }
 
   getCurrentUseContent(): chrome.runtime.Port | null {
-    return (
-      this.content.find(
-        (el) =>
-          el.sender?.frameId !== undefined &&
-          el.sender.frameId === this.currentUseContentFrameID
-      ) || null
-    );
+    const port: chrome.runtime.Port = this.content.find((el) => {
+      const b1 = el.sender?.frameId !== undefined;
+      const b2 = el.sender.frameId === this.currentUseContentFrameID
+      return b1 && b2
+    })
+    return port || null;
   }
 
   _updateFrames() {
@@ -75,8 +70,7 @@ class PortMan {
       case Page.Content: {
         this.content.push(port);
         this._updateFrames();
-        this.onPortConnect(
-          port,
+        this.onPortConnect(port,
           (data: PluginEvent) => {
             if (data.target === Page.Devtools) {
               this.sendDevtoolMsg(data);
@@ -92,8 +86,7 @@ class PortMan {
             this.content.splice(index, 1);
             this._updateFrames();
             this.checkValid();
-          }
-        );
+          });
         break;
       }
       case Page.Devtools: {
@@ -157,23 +150,23 @@ class PortManagement {
   port: Array<PortMan> = [];
 
   constructor() {
+    terminal.ok();
     this.initConnect();
-    chrome.runtime.onMessage.addListener(
-      (request: PluginEvent, sender: any, sendResponse: any) => {
-        const tabID = sender.tab.id;
-        const portMan: PortMan | undefined = this.find(tabID);
-        if (portMan) {
-          if (PluginEvent.check(request, Page.Content, Page.Background)) {
-            //  监听来自content.js发来的事件，将消息转发到devtools
-            PluginEvent.reset(request, Page.Background, Page.Devtools);
-            console.log(
-              `%c[Message]url:${sender.url}]\n${JSON.stringify(request)}`,
-              "color:green"
-            );
-            portMan.sendDevtoolMsg(request);
-          }
+    chrome.runtime.onMessage.addListener((request: PluginEvent, sender: any, sendResponse: any) => {
+      const tabID = sender.tab.id;
+      const portMan: PortMan | undefined = this.find(tabID);
+      if (portMan) {
+        if (PluginEvent.check(request, Page.Content, Page.Background)) {
+          //  监听来自content.js发来的事件，将消息转发到devtools
+          PluginEvent.reset(request, Page.Background, Page.Devtools);
+          console.log(
+            `%c[Message]url:${sender.url}]\n${JSON.stringify(request)}`,
+            "color:green"
+          );
+          portMan.sendDevtoolMsg(request);
         }
       }
+    }
     );
     chrome.tabs.onActivated.addListener(({ tabId, windowId }) => { });
     chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
@@ -184,11 +177,7 @@ class PortManagement {
         if (id && id > -1) {
           let portMan = this.find(id);
           if (portMan) {
-            let data = new PluginEvent(
-              Page.Background,
-              Page.Content,
-              Msg.Support
-            );
+            let data = new PluginEvent(Page.Background, Page.Content, Msg.Support);
             portMan.sendContentMsg(data);
           }
         }
@@ -206,8 +195,10 @@ class PortManagement {
     chrome.runtime.onConnect.addListener((port: chrome.runtime.Port) => {
       if (port.name === Page.Devtools) {
         // devtool链接过来没有port.sender.tab
-        chrome.tabs.getSelected((tab: chrome.tabs.Tab) => {
-          this._onConnect(tab, port);
+        chrome.tabs.query({ active: true }, (tabs: chrome.tabs.Tab[]) => {
+          tabs.forEach((tab) => {
+            this._onConnect(tab, port);
+          })
         });
       } else {
         const tab: chrome.tabs.Tab | undefined = port.sender?.tab;
@@ -241,43 +232,4 @@ class PortManagement {
     }
   }
 }
-
-(window as any).backgroundInstance = new PortManagement();
-
-function createPluginMenus() {
-  const menus = [];
-
-  let parent = chrome.contextMenus.create({
-    id: "parent",
-    title: "CC-Inspector",
-  });
-  chrome.contextMenus.create({
-    id: "test",
-    title: "测试右键菜单",
-    parentId: parent,
-    // 上下文环境，可选：["all", "page", "frame", "selection", "link", "editable", "image", "video", "audio"]，默认page
-    contexts: ["page"],
-  });
-  chrome.contextMenus.create({
-    id: "notify",
-    parentId: parent,
-    title: "通知",
-  });
-
-  chrome.contextMenus.onClicked.addListener(function (info, tab) {
-    if (info.menuItemId === "test") {
-      alert("您点击了右键菜单！");
-    } else if (info.menuItemId === "notify") {
-      chrome.notifications.create("null", {
-        type: "basic",
-        iconUrl: "icons/48.png",
-        title: "通知",
-        message: "测试通知",
-      });
-    }
-  });
-}
-
-chrome.contextMenus.removeAll(function () {
-  createPluginMenus();
-});
+new PortManagement();
