@@ -129,10 +129,7 @@ export class TestServer {
           let g = new Group("scene").buildProperty("scene id", new StringData(id));
           group.push(g);
         }
-        const ret: NodeInfoData = {
-          uuid: id,
-          group: group
-        };
+        const ret: NodeInfoData = new NodeInfoData(id, group);
         const event = new PluginEvent(Page.Background, Page.Devtools, Msg.NodeInfo, ret);
         this.send(event);
         break;
@@ -158,6 +155,8 @@ export class TestServer {
           }
           const event = new PluginEvent(Page.Inject, Page.Devtools, Msg.GetObjectItemData, ret);
           this.send(event)
+        } else {
+          console.warn("not found data: ", objData.id);
         }
         break;
       }

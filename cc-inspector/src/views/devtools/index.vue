@@ -68,7 +68,7 @@ export default defineComponent({
   setup(props, ctx) {
     appStore().init();
     const { config } = storeToRefs(appStore());
-    const treeItemData = ref<NodeInfoData | null>({ uuid: "", group: [] });
+    const treeItemData = ref<NodeInfoData | null>(null);
     const isShowDebug = ref<boolean>(false);
     const frameID = ref<number>(0);
     const iframes = ref<Array<FrameInfo>>([]);
@@ -204,7 +204,13 @@ export default defineComponent({
       };
       msgFunctionMap[Msg.NodeInfo] = (eventData: NodeInfoData) => {
         isShowDebug.value = true;
-        treeItemData.value = eventData;
+        try {
+          const nodeInfo = new NodeInfoData(eventData.uuid, eventData.group).parse(eventData);
+          treeItemData.value = nodeInfo;
+        } catch (error) {
+          console.error(error);
+          ccui.footbar.showError(error, { title: "parse property error" });
+        }
       };
       msgFunctionMap[Msg.MemoryInfo] = (eventData: any) => {
         memory.value = eventData;
