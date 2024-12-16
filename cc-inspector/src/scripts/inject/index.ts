@@ -1,33 +1,9 @@
 // eval 注入脚本的代码,变量尽量使用var,后来发现在import之后,let会自动变为var
 import { uniq } from "lodash";
 import { Msg, Page, PluginEvent } from "../../core/types";
-import {
-  ArrayData,
-  BoolData,
-  ColorData,
-  DataType,
-  EngineData,
-  Group,
-  ImageData,
-  Info,
-  InvalidData,
-  NodeInfoData,
-  NumberData,
-  ObjectData,
-  ObjectItemRequestData,
-  Property,
-  StringData,
-  TreeData,
-  Vec2Data,
-  Vec3Data,
-} from "../../views/devtools/data";
+import { ArrayData, BoolData, ColorData, DataType, EngineData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectData, ObjectItemRequestData, Property, StringData, TreeData, Vec2Data, Vec3Data } from "../../views/devtools/data";
 import { getValue, trySetValueWithConfig } from "./setValue";
-import {
-  BuildArrayOptions,
-  BuildImageOptions,
-  BuildObjectOptions,
-  BuildVecOptions,
-} from "./types";
+import { BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOptions } from "./types";
 import { isHasProperty } from "./util";
 
 declare const cc: any;
@@ -646,10 +622,7 @@ class CCInspector {
         let compGroup = this._getGroupData(itemComp);
         groupData.push(compGroup);
       }
-      const data: NodeInfoData = {
-        uuid: uuid,
-        group: groupData,
-      };
+      const data: NodeInfoData = new NodeInfoData(uuid, groupData);
       this.sendMsgToContent(Msg.NodeInfo, data);
     } else {
       // 未获取到节点数据

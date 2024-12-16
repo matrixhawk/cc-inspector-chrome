@@ -24,8 +24,8 @@ export class Info {
   public data: any;
   public readonly: boolean = false;
   public path: Array<string> = [];// 属性对应的路径
-  constructor() {
-    this.id = v4();
+  constructor(id: string = "") {
+    this.id = id || v4();
   }
   public isEnum(): boolean { return false; }
   public isVec2(): boolean { return false; }
@@ -45,10 +45,15 @@ export class Info {
 }
 
 export class TextData extends Info {
+  public data: string = "";
   constructor(data: string = "") {
     super();
     this.type = DataType.Text;
     this.data = data;
+  }
+  parse(data: TextData) {
+    this.data = data.data;
+    return this;
   }
   public isText(): boolean { return true; }
 }
@@ -78,6 +83,13 @@ export class EngineData extends Info {
     super();
     this.type = DataType.Engine;
   }
+  parse(data: EngineData) {
+    this.id = data.id;
+    this.engineType = data.engineType;
+    this.engineUUID = data.engineUUID;
+    this.engineName = data.engineName;
+    return this;
+  }
   init(name: string, type: string, uuid: string) {
     this.engineName = name;
     this.engineType = type;
@@ -94,7 +106,15 @@ export class ArrayData extends Info {
     super();
     this.type = DataType.Array;
   }
-
+  parse(data: ArrayData) {
+    this.id = data.id;
+    for (let i = 0; i < data.data.length; i++) {
+      const item = data.data[i];
+      const property = new Property(item.name, item.value).parse(item);
+      this.data.push(property);
+    }
+    return this;
+  }
   add(info: Property) {
     this.data.push(info);
     return this;
@@ -129,6 +149,11 @@ export class ObjectData extends Info {
   constructor() {
     super();
     this.type = DataType.Object;
+  }
+  parse(data: ObjectData) {
+    this.id = data.id;
+    this.data = data.data;
+    return this;
   }
 
   test() {
@@ -165,37 +190,61 @@ export class InvalidData extends Info {
 }
 
 export class ColorData extends Info {
-  constructor(color: string) {
+  public data: string = "#ffffff";
+  constructor(color: string = "#ffffff") {
     super();
     this.type = DataType.Color;
     this.data = color;
+  }
+  parse(data: ColorData) {
+    this.id = data.id;
+    this.data = data.data;
+    return this;
   }
   public isColor(): boolean { return true; }
 }
 
 export class StringData extends Info {
-  constructor(data: string) {
+  public data: string = "";
+  constructor(data: string = "") {
     super();
     this.type = DataType.String;
     this.data = data;
+  }
+  parse(data: StringData) {
+    this.id = data.id;
+    this.data = data.data;
+    return this;
   }
   public isString(): boolean { return true; }
 }
 
 export class NumberData extends Info {
-  constructor(data: number) {
+  public data: number = 0;
+  constructor(data: number = 0) {
     super();
     this.type = DataType.Number;
     this.data = data;
+  }
+  parse(data: NumberData) {
+    this.id = data.id;
+    this.data = data.data;
+    return this;
   }
   public isNumber(): boolean { return true; }
 }
 
 export class BoolData extends Info {
-  constructor(bol: boolean) {
+  public data: boolean = false;
+  constructor(bol: boolean = false) {
     super();
     this.type = DataType.Bool;
     this.data = bol;
+  }
+  parse(data: BoolData) {
+    this.id = data.id;
+    this.data = data.data;
+    return this;
   }
   public isBool(): boolean { return true; }
 }
@@ -207,6 +256,15 @@ export class Vec2Data extends Info {
     super();
     this.type = DataType.Vec2
     this.data = [];
+    return this;
+  }
+  parse(data: Vec2Data) {
+    this.id = data.id;
+    for (let i = 0; i < data.data.length; i++) {
+      const item = data.data[i];
+      const property = new Property(item.name, item.value).parse(item);
+      this.data.push(property);
+    }
     return this;
   }
 
@@ -233,7 +291,15 @@ export class Vec3Data extends Info {
     this.data = [];
     return this;
   }
-
+  parse(data: Vec3Data) {
+    this.id = data.id;
+    for (let i = 0; i < data.data.length; i++) {
+      const item = data.data[i];
+      const property = new Property(item.name, item.value).parse(item);
+      this.data.push(property);
+    }
+    return this;
+  }
   add(info: Property) {
     this.data.push(info);
     return this;
@@ -257,7 +323,14 @@ export class Vec4Data extends Info {
     this.data = [];
     return this;
   }
-
+  parse(data: Vec4Data) {
+    for (let i = 0; i < data.data.length; i++) {
+      const item = data.data[i];
+      const property = new Property(item.name, item.value).parse(item);
+      this.data.push(property);
+    }
+    return this;
+  }
   add(info: Property) {
     this.data.push(info);
     return this;
@@ -285,6 +358,11 @@ export class ImageData extends Info {
     this.data = "";
     return this;
   }
+  parse(data: ImageData) {
+    this.id = data.id;
+    this.data = data.data;
+    return this;
+  }
   test() {
     const cocos = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAABz1JREFUaEO9WXuMHVUZ/32zfbHSQkDa3pkukALb7N6ZUjFGjBFjopCUBA1PRYyJaVIVMVTF3rlbhAh7z922EB8oVRKNlUcgSAwCMWAQlKg0msjOzPYFwdCdMy3U2tqy7Xbvzmfm7t7dO/fO7Jx799b5c77X73fOd77znXMIHfx04e6TttnbQZeZrihTowWFXMnbSRqulIX8/41ERwkYD7zVyxMn94B5WNrWuha4t63aUQIRCr3svQfmDzLwWmCbn2gbmaJhxwnkhrznKeT1UXxmeiEo5q9VxNKWWucJDA6/SpoWjXzVtwbtiVG7/9a20CkYdZSAIbztDP4SwEsBOmsmPk8+LIuXf10BT8sqHSPQUx65qsL8cnCJtxQ333zSEO5pBhbWEBHhfr9g3t0ywgyDjhBY9eBfzgrHlx0i0FHfzl8YxTSEV2KwXR9/krHpUNH8QSdJdISAUXLfZPAlXUsnjAN3XCFrAHXh+QDrdYAZC7puk3f1Pd4pEvMmkCt5zxPxegYOBraZiwH72d+79f8sOQGeWtDVj7mCicp6ec+HXuoEiXkRWFX2CiGziICMn72w7993rNnTCEoveb8H8TXRf6pFYzpVCSsfOTRwuTtfEm0TuFDsW13B6b0AFgD0nrTzy9PAGCX3fSZ018sZON61+JyLR7/Vc6T+v36/c4vcYj2pSqxtAkbJOcpE51Rr/YJFV47e1ft6WtAVg7tv7dImH2uW02Fp5y+o/58Tzh8D2/rUGSWgC2cEoL5qEKLDshAHkRRcF85+gC5NkI1K2+yZXfjuCWmbZ58xAnrJeRREX6wF6OpafM2B7172okpAXbiT1c256aN90s6vWbl9f782Me5J21TODGXFKObyoeHPLWB6Bjy9HBlHZNE8XwV8pGOUnB1MtDFZn97gEH8ljb/KpN0ZFPp/qOI3kUDP1v1XJ42qLpyx+haBuXJDUFz3jEqgmk792onZVZHQu2BeziHvCgasj6r4TSSgl71/yEL+w7HqINy3AVxc+0fgY75tnasSpF7nvAd29Sw53f1Oqh0DDJwIiuZSFd+JBHIl91hQNKsVJvp04TwHULwt1sKvyM1rf6kSpFEnJ7zXCPzxdFuCHO9fiHupkuU/lQBxZZMcWPeLlWX3do35oenueMof0XFZyC/Lcj6XXBfuxNQekvyF4B0HbetrWTFSCWiEYzx+3hW05Ihknu0qownmEHcGA5bSIksDkBMjGwjhI2lyIrziF8zM/SB9BoiWgVBdVPVBiHnML1ofyBoZFbkunFGAjERd5rdl0Vqd5WcOAlg2lTYc80EIv+fba+/Lcqwq14UbDzBtqFok5ibQgJ/BpwLbmj1pqaKcQ88Qw79maLc1qRAmZMFclBUiuYwK9wCAVU3GHG6VxbWbs5y2KjeEO8ZAfGAILAtmwq4d9548A8L9EwHTVyIz03Ba2ubiVsGp6Otl77dg/mwjNGnnMzuFZAKDziuk0SdjDhk/kUXzGyqAWtXJCfcgASua7LRFV8vNvXMefJQIEGHCV8jHVoHX9PWyVwFzV5N9iCE5YBbm8qtGABjzbbMjpbMRzKU/2r947P3xU0kgCfyCb1tzXowpEYicV8Lule8OrD7U7iin2eWE+yABm5LkDHICO7923jMQOSCiXX4hr9QhtkJSF94egNck2oQI5IBZvdXIDf3z+mBzc+ebUoW8pwh8U4PTM1KFdOFG6ZNc3QjHu/13LhjTL3qdWNvtF/u+0Eg0eR8ouQ+BcHv1GoFnN0oKsdEfMH/eyghn6erC4VijWGfAQIU4ul4Fpe0JiQQM4d7NwPcbgzNjJCia+SxQqnJj0LmWNXquWX/m/mVaxH+TtvWx5IWe8De3dWQDTSZ0iqRNykJ/agusCrymlys7TxPTDRl2FWmbM3esSilklJ0iQIN12TNjx4SdQcH8cqtgk/R14f0L4IuqsihTE/KBQE/6dv7zafFSt+pc2b2PGFuaDBn/lXWntfkQMYR7koElVR/NjW908tgRZBxq5uw19LK3DczfaQSpTeLG0S3mb+YDPrLVhTcJcGLDxuCdgW1lznRms6QL98cAGnug3dI2+9slYAztuZHDyk40dqA1h0RPyUL+FhX/mQSqI1Xyfgri2fMp81ECXvaLVtYCbMKgl4b3grTexJypZhL9zrfz16mAr2Wekq5ecraBKJ5OzBUCnlUhogtnOxF9M36+jocm8B982/qMEqBpJaUZqDnUB517odE9zQGqRB73E3I2N7Svj8LxFwGKH5Aaqg4Dfw5s86pWwLc0AzMkhLMdoG8nB+IKCL+SBWvDVOo5L4Ho01mgmGlXUGyvz2ppBmpAjLK3g5k3phZvILqQGgeg0oK/IW2z7Vf9tghMja77GAhN779N5Txlg5oejHlVs7ZSqD4d9JI7/XxEaUVlVr2eSPVym9+SBTPpvSAr42Lytmcg8rJi25vLuyZO7gVRi5e8fFjaVuxlpiXUdcr/A3Hqok9HdvAQAAAAAElFTkSuQmCC';
     this.data = cocos;
@@ -298,6 +376,14 @@ export class EnumData extends Info {
   constructor() {
     super();
     this.type = DataType.Enum;
+  }
+  parse(data: EnumData) {
+    this.id = data.id;
+    for (let i = 0; i < data.values.length; i++) {
+      const item = data.values[i];
+      this.values.push({ name: item.name, value: item.value });
+    }
+    return this;
   }
   public isEnum(): boolean {
     return this.type === DataType.Enum;
@@ -328,6 +414,55 @@ export class Property {
     this.name = name;
     this.value = info;
   }
+  parse(data: Property) {
+    this.name = data.name;
+    this.value = data.value;
+    switch (data.value.type) {
+      case DataType.Object:
+        this.value = new ObjectData().parse(data.value as ObjectData);
+        break;
+      case DataType.Number:
+        this.value = new NumberData().parse(data.value as NumberData);
+        break;
+      case DataType.Array:
+        this.value = new ArrayData().parse(data.value as ArrayData);
+        break;
+      case DataType.String:
+        this.value = new StringData().parse(data.value as StringData);
+        break;
+      case DataType.Bool:
+        this.value = new BoolData().parse(data.value as BoolData);
+        break;
+      case DataType.Color:
+        this.value = new ColorData().parse(data.value as ColorData);
+        break;
+      case DataType.Vec2:
+        this.value = new Vec2Data().parse(data.value as Vec2Data);
+        break;
+      case DataType.Vec3:
+        this.value = new Vec3Data().parse(data.value as Vec3Data);
+        break;
+      case DataType.Vec4:
+        this.value = new Vec4Data().parse(data.value as Vec4Data);
+        break;
+      case DataType.Image:
+        this.value = new ImageData().parse(data.value as ImageData);
+        break;
+      case DataType.Text:
+        this.value = new TextData().parse(data.value as TextData);
+        break;
+      case DataType.Enum:
+        this.value = new EnumData().parse(data.value as EnumData);
+        break;
+      case DataType.Engine:
+        this.value = new EngineData().parse(data.value as EngineData);
+        break;
+      case DataType.ObjectItem:
+      default:
+        throw new Error(`not support type: ${typeof data === 'string' ? data : JSON.stringify(data)}`);
+    }
+    return this;
+  }
 }
 
 export class Group {
@@ -342,7 +477,17 @@ export class Group {
     this.name = name;
     this.id = id || '';
   }
-
+  parse(data: Group) {
+    this.id = data.id;
+    this.name = data.name;
+    this.data = [];
+    for (let i = 0; i < data.data.length; i++) {
+      const item = data.data[i];
+      const property = new Property(item.name, item.value).parse(item);
+      this.data.push(property);
+    }
+    return this;
+  }
   addProperty(property: Property) {
     this.data.push(property)
   }
@@ -371,7 +516,7 @@ export class Group {
   }
 }
 
-export interface NodeInfoData {
+export class NodeInfoData {
   /**
    * 节点的uuid
    */
@@ -380,4 +525,21 @@ export interface NodeInfoData {
    * 组件数据
    */
   group: Group[];
+  constructor(uuid: string, group: Group[]) {
+    this.uuid = uuid;
+    this.group = group;
+  }
+  /**
+   * 将json数据解析成NodeInfoData
+   */
+  parse(data: NodeInfoData) {
+    this.uuid = data.uuid;
+    this.group = [];
+    for (let i = 0; i < data.group.length; i++) {
+      const item = data.group[i];
+      const group = new Group(item.name, item.id).parse(item);
+      this.group.push(group);
+    }
+    return this;
+  }
 }
