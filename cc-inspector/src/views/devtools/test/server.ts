@@ -1,6 +1,6 @@
 import { v4 } from "uuid";
 import { Msg, Page, PluginEvent } from "../../../core/types";
-import { ArrayData, BoolData, ColorData, EngineData, EnumData, Group, ImageData, Info, NodeInfoData, NumberData, ObjectData, ObjectItemRequestData, Property, StringData, TextData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../data";
+import { ArrayData, BoolData, ColorData, EngineData, EnumData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectData, ObjectItemRequestData, Property, StringData, TextData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../data";
 export class TestClient {
   recv(event: PluginEvent) {
 
@@ -113,6 +113,12 @@ export class TestServer {
 
     this.testData.buildChild("str2").buildComponent("group6")
       .buildProperty("str2", new StringData("str2"))
+
+    this.testData.buildChild("Invalid").buildComponent("group7")
+      .buildProperty("NaN", new InvalidData(NaN))
+      .buildProperty("null", new InvalidData(null))
+      .buildProperty("Infinity", new InvalidData(Infinity))
+      .buildProperty("undefined", new InvalidData(undefined))
   }
   add(client: TestClient) {
     this.clients.push(client);

@@ -6,6 +6,7 @@
       <CCButton @click="onTestTree">init tree data</CCButton>
       <CCButton @click="onFrames">test frame</CCButton>
       <CCButton @click="onTestNodeInfo">test node info</CCButton>
+      <CCButton @click="onNull">test null</CCButton>
     </CCSection>
   </div>
 </template>
@@ -15,7 +16,7 @@ import { ITreeData } from "@xuyanfeng/cc-ui/types/cc-tree/const";
 import { defineComponent, ref } from "vue";
 import { Msg, Page, PluginEvent } from "../../../core/types";
 import { connectBackground } from "../connectBackground";
-import { FrameDetails, TreeData } from "../data";
+import { FrameDetails, Group, Info, InvalidData, NodeInfoData, TreeData } from "../data";
 import { testServer, TestServer } from "./server";
 const { CCButton, CCSection } = ccui.components;
 export default defineComponent({
@@ -81,6 +82,11 @@ export default defineComponent({
       },
       onTestNodeInfo() {
         const event = new PluginEvent(Page.Background, Page.Devtools, Msg.NodeInfo, testData);
+        testServer.send(event);
+      },
+      onNull() {
+        const data = new NodeInfoData("", [new Group("", "1").buildProperty("dependAssets", new InvalidData("Null"))]);
+        const event = new PluginEvent(Page.Background, Page.Devtools, Msg.NodeInfo, data);
         testServer.send(event);
       },
     };

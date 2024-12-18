@@ -3,7 +3,7 @@
     <CCProp :name="name" :icon="icon" :head-width="headWidth" v-model:expand="expand" :arrow="value && value.isArrayOrObject()" :slide="value && value.isNumber()" :indent="indent * 10" @change-expand="onClickFold">
       <div class="prop-value" v-if="value">
         <div v-if="value.isInvalid()" class="invalid">
-          {{ value.data }}
+          {{ formatValue(value.data) }}
         </div>
         <CCInput v-if="value.isString()" v-model:value="value.data" :disabled="value.readonly" @change="onChangeValue"> </CCInput>
         <CCTextarea v-if="value.isText()" v-model:value="value.data" :disabled="value.readonly" @change="onChangeValue"> </CCTextarea>
@@ -81,6 +81,20 @@ export default defineComponent({
     return {
       expand,
       subData,
+      formatValue(data: any) {
+        console.log(data);
+        if (data === null) {
+          return "null";
+        } else if (data === undefined) {
+          return "undefined";
+        } else if (data === Infinity) {
+          return "Infinity";
+        } else if (Number.isNaN(data)) {
+          return "NaN";
+        } else {
+          return data;
+        }
+      },
       getEnumValues(data: any): Option[] {
         const value: EnumData = data;
         const ret: Option[] = [];
@@ -147,6 +161,8 @@ export default defineComponent({
     align-items: flex-start;
 
     .invalid {
+      user-select: none;
+      font-size: 12px;
       color: grey;
     }
 

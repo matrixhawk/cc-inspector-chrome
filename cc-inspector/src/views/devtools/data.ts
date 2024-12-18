@@ -186,6 +186,11 @@ export class InvalidData extends Info {
     this.data = data;
     this.type = DataType.Invalid;
   }
+  parse(data: InvalidData) {
+    this.id = data.id;
+    this.data = data.data;
+    return this;
+  }
   public isInvalid(): boolean { return true; }
 }
 
@@ -456,6 +461,9 @@ export class Property {
         break;
       case DataType.Engine:
         this.value = new EngineData().parse(data.value as EngineData);
+        break;
+      case DataType.Invalid:
+        this.value = new InvalidData(data.value).parse(data.value as InvalidData);
         break;
       case DataType.ObjectItem:
       default:
