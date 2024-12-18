@@ -27,6 +27,11 @@ export class Info {
   constructor(id: string = "") {
     this.id = id || v4();
   }
+  parse(data: Info) {
+    this.id = data.id;
+    this.path = data.path;
+    this.readonly = data.readonly;
+  }
   public isEnum(): boolean { return false; }
   public isVec2(): boolean { return false; }
   public isVec3(): boolean { return false; }
@@ -52,6 +57,7 @@ export class TextData extends Info {
     this.data = data;
   }
   parse(data: TextData) {
+    super.parse(data);
     this.data = data.data;
     return this;
   }
@@ -84,7 +90,7 @@ export class EngineData extends Info {
     this.type = DataType.Engine;
   }
   parse(data: EngineData) {
-    this.id = data.id;
+    super.parse(data);
     this.engineType = data.engineType;
     this.engineUUID = data.engineUUID;
     this.engineName = data.engineName;
@@ -107,7 +113,7 @@ export class ArrayData extends Info {
     this.type = DataType.Array;
   }
   parse(data: ArrayData) {
-    this.id = data.id;
+    super.parse(data);
     for (let i = 0; i < data.data.length; i++) {
       const item = data.data[i];
       const property = new Property(item.name, item.value).parse(item);
@@ -151,7 +157,7 @@ export class ObjectData extends Info {
     this.type = DataType.Object;
   }
   parse(data: ObjectData) {
-    this.id = data.id;
+    super.parse(data);
     this.data = data.data;
     return this;
   }
@@ -187,7 +193,7 @@ export class InvalidData extends Info {
     this.type = DataType.Invalid;
   }
   parse(data: InvalidData) {
-    this.id = data.id;
+    super.parse(data);
     this.data = data.data;
     return this;
   }
@@ -202,7 +208,7 @@ export class ColorData extends Info {
     this.data = color;
   }
   parse(data: ColorData) {
-    this.id = data.id;
+    super.parse(data);
     this.data = data.data;
     return this;
   }
@@ -217,7 +223,7 @@ export class StringData extends Info {
     this.data = data;
   }
   parse(data: StringData) {
-    this.id = data.id;
+    super.parse(data);
     this.data = data.data;
     return this;
   }
@@ -232,7 +238,7 @@ export class NumberData extends Info {
     this.data = data;
   }
   parse(data: NumberData) {
-    this.id = data.id;
+    super.parse(data);
     this.data = data.data;
     return this;
   }
@@ -247,7 +253,7 @@ export class BoolData extends Info {
     this.data = bol;
   }
   parse(data: BoolData) {
-    this.id = data.id;
+    super.parse(data);
     this.data = data.data;
     return this;
   }
@@ -264,7 +270,7 @@ export class Vec2Data extends Info {
     return this;
   }
   parse(data: Vec2Data) {
-    this.id = data.id;
+    super.parse(data);
     for (let i = 0; i < data.data.length; i++) {
       const item = data.data[i];
       const property = new Property(item.name, item.value).parse(item);
@@ -297,7 +303,7 @@ export class Vec3Data extends Info {
     return this;
   }
   parse(data: Vec3Data) {
-    this.id = data.id;
+    super.parse(data);
     for (let i = 0; i < data.data.length; i++) {
       const item = data.data[i];
       const property = new Property(item.name, item.value).parse(item);
@@ -329,6 +335,7 @@ export class Vec4Data extends Info {
     return this;
   }
   parse(data: Vec4Data) {
+    super.parse(data);
     for (let i = 0; i < data.data.length; i++) {
       const item = data.data[i];
       const property = new Property(item.name, item.value).parse(item);
@@ -364,7 +371,7 @@ export class ImageData extends Info {
     return this;
   }
   parse(data: ImageData) {
-    this.id = data.id;
+    super.parse(data);
     this.data = data.data;
     return this;
   }
@@ -383,7 +390,7 @@ export class EnumData extends Info {
     this.type = DataType.Enum;
   }
   parse(data: EnumData) {
-    this.id = data.id;
+    super.parse(data);
     for (let i = 0; i < data.values.length; i++) {
       const item = data.values[i];
       this.values.push({ name: item.name, value: item.value });
