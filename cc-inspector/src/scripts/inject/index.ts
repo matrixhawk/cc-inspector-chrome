@@ -5,6 +5,7 @@ import { ArrayData, BoolData, ColorData, DataType, EngineData, Group, ImageData,
 import { getValue, trySetValueWithConfig } from "./setValue";
 import { BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOptions } from "./types";
 import { isHasProperty } from "./util";
+import { Terminal } from "../terminal";
 
 declare const cc: any;
 
@@ -23,9 +24,9 @@ class CCInspector {
       }
     }, 300);
   }
-
+  private terminal = new Terminal('Inject', 'blue', 'gray');
   init() {
-    console.log("cc-inspector init ~~~");
+    console.log(...this.terminal.init());
     this.watchIsCocosGame();
     window.addEventListener("message", (event) => {
       // 接受来自content的事件，有可能也会受到其他插件的
@@ -34,10 +35,7 @@ class CCInspector {
       }
       let pluginEvent: PluginEvent = event.data;
       if (PluginEvent.check(pluginEvent, Page.Content, Page.Inject)) {
-        console.log(
-          `%c[Inject] ${JSON.stringify(pluginEvent)}`,
-          "color:green;"
-        );
+        console.log(...this.terminal.message(JSON.stringify(pluginEvent)));
         PluginEvent.finish(pluginEvent);
         switch (pluginEvent.msg) {
           case Msg.Support: {

@@ -70,7 +70,7 @@ export class PortMgr {
         id: port.id,
         url: port.url
       });
-      str.push(`[${i + 1}] name:${port.name}, id:${port.id}, url:${port.url}`);
+      str.push(`[${i + 1}] time:${new Date(port.timestamp).toLocaleString()}, name:${port.name}, id:${port.id}, url:${port.url}`);
     }
 
     if (arr.length) {
@@ -92,9 +92,11 @@ export class PortMgr {
     this.getCurrentUseContent()?.postMessage(data);
   }
   sendDevtoolMsg(data: PluginEvent) {
-    const portMan = this.portArray.find(el => el.isDevtoolsPort());
-    if (portMan) {
-      portMan.port.postMessage(data);
+    const portManArray = this.portArray.filter(el => el.isDevtoolsPort());
+    if (portManArray.length) {
+      portManArray.forEach(portMan => {
+        portMan.port.postMessage(data);
+      })
     } else {
       console.log('not find devtools port');
     }

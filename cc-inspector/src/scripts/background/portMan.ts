@@ -20,19 +20,20 @@ export abstract class PortMan {
   public onDisconnect: (port: chrome.runtime.Port) => void | null = null;
   public onMessage: (data: PluginEvent) => void | null = null;
   public terminal: Terminal = null;
+  public timestamp: number = 0;
   constructor(tab: chrome.tabs.Tab, port: chrome.runtime.Port) {
+    this.timestamp = Date.now();
     this.port = port;
     this.tab = tab;
     this.name = port.name;
     this.id = tab.id;
     this.url = tab.url;
     this.title = tab.title;
-    this.terminal = new Terminal(`Port-${this.name}/ID-${this.id}`);
-    port.onMessage.addListener((data: any, sender: any) => {
-      const str = `${sender.name}\n${JSON.stringify(data)}`
-      console.log(... this.terminal.green(str));
+    this.terminal = new Terminal(`Port-${this.name}`);
+    port.onMessage.addListener((data: any, port: chrome.runtime.Port) => {
+      console.log(... this.terminal.message(JSON.stringify(data)));
       // 如果多个页面都监听 onMessage 事件，对于某一次事件只有第一次调用 sendResponse() 能成功发出回应，所有其他回应将被忽略。
-      // sender.postMessage(data);
+      // port.postMessage(data);
       const cls = PluginEvent.create(data);
       if (this.onMessage) {
         this.onMessage(cls);

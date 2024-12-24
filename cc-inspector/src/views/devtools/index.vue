@@ -48,7 +48,7 @@ import { defineComponent, nextTick, onMounted, PropType, reactive, Ref, ref, toR
 import PluginConfig from "../../../cc-plugin.config";
 import { Msg, Page, PluginEvent } from "../../core/types";
 import Bus, { BusMsg } from "./bus";
-import { connectBackground } from "./connectBackground";
+import { bridge } from "./bridge";
 import { EngineData, FrameDetails, Info, NodeInfoData, ObjectData, ObjectItemRequestData, TreeData } from "./data";
 import { appStore, RefreshType } from "./store";
 import Test from "./test/test.vue";
@@ -274,12 +274,12 @@ export default defineComponent({
         }
       };
       // 接收来自background.js的消息数据
-      connectBackground.onBackgroundMessage((data: PluginEvent, sender: any) => {
+      bridge.onMessage = (data: PluginEvent, sender: any) => {
         if (!data) {
           return;
         }
-        if (data.target === Page.Devtools) {
-          console.log("[Devtools]", data);
+        debugger;
+        if (data.isTargetDevtools()) {
           PluginEvent.finish(data);
           const { msg } = data;
           if (msg) {
@@ -290,8 +290,10 @@ export default defineComponent({
               console.warn(`没有${msg}消息的函数`);
             }
           }
+        } else {
+          debugger;
         }
-      });
+      };
     }
     _initChromeRuntimeConnect();
     window.addEventListener(
@@ -310,13 +312,13 @@ export default defineComponent({
         return;
       }
       requestList.push({ id: data.id, cb });
-      connectBackground.sendMsgToContentScript(Msg.GetObjectItemData, data);
+      bridge.send(Msg.GetObjectItemData, data);
     });
     Bus.on(BusMsg.UpdateSettings, () => {
       syncSettings();
     });
     Bus.on(BusMsg.LogData, (data: string[]) => {
-      connectBackground.sendMsgToContentScript(Msg.LogData, data);
+      bridge.send(Msg.LogData, data);
     });
     onMounted(() => {
       syncSettings();
@@ -381,7 +383,7 @@ export default defineComponent({
     }
     function updateNodeInfo() {
       if (selectedUUID) {
-        connectBackground.sendMsgToContentScript(Msg.NodeInfo, selectedUUID);
+        bridge.send(Msg.NodeInfo, selectedUUID);
       }
     }
     let selectedUUID: string | null = null;
@@ -389,10 +391,12 @@ export default defineComponent({
       (elTree.value as any)?.filter(val);
     }
     function onBtnClickUpdateTree() {
-      connectBackground.sendMsgToContentScript(Msg.TreeInfo, frameID);
+      const id = toRaw(frameID.value);
+      bridge.send(Msg.TreeInfo, id);
     }
     function onChangeFrame() {
-      connectBackground.sendMsgToContentScript(Msg.UseFrame, frameID);
+      const id = toRaw(frameID.value);
+      bridge.send(Msg.UseFrame, id);
     }
     const elLeft = ref<HTMLDivElement>();
     const version = ref(PluginConfig.manifest.version);
@@ -451,10 +455,10 @@ export default defineComponent({
       },
 
       onBtnClickUpdatePage() {
-        connectBackground.sendMsgToContentScript(Msg.Support);
+        bridge.send(Msg.Support);
       },
       onMemoryTest() {
-        connectBackground.sendMsgToContentScript(Msg.MemoryInfo);
+        bridge.send(Msg.MemoryInfo);
       },
 
       onChangeFrame,

@@ -35,7 +35,7 @@ import { nextTick } from "process";
 import { defineComponent, onMounted, onUnmounted, PropType, ref, toRaw, watch } from "vue";
 import { Msg } from "../../../core/types";
 import Bus, { BusMsg } from "../bus";
-import { connectBackground } from "../connectBackground";
+import { bridge } from "../bridge";
 import { DataType, EngineData, EnumData, ImageData, Info, NumberData, Property, StringData, TextData, Vec2Data, Vec3Data } from "../data";
 import Engine from "./property-engine.vue";
 import PropertyImage from "./property-image.vue";
@@ -139,7 +139,8 @@ export default defineComponent({
       },
       onChangeValue() {
         if (!props.value.readonly) {
-          connectBackground.postMessageToBackground(Msg.SetProperty, toRaw(props.value));
+          const raw = toRaw(props.value);
+          bridge.send(Msg.SetProperty, raw);
         }
       },
     };

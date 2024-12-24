@@ -1,18 +1,3 @@
-export function injectScript(url: string) {
-  if (chrome && chrome.runtime && chrome.runtime.getURL) {
-    let content = chrome.runtime.getURL(url)
-    const script = document.createElement("script")
-    script.setAttribute("type", "text/javascript")
-    script.setAttribute("src", content)
-    script.onload = function () {
-      document.head.removeChild(script);
-    }
-    document.head.appendChild(script)
-    console.log(`inject script success: ${content}`);
-  } else {
-    console.log("inject script failed")
-  }
-}
 
 interface LogOptions {
   data: any;

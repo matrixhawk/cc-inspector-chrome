@@ -14,7 +14,7 @@
 
 <script lang="ts">
 import ccui from "@xuyanfeng/cc-ui";
-import { defineComponent, PropType, ref, watch } from "vue";
+import { defineComponent, PropType, ref, toRaw, watch } from "vue";
 import Bus, { BusMsg } from "../bus";
 import { Group } from "../data";
 import UiProp from "./ui-prop.vue";
@@ -53,7 +53,8 @@ export default defineComponent({
     return {
       fold,
       onLog() {
-        Bus.emit(BusMsg.LogData, [props.group.id]);
+        const raw = toRaw(props);
+        Bus.emit(BusMsg.LogData, [raw.group.id]);
       },
     };
   },

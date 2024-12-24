@@ -15,7 +15,7 @@ import ccui from "@xuyanfeng/cc-ui";
 import { ITreeData } from "@xuyanfeng/cc-ui/types/cc-tree/const";
 import { defineComponent, ref } from "vue";
 import { Msg, Page, PluginEvent } from "../../../core/types";
-import { connectBackground } from "../connectBackground";
+import { bridge } from "../bridge";
 import { FrameDetails, Group, Info, InvalidData, NodeInfoData, TreeData } from "../data";
 import { testServer, TestServer } from "./server";
 const { CCButton, CCSection } = ccui.components;
@@ -70,7 +70,7 @@ export default defineComponent({
           children: [],
         };
         const event = new PluginEvent(Page.Inject, Page.Devtools, Msg.TreeInfo, data);
-        connectBackground.doCallback(event);
+        bridge.doMessage(event);
       },
       onFrames() {
         const data: FrameDetails[] = [
