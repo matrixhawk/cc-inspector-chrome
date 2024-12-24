@@ -24,7 +24,7 @@ class CCInspector {
       }
     }, 300);
   }
-  private terminal = new Terminal('Inject', 'blue', 'gray');
+  private terminal = new Terminal('Inject ', 'blue', 'gray');
   init() {
     console.log(...this.terminal.init());
     this.watchIsCocosGame();
