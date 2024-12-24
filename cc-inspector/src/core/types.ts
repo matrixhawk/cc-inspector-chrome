@@ -1,4 +1,5 @@
 export enum Page {
+  None = "None",
   Inject = "Inject",
   Devtools = "Devtools",
   Background = "Background",
@@ -64,7 +65,30 @@ export class PluginEvent {
    * 事件要发送的目标
    */
   target: Page | null = null;
+  isTargetDevtools() {
+    return this.target === Page.Devtools;
+  }
+  isTargetBackground() {
+    return this.target === Page.Background;
+  }
+  isTargetContent() {
+    return this.target === Page.Content;
+  }
+  /**
+   * 将addListener监听的数据转换为类
+   */
+  static create(data: any): PluginEvent {
+    let obj = data;
+    if (typeof data === "string") {
+      obj = JSON.stringify(data)
+    } else if (typeof data === "object") {
 
+    } else {
+      debugger;
+    }
+    const cls = data as PluginEvent;
+    return new PluginEvent(cls.source, cls.target, cls.msg, cls.data);
+  }
   static check(event: PluginEvent, source: Page, target: Page) {
     return event && source && target && event.source === source && event.target === target;
   }

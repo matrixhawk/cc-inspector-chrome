@@ -7,13 +7,30 @@ export class Terminal {
     this.background = background;
     this.tag = tag;
   }
-  ok() {
-    this.log(`ok`);
+  init(): string[] {
+    return this.log(`init`);
   }
-  log(message: string) {
-    console.log(`%c${this.tag}%c${message}`, `color:${this.color};background:${this.background};padding:0 4px`, "color:black;margin-left:5px")
+  public log(message: string, newline: boolean = false): string[] {
+    return [`%c${this.tag}%c${newline ? '\n' : ''}${message}`, `color:${this.color};background:${this.background};padding:0 4px`, "color:black;margin-left:5px"];
   }
-  connect(msg: string) {
-    this.log(`[connect] ${msg}`);
+
+
+  public blue(message: string): string[] {
+    this.color = 'blue';
+    return this.log(message);
+  }
+  public green(message: string): string[] {
+    this.color = 'green';
+    return this.log(message);
+  }
+  public red(message: string): string[] {
+    this.color = 'red';
+    return this.log(message);
+  }
+  connect(msg: string): string[] {
+    return this.log(`[connect] ${msg}`);
+  }
+  disconnect(msg: string): string[] {
+    return this.log(`[disconnect] ${msg}`);
   }
 }
