@@ -49,7 +49,7 @@ const manifest: CocosPluginManifest = {
     view_devtools: "src/views/devtools/index.ts",
     view_options: "src/views/options/index.ts",
     view_popup: "src/views/popup/index.ts",
-    script_background: "src/scripts/background.ts",
+    script_background: "src/scripts/background/index.ts",
     script_content: "src/scripts/content.ts",
     script_inject: "src/scripts/inject/index.ts",
   },

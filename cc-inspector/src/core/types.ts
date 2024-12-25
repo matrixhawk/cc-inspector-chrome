@@ -1,3 +1,5 @@
+import { Chunk } from "../scripts/terminal";
+
 export enum Page {
   None = "None",
   Inject = "Inject",
@@ -106,7 +108,15 @@ export class PluginEvent {
   static finish(event: PluginEvent) {
     event.source = event.target = null;
   }
-
+  toChunk(): Chunk[] {
+    return [
+      new Chunk(this.msg).color("white").background("black").margin('0 0 0 5px').padding("0 6px"),
+      new Chunk(this.source).color('white').background("red").padding('0 4px').margin('0 0 0 0px'),
+      new Chunk('=>').color('black').background("yellow").bold(),
+      new Chunk(this.target, true).color("white").background("green").padding('0 4px'),
+      new Chunk(JSON.stringify(this.data))
+    ];
+  }
   constructor(source: Page, target: Page, msg: Msg, data?: any) {
     if (PageInclude(target)) {
       this.source = source;

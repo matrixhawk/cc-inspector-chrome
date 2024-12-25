@@ -1,12 +1,13 @@
 <template>
   <div v-if="show" class="test">
-    <CCSection name="功能测试" :expand="false">
+    <CCSection name="功能测试" :expand="config.expandTest" @change="onExpandTest">
       <CCButton @click="onClickHasCocosGame">Has CocosGame</CCButton>
       <CCButton @click="onClickNoCocosGame">No CocosGame</CCButton>
       <CCButton @click="onTestTree">init tree data</CCButton>
       <CCButton @click="onFrames">test frame</CCButton>
       <CCButton @click="onTestNodeInfo">test node info</CCButton>
       <CCButton @click="onNull">test null</CCButton>
+      <CCButton @click="onTerminal">onTerminal</CCButton>
     </CCSection>
   </div>
 </template>
@@ -16,8 +17,11 @@ import { ITreeData } from "@xuyanfeng/cc-ui/types/cc-tree/const";
 import { defineComponent, ref } from "vue";
 import { Msg, Page, PluginEvent } from "../../../core/types";
 import { bridge } from "../bridge";
+import { appStore, RefreshType } from "../store";
+import { storeToRefs } from "pinia";
 import { FrameDetails, Group, Info, InvalidData, NodeInfoData, TreeData } from "../data";
 import { testServer, TestServer } from "./server";
+import { Terminal } from "../../../scripts/terminal";
 const { CCButton, CCSection } = ccui.components;
 export default defineComponent({
   name: "test",
@@ -27,6 +31,7 @@ export default defineComponent({
     isCocosGame: { type: Boolean, default: false },
   },
   setup(props, { emit }) {
+    const { config } = storeToRefs(appStore());
     const show = ref(__DEV__);
     // 测试发送的是纯数据
     const testData = {
@@ -55,12 +60,31 @@ export default defineComponent({
       ],
     };
     return {
+      config,
       show,
+      onExpandTest(v: boolean) {
+        console.log(v);
+        config.value.expandTest = v;
+        appStore().save();
+      },
       onClickHasCocosGame() {
         emit("validGame", true);
       },
       onClickNoCocosGame() {
         emit("validGame", false);
+      },
+      onTerminal() {
+        const t = new Terminal("flag");
+        const event = new PluginEvent(Page.Background, Page.Background, Msg.NodeInfo, "");
+        console.log(...t.message("1"));
+        console.log(...t.log("newline", true));
+        console.log(...t.log("oneline", false));
+        console.log(...t.disconnect("disconnect"));
+        console.log(...t.connect("connect"));
+        console.log(...t.red("red"));
+        console.log(...t.green("green"));
+        console.log(...t.blue("blue"));
+        console.log(...t.chunk(event.toChunk()));
       },
       onTestTree() {
         const data: TreeData = {
