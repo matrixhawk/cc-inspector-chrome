@@ -7,7 +7,7 @@
 <script lang="ts">
 import { defineComponent, PropType, watch } from "vue";
 import Bus, { BusMsg } from "../bus";
-import { Group, NodeInfoData } from "../data";
+import { NodeInfoData } from "../data";
 import PropertyGroup from "../ui/property-group.vue";
 import UiProp from "./ui-prop.vue";
 

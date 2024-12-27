@@ -1,7 +1,6 @@
-import { Msg, Page, PluginEvent } from "../../core/types";
+import { PluginEvent } from "../../core/types";
 import { PortMan } from "./portMan";
 import { portMgr } from "./portMgr";
-import { FrameDetails } from "views/devtools/data";
 
 export class PortContent extends PortMan {
   init(): void {

@@ -10,10 +10,9 @@
 </template>
 
 <script lang="ts">
-import ccui from "@xuyanfeng/cc-ui";
-import { defineComponent, PropType, ref } from "vue";
+import { defineComponent, PropType } from "vue";
 import Bus, { BusMsg } from "../bus";
-import { EngineData, NumberData, Property } from "../data";
+import { EngineData } from "../data";
 export default defineComponent({
   name: "property-engine",
   components: {},

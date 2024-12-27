@@ -1,7 +1,5 @@
 import CCP from "cc-plugin/src/ccp/entry-render";
 import { ChromeConst } from "cc-plugin/src/chrome/const";
-import { bridge } from "./bridge";
-import { Msg } from "../../core/types";
 export function init() {
   if (chrome && chrome.devtools) {
     // 对应的是Elements面板的边栏
@@ -12,8 +10,8 @@ export function init() {
     // 创建devtools-panel
     let iconPath = "";
     const { icon } = CCP.manifest;
-    if (icon && icon['48']) {
-      iconPath = icon['48'];
+    if (icon && icon["48"]) {
+      iconPath = icon["48"];
     }
     chrome.devtools.panels.create(CCP.manifest.name, iconPath, ChromeConst.html.devtools, (panel: chrome.devtools.panels.ExtensionPanel) => {
       console.log("[CC-Inspector] Dev Panel Created!");
@@ -30,7 +28,6 @@ export function init() {
         // ctrl+f 查找触发
         console.log("panel search!");
       });
-    }
-    );
+    });
   }
 }

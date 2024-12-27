@@ -1,10 +1,5 @@
 // @ts-ignore
-import {
-  CocosPluginManifest,
-  CocosPluginOptions,
-  Panel,
-  PluginType,
-} from "cc-plugin/src/declare";
+import { CocosPluginManifest, CocosPluginOptions, Panel } from "cc-plugin/src/declare";
 
 const pkgName = "cc-inspector";
 

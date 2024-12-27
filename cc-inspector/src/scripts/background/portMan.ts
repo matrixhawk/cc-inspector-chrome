@@ -1,8 +1,5 @@
-import { ChromeConst } from "cc-plugin/src/chrome/const";
-import { Msg, Page, PluginEvent } from "../../core/types";
-import { FrameDetails } from "../../views/devtools/data";
+import { Page, PluginEvent } from "../../core/types";
 import { Terminal } from "../terminal";
-import { portMgr } from "./portMgr";
 
 export abstract class PortMan {
   /**
@@ -32,13 +29,13 @@ export abstract class PortMan {
     this.terminal = new Terminal(`Port-${this.name}`);
     port.onMessage.addListener((data: any, port: chrome.runtime.Port) => {
       const event = PluginEvent.create(data);
-      console.log(... this.terminal.chunkMessage(event.toChunk()));
+      console.log(...this.terminal.chunkMessage(event.toChunk()));
       // 如果多个页面都监听 onMessage 事件，对于某一次事件只有第一次调用 sendResponse() 能成功发出回应，所有其他回应将被忽略。
       // port.postMessage(data);
       if (event.valid && this.onMessage) {
         this.onMessage(event);
       } else {
-        console.log(... this.terminal.log(JSON.stringify(data)));
+        console.log(...this.terminal.log(JSON.stringify(data)));
       }
     });
     port.onDisconnect.addListener((port: chrome.runtime.Port) => {

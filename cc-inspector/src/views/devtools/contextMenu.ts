@@ -1,4 +1,3 @@
-
 function createPluginMenus() {
   const menus = [];
 

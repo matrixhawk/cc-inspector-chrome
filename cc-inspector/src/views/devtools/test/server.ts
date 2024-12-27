@@ -2,9 +2,7 @@ import { v4 } from "uuid";
 import { Msg, Page, PluginEvent } from "../../../core/types";
 import { ArrayData, BoolData, ColorData, EngineData, EnumData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectData, ObjectItemRequestData, Property, StringData, TextData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../data";
 export class TestClient {
-  recv(event: PluginEvent) {
-
-  }
+  recv(event: PluginEvent) {}
 }
 class Node {
   active: boolean = true;
@@ -19,7 +17,7 @@ class Node {
     this.children = [];
   }
   buildComponent(name: string) {
-    const info = new Group(name)
+    const info = new Group(name);
     this.components.push(info);
     return info;
   }
@@ -43,17 +41,17 @@ class Node {
   private allNodes(): Node[] {
     const nodes: Node[] = [];
     function circle(node: Node) {
-      node.children.forEach(child => {
+      node.children.forEach((child) => {
         nodes.push(child);
         circle(child);
-      })
+      });
     }
     circle(this);
     return nodes;
   }
   findNode(id: string): Node | null {
     const nodes: Node[] = this.allNodes();
-    return nodes.find(node => node.id === id) || null;
+    return nodes.find((node) => node.id === id) || null;
   }
   findInfo(id: string): Info | null {
     const nodes: Node[] = this.allNodes();
@@ -83,42 +81,19 @@ export class TestServer {
   private clients: TestClient[] = [];
   private testData: Node = new Node("scene");
   constructor() {
-    this.testData.buildChild("base").buildComponent("group1")
-      .buildProperty('bool', new BoolData(true))
-      .buildProperty("text", new TextData("text"))
-      .buildProperty("number", new NumberData(100))
-      .buildProperty("string", new StringData("string"))
-      .buildProperty("enum", new EnumData().test())
-      .buildProperty("color", new ColorData('#f00'))
-      .buildProperty("image", new ImageData().test())
-    this.testData.buildChild('vec').buildComponent('group2')
-      .buildProperty("number", new NumberData(200))
-      .buildProperty("vec2", new Vec2Data().test())
-      .buildProperty("vec3", new Vec3Data().test())
-      .buildProperty("vec4", new Vec4Data().test())
-    this.testData.buildChild("obj/arr").buildComponent("group3")
-      .buildProperty("array", new ArrayData().test())
-      .buildProperty("object", new ObjectData().test())
-      .buildProperty("arr_arr", new ArrayData().testSub())
-    this.testData.buildChild("engine").buildComponent("group4")
-      .buildProperty("node", new EngineData().init('name', 'cc_Node', 'uuid'))
-      .buildProperty("sprite", new EngineData().init('name', 'cc_Sprite', 'uuid'))
-      .buildProperty("label", new EngineData().init('name', 'cc_Label', 'uuid'))
-      .buildProperty("un_known", new EngineData().init('name', 'un_known', 'uuid'))
+    this.testData.buildChild("base").buildComponent("group1").buildProperty("bool", new BoolData(true)).buildProperty("text", new TextData("text")).buildProperty("number", new NumberData(100)).buildProperty("string", new StringData("string")).buildProperty("enum", new EnumData().test()).buildProperty("color", new ColorData("#f00")).buildProperty("image", new ImageData().test());
+    this.testData.buildChild("vec").buildComponent("group2").buildProperty("number", new NumberData(200)).buildProperty("vec2", new Vec2Data().test()).buildProperty("vec3", new Vec3Data().test()).buildProperty("vec4", new Vec4Data().test());
+    this.testData.buildChild("obj/arr").buildComponent("group3").buildProperty("array", new ArrayData().test()).buildProperty("object", new ObjectData().test()).buildProperty("arr_arr", new ArrayData().testSub());
+    this.testData.buildChild("engine").buildComponent("group4").buildProperty("node", new EngineData().init("name", "cc_Node", "uuid")).buildProperty("sprite", new EngineData().init("name", "cc_Sprite", "uuid")).buildProperty("label", new EngineData().init("name", "cc_Label", "uuid")).buildProperty("un_known", new EngineData().init("name", "un_known", "uuid"));
 
-    const c = this.testData.buildChild("str1")
+    const c = this.testData.buildChild("str1");
     c.active = false;
-    c.buildComponent("group51").buildProperty("str1", new StringData("str1"))
-    c.buildComponent("group52").buildProperty("num", new NumberData(200))
+    c.buildComponent("group51").buildProperty("str1", new StringData("str1"));
+    c.buildComponent("group52").buildProperty("num", new NumberData(200));
 
-    this.testData.buildChild("str2").buildComponent("group6")
-      .buildProperty("str2", new StringData("str2"))
+    this.testData.buildChild("str2").buildComponent("group6").buildProperty("str2", new StringData("str2"));
 
-    this.testData.buildChild("Invalid").buildComponent("group7")
-      .buildProperty("NaN", new InvalidData(NaN))
-      .buildProperty("null", new InvalidData(null))
-      .buildProperty("Infinity", new InvalidData(Infinity))
-      .buildProperty("undefined", new InvalidData(undefined))
+    this.testData.buildChild("Invalid").buildComponent("group7").buildProperty("NaN", new InvalidData(NaN)).buildProperty("null", new InvalidData(null)).buildProperty("Infinity", new InvalidData(Infinity)).buildProperty("undefined", new InvalidData(undefined));
   }
   add(client: TestClient) {
     this.clients.push(client);
@@ -158,9 +133,9 @@ export class TestServer {
           const ret: ObjectItemRequestData = {
             id: objData.id,
             data: info.testProperty(),
-          }
+          };
           const event = new PluginEvent(Page.Inject, Page.Devtools, Msg.GetObjectItemData, ret);
-          this.send(event)
+          this.send(event);
         } else {
           console.warn("not found data: ", objData.id);
         }
@@ -176,7 +151,7 @@ export class TestServer {
   }
   send(event: PluginEvent) {
     this.clients.forEach((client) => {
-      client.recv(event)
+      client.recv(event);
     });
   }
 }

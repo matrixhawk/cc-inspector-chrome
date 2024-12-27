@@ -1,10 +1,10 @@
 import CCP from "cc-plugin/src/ccp/entry-render";
 import { Msg, Page, PluginEvent } from "../../core/types";
-import { TestClient, testServer, TestServer } from "./test/server";
 import { Terminal } from "../../scripts/terminal";
+import { TestClient, testServer } from "./test/server";
 export type BridgeCallback = (data: PluginEvent, sender: chrome.runtime.Port) => void;
 if (chrome.devtools) {
-  console.log("chrome devtools")
+  console.log("chrome devtools");
 }
 class Bridge implements TestClient {
   /**
@@ -25,9 +25,9 @@ class Bridge implements TestClient {
     if (CCP.Adaptation.Env.isChromeRuntime) {
       this.connect = chrome.runtime.connect({ name: Page.Devtools });
       this.connect.onDisconnect.addListener(() => {
-        console.log(...this.terminal.disconnect(""))
+        console.log(...this.terminal.disconnect(""));
         this.connect = null;
-      })
+      });
 
       this.connect.onMessage.addListener((event, sender: chrome.runtime.Port) => {
         const data = PluginEvent.create(event);
@@ -38,7 +38,6 @@ class Bridge implements TestClient {
           console.log(JSON.stringify(event));
         }
       });
-
     } else {
       testServer.add(this);
     }
@@ -55,12 +54,12 @@ class Bridge implements TestClient {
   send(msg: Msg, data?: any) {
     if (CCP.Adaptation.Env.isChromeDevtools) {
       if (this.connect) {
-        let sendData = new PluginEvent(Page.Devtools, Page.Background, msg, data)
-        this.connect.postMessage(sendData)
+        let sendData = new PluginEvent(Page.Devtools, Page.Background, msg, data);
+        this.connect.postMessage(sendData);
       } else {
-        console.warn(...this.terminal.log("重新和background建立链接"))
+        console.warn(...this.terminal.log("重新和background建立链接"));
         this.init();
-        this.send(msg, data)
+        this.send(msg, data);
       }
     } else {
       testServer.recv(msg, data);

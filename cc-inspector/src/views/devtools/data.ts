@@ -1,21 +1,21 @@
-import { ITreeData } from '@xuyanfeng/cc-ui/types/cc-tree/const';
+import { ITreeData } from "@xuyanfeng/cc-ui/types/cc-tree/const";
 import { v4 } from "uuid";
 export enum DataType {
-  Number = 'Number',
-  String = 'String',
-  Text = 'Text',
-  Vec2 = 'Vec2',
-  Vec3 = 'Vec3',
-  Vec4 = 'Vec4',
-  Enum = 'Enum',
-  Bool = 'Bool',
-  Color = 'Color',
-  Invalid = 'Invalid',
-  Array = 'Array', // 暂时在控制台打印下
-  Object = 'Object',
-  ObjectItem = 'ObjectItem',
-  Image = 'Image', // 图片
-  Engine = 'Engine',// 引擎的类型：cc.Node, cc.Sprite, cc.Label等。。。
+  Number = "Number",
+  String = "String",
+  Text = "Text",
+  Vec2 = "Vec2",
+  Vec3 = "Vec3",
+  Vec4 = "Vec4",
+  Enum = "Enum",
+  Bool = "Bool",
+  Color = "Color",
+  Invalid = "Invalid",
+  Array = "Array", // 暂时在控制台打印下
+  Object = "Object",
+  ObjectItem = "ObjectItem",
+  Image = "Image", // 图片
+  Engine = "Engine", // 引擎的类型：cc.Node, cc.Sprite, cc.Label等。。。
 }
 
 export class Info {
@@ -23,7 +23,7 @@ export class Info {
   public type: DataType = DataType.Number;
   public data: any;
   public readonly: boolean = false;
-  public path: Array<string> = [];// 属性对应的路径
+  public path: Array<string> = []; // 属性对应的路径
   constructor(id: string = "") {
     this.id = id || v4();
   }
@@ -32,21 +32,51 @@ export class Info {
     this.path = data.path;
     this.readonly = data.readonly;
   }
-  public isEnum(): boolean { return false; }
-  public isVec2(): boolean { return false; }
-  public isVec3(): boolean { return false; }
-  public isVec4(): boolean { return false; }
-  public isBool(): boolean { return false; }
-  public isText(): boolean { return false; }
-  public isString(): boolean { return false; }
-  public isColor(): boolean { return false; }
-  public isInvalid(): boolean { return false; }
-  public isNumber(): boolean { return false; }
-  public isArrayOrObject(): boolean { return false; }
-  public isArray(): boolean { return false; }
-  public isObject(): boolean { return false; }
-  public isImage(): boolean { return false; }
-  public isEngine(): boolean { return false; }
+  public isEnum(): boolean {
+    return false;
+  }
+  public isVec2(): boolean {
+    return false;
+  }
+  public isVec3(): boolean {
+    return false;
+  }
+  public isVec4(): boolean {
+    return false;
+  }
+  public isBool(): boolean {
+    return false;
+  }
+  public isText(): boolean {
+    return false;
+  }
+  public isString(): boolean {
+    return false;
+  }
+  public isColor(): boolean {
+    return false;
+  }
+  public isInvalid(): boolean {
+    return false;
+  }
+  public isNumber(): boolean {
+    return false;
+  }
+  public isArrayOrObject(): boolean {
+    return false;
+  }
+  public isArray(): boolean {
+    return false;
+  }
+  public isObject(): boolean {
+    return false;
+  }
+  public isImage(): boolean {
+    return false;
+  }
+  public isEngine(): boolean {
+    return false;
+  }
 }
 
 export class TextData extends Info {
@@ -61,7 +91,9 @@ export class TextData extends Info {
     this.data = data.data;
     return this;
   }
-  public isText(): boolean { return true; }
+  public isText(): boolean {
+    return true;
+  }
 }
 
 export interface ObjectItemRequestData {
@@ -102,7 +134,9 @@ export class EngineData extends Info {
     this.engineUUID = uuid;
     return this;
   }
-  public isEngine(): boolean { return true; }
+  public isEngine(): boolean {
+    return true;
+  }
 }
 
 export class ArrayData extends Info {
@@ -135,16 +169,18 @@ export class ArrayData extends Info {
     this.add(new Property("item1", new TextData("text")));
     const sub = new ArrayData();
     sub.add(new Property("sub", new StringData("sub")));
-    this.add(new Property('arr', sub));
+    this.add(new Property("arr", sub));
     return this;
   }
-  public isArray(): boolean { return true; }
-  public isArrayOrObject(): boolean { return true; }
+  public isArray(): boolean {
+    return true;
+  }
+  public isArrayOrObject(): boolean {
+    return true;
+  }
 }
 
-export class ObjectDataItem extends Info {
-
-}
+export class ObjectDataItem extends Info {}
 
 export class ObjectData extends Info {
   /**
@@ -163,25 +199,29 @@ export class ObjectData extends Info {
   }
 
   test() {
-    this.data = JSON.stringify({ fack: 'test' });
+    this.data = JSON.stringify({ fack: "test" });
     return this;
   }
   testProperty(): Property[] {
     const obj: Object = JSON.parse(this.data);
     const properties: Property[] = [];
     for (let key in obj) {
-      if (typeof obj[key] === 'string') {
+      if (typeof obj[key] === "string") {
         properties.push(new Property(key, new StringData(obj[key])));
-      } else if (typeof obj[key] === 'number') {
+      } else if (typeof obj[key] === "number") {
         properties.push(new Property(key, new NumberData(obj[key])));
-      } else if (typeof obj[key] === 'boolean') {
+      } else if (typeof obj[key] === "boolean") {
         properties.push(new Property(key, new BoolData(obj[key])));
       }
     }
     return properties;
   }
-  public isObject(): boolean { return true; }
-  public isArrayOrObject(): boolean { return true; }
+  public isObject(): boolean {
+    return true;
+  }
+  public isArrayOrObject(): boolean {
+    return true;
+  }
 }
 
 export class InvalidData extends Info {
@@ -197,7 +237,9 @@ export class InvalidData extends Info {
     this.data = data.data;
     return this;
   }
-  public isInvalid(): boolean { return true; }
+  public isInvalid(): boolean {
+    return true;
+  }
 }
 
 export class ColorData extends Info {
@@ -212,7 +254,9 @@ export class ColorData extends Info {
     this.data = data.data;
     return this;
   }
-  public isColor(): boolean { return true; }
+  public isColor(): boolean {
+    return true;
+  }
 }
 
 export class StringData extends Info {
@@ -227,7 +271,9 @@ export class StringData extends Info {
     this.data = data.data;
     return this;
   }
-  public isString(): boolean { return true; }
+  public isString(): boolean {
+    return true;
+  }
 }
 
 export class NumberData extends Info {
@@ -242,7 +288,9 @@ export class NumberData extends Info {
     this.data = data.data;
     return this;
   }
-  public isNumber(): boolean { return true; }
+  public isNumber(): boolean {
+    return true;
+  }
 }
 
 export class BoolData extends Info {
@@ -257,7 +305,9 @@ export class BoolData extends Info {
     this.data = data.data;
     return this;
   }
-  public isBool(): boolean { return true; }
+  public isBool(): boolean {
+    return true;
+  }
 }
 
 export class Vec2Data extends Info {
@@ -265,7 +315,7 @@ export class Vec2Data extends Info {
 
   constructor() {
     super();
-    this.type = DataType.Vec2
+    this.type = DataType.Vec2;
     this.data = [];
     return this;
   }
@@ -376,15 +426,18 @@ export class ImageData extends Info {
     return this;
   }
   test() {
-    const cocos = 'data:image/png;base64,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';
+    const cocos =
+      "data:image/png;base64,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";
     this.data = cocos;
     return this;
   }
-  public isImage(): boolean { return true; }
+  public isImage(): boolean {
+    return true;
+  }
 }
 
 export class EnumData extends Info {
-  public values: Array<{ name: string, value: any }> = [];
+  public values: Array<{ name: string; value: any }> = [];
   constructor() {
     super();
     this.type = DataType.Enum;
@@ -474,7 +527,7 @@ export class Property {
         break;
       case DataType.ObjectItem:
       default:
-        throw new Error(`not support type: ${typeof data === 'string' ? data : JSON.stringify(data)}`);
+        throw new Error(`not support type: ${typeof data === "string" ? data : JSON.stringify(data)}`);
     }
     return this;
   }
@@ -490,7 +543,7 @@ export class Group {
 
   constructor(name: string, id?: string) {
     this.name = name;
-    this.id = id || '';
+    this.id = id || "";
   }
   parse(data: Group) {
     this.id = data.id;
@@ -504,7 +557,7 @@ export class Group {
     return this;
   }
   addProperty(property: Property) {
-    this.data.push(property)
+    this.data.push(property);
   }
   buildProperty(name: string, info: Info) {
     const property = new Property(name, info);
@@ -516,16 +569,16 @@ export class Group {
     let order = ["name", "active", "enabled", "uuid", "position", "rotation", "scale", "anchor", "size", "color", "opacity", "skew", "group"];
     let orderKeys: Array<Property> = [];
     let otherKeys: Array<Property> = [];
-    this.data.forEach(property => {
-      if (order.find(el => el === property.name)) {
-        orderKeys.push(property)
+    this.data.forEach((property) => {
+      if (order.find((el) => el === property.name)) {
+        orderKeys.push(property);
       } else {
         otherKeys.push(property);
       }
-    })
+    });
     orderKeys.sort((a, b) => {
       return order.indexOf(a.name) - order.indexOf(b.name);
-    })
+    });
     otherKeys.sort();
     this.data = orderKeys.concat(otherKeys);
   }

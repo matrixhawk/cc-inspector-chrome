@@ -36,5 +36,5 @@ export const appStore = defineStore("app", () => {
       const cfg = toRaw(config.value);
       profile.save(cfg);
     },
-  }
+  };
 });

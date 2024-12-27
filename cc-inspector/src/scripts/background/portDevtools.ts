@@ -8,7 +8,7 @@ export class PortDevtools extends PortMan {
     portMgr._updateFrames();
     this.onDisconnect = () => {
       portMgr.removePort(this);
-    }
+    };
     this.onMessage = (data: PluginEvent) => {
       if (data.msg === Msg.UseFrame) {
         portMgr.useFrame(data.data);
@@ -29,8 +29,6 @@ export class PortDevtools extends PortMan {
           port.postMessage(data);
         }
       }
-
-    }
+    };
   }
-
 }

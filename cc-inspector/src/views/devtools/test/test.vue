@@ -13,15 +13,14 @@
 </template>
 <script lang="ts">
 import ccui from "@xuyanfeng/cc-ui";
-import { ITreeData } from "@xuyanfeng/cc-ui/types/cc-tree/const";
+import { storeToRefs } from "pinia";
 import { defineComponent, ref } from "vue";
 import { Msg, Page, PluginEvent } from "../../../core/types";
-import { bridge } from "../bridge";
-import { appStore, RefreshType } from "../store";
-import { storeToRefs } from "pinia";
-import { FrameDetails, Group, Info, InvalidData, NodeInfoData, TreeData } from "../data";
-import { testServer, TestServer } from "./server";
 import { Terminal } from "../../../scripts/terminal";
+import { bridge } from "../bridge";
+import { FrameDetails, Group, InvalidData, NodeInfoData, TreeData } from "../data";
+import { appStore } from "../store";
+import { testServer } from "./server";
 const { CCButton, CCSection } = ccui.components;
 export default defineComponent({
   name: "test",

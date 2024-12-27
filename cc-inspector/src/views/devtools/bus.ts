@@ -1,4 +1,4 @@
-import { TinyEmitter } from 'tiny-emitter';
+import { TinyEmitter } from "tiny-emitter";
 
 export enum BusMsg {
   ShowPlace = "ShowPlace",

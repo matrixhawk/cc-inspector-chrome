@@ -1,9 +1,8 @@
 import { ChromeConst } from "cc-plugin/src/chrome/const";
 import { Msg, Page, PluginEvent } from "../../core/types";
-import { FrameDetails } from "../../views/devtools/data";
-import { PortMan } from "./portMan";
-import { PortMgr, portMgr } from "./portMgr";
 import { Terminal } from "../terminal";
+import { PortMan } from "./portMan";
+import { portMgr } from "./portMgr";
 const terminal = new Terminal(Page.Background);
 console.log(...terminal.init());
 function isDevtools(port: chrome.runtime.Port) {
@@ -16,7 +15,7 @@ function onTabConnect(tab: chrome.tabs.Tab, port: chrome.runtime.Port) {
     debugger;
     return;
   }
-  let portMan = portMgr.findPort(tab.id)
+  let portMan = portMgr.findPort(tab.id);
   if (portMan) {
     // 一个port发起多次发起链接，以最后一次的为数据通讯基准
     // portMgr.removePort(portMan);
@@ -30,7 +29,7 @@ chrome.runtime.onConnect.addListener((port: chrome.runtime.Port) => {
     chrome.tabs.query({ active: true }, (tabs: chrome.tabs.Tab[]) => {
       tabs.forEach((tab) => {
         onTabConnect(tab, port);
-      })
+      });
     });
   } else {
     const tab: chrome.tabs.Tab | undefined = port.sender?.tab;
@@ -52,7 +51,7 @@ chrome.runtime.onMessage.addListener((request: PluginEvent, sender: any, sendRes
     }
   }
 });
-chrome.tabs.onActivated.addListener(({ tabId, windowId }) => { });
+chrome.tabs.onActivated.addListener(({ tabId, windowId }) => {});
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   // 页面发生刷新，通知重新生成数据
   if (changeInfo.status === "complete") {

@@ -31,12 +31,11 @@
 <script lang="ts">
 import ccui from "@xuyanfeng/cc-ui";
 import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
-import { nextTick } from "process";
-import { defineComponent, onMounted, onUnmounted, PropType, ref, toRaw, watch } from "vue";
+import { defineComponent, onMounted, PropType, ref, toRaw, watch } from "vue";
 import { Msg } from "../../../core/types";
-import Bus, { BusMsg } from "../bus";
 import { bridge } from "../bridge";
-import { DataType, EngineData, EnumData, ImageData, Info, NumberData, Property, StringData, TextData, Vec2Data, Vec3Data } from "../data";
+import Bus, { BusMsg } from "../bus";
+import { EngineData, EnumData, ImageData, Info, NumberData, Property, StringData, TextData, Vec2Data, Vec3Data } from "../data";
 import Engine from "./property-engine.vue";
 import PropertyImage from "./property-image.vue";
 const { CCInput, CCTextarea, CCProp, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } = ccui.components;

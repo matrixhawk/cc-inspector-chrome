@@ -42,13 +42,12 @@
 import ccui from "@xuyanfeng/cc-ui";
 import { ButtonGroupItem } from "@xuyanfeng/cc-ui/types/cc-button-group/const";
 import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
-import { ITreeData } from "@xuyanfeng/cc-ui/types/cc-tree/const";
-import { _UnwrapAll, Store, storeToRefs } from "pinia";
-import { defineComponent, nextTick, onMounted, PropType, reactive, Ref, ref, toRaw, watch } from "vue";
+import { storeToRefs } from "pinia";
+import { defineComponent, nextTick, onMounted, reactive, ref, toRaw, watch } from "vue";
 import PluginConfig from "../../../cc-plugin.config";
-import { Msg, Page, PluginEvent } from "../../core/types";
-import Bus, { BusMsg } from "./bus";
+import { Msg, PluginEvent } from "../../core/types";
 import { bridge } from "./bridge";
+import Bus, { BusMsg } from "./bus";
 import { EngineData, FrameDetails, Info, NodeInfoData, ObjectData, ObjectItemRequestData, TreeData } from "./data";
 import { appStore, RefreshType } from "./store";
 import Test from "./test/test.vue";
