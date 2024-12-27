@@ -1265,10 +1265,10 @@
   resolved "https://mirrors.cloud.tencent.com/npm/@xuyanfeng/fs-browserify/-/fs-browserify-1.0.0.tgz#808811e8d7e2fb8bcad9fd7290a4ca0f280bc585"
   integrity sha512-Tir61SPNwFLSRE18QsD8vJZg78td9+uDDUnyWB/iP896zhqhzXlqJnPOKOIZEPs4dQ1IqjZZfFwJ9STIH2uD+A==
 
-"@xuyanfeng/fs-extra-browserify@^1.0.2":
-  version "1.0.2"
-  resolved "https://mirrors.cloud.tencent.com/npm/@xuyanfeng/fs-extra-browserify/-/fs-extra-browserify-1.0.2.tgz#64c7e571aa0e881c47f2c15d33a42a81a74c2ab5"
-  integrity sha512-vbysPDyzcMdliomc6CfoF/zZ3BoPScR9ObdZIjZ9Tf6yf6L1vNI9PLJxM6bL/LYv5QupqRzMQ5awkiCy+pFuyw==
+"@xuyanfeng/fs-extra-browserify@^1.0.3":
+  version "1.0.3"
+  resolved "https://mirrors.cloud.tencent.com/npm/@xuyanfeng/fs-extra-browserify/-/fs-extra-browserify-1.0.3.tgz#a97add75645d924639cb4d855abaef1455c3ad06"
+  integrity sha512-NgmhlTvbC0mj7XLJ6VWBQP7B6/PMXPM6H9975OQZElBpDLTKL+O2pnFAcd1lYyZwsG7/JlQQDZnI5Fuj9ZcdQw==
 
 "@xuyanfeng/globby-browserify@^1.0.0":
   version "1.0.0"
@@ -1943,7 +1943,7 @@ case-sensitive-paths-webpack-plugin@^2.3.0:
   integrity sha512-roIFONhcxog0JSSWbvVAh3OocukmSgpqOH6YpMkCvav/ySIV3JKg4Dc8vYtQjYi/UxpNE36r/9v+VqTQqgkYmw==
 
 "cc-plugin@file:.yalc/cc-plugin":
-  version "2.1.65"
+  version "2.1.68"
   dependencies:
     "@babel/generator" "^7.16.8"
     "@popperjs/core" "^2.11.6"
@@ -1952,7 +1952,7 @@ case-sensitive-paths-webpack-plugin@^2.3.0:
     "@xuyanfeng/chokidar-browserify" "^1.0.1"
     "@xuyanfeng/express-browserify" "^1.0.0"
     "@xuyanfeng/fs-browserify" "^1.0.0"
-    "@xuyanfeng/fs-extra-browserify" "^1.0.2"
+    "@xuyanfeng/fs-extra-browserify" "^1.0.3"
     "@xuyanfeng/globby-browserify" "^1.0.0"
     "@xuyanfeng/sharp-browserify" "^1.0.0"
     assert "^2.0.0"
