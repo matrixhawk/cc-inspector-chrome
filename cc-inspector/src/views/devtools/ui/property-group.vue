@@ -15,7 +15,9 @@
 <script lang="ts">
 import ccui from "@xuyanfeng/cc-ui";
 import { defineComponent, PropType, ref, toRaw, watch } from "vue";
-import Bus, { BusMsg } from "../bus";
+import { Msg, RequestLogData } from "../../../core/types";
+import { bridge } from "../bridge";
+import { Bus, BusMsg } from "../bus";
 import { Group } from "../data";
 import UiProp from "./ui-prop.vue";
 const { CCInput, CCSection, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } = ccui.components;
@@ -54,7 +56,8 @@ export default defineComponent({
       fold,
       onLog() {
         const raw = toRaw(props);
-        Bus.emit(BusMsg.LogData, [raw.group.id]);
+        const data = [raw.group.id];
+        bridge.send(Msg.RequestLogData, data as RequestLogData);
       },
     };
   },

@@ -23,7 +23,9 @@ export class ConfigData {
 
 export const appStore = defineStore("app", () => {
   const config = ref<ConfigData>(new ConfigData());
+  const frameID = ref<number>(0);
   return {
+    frameID,
     config,
     init() {
       profile.init(new ConfigData(), pluginConfig);

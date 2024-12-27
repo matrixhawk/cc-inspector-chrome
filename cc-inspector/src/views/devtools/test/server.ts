@@ -1,5 +1,5 @@
 import { v4 } from "uuid";
-import { Msg, Page, PluginEvent, RequestNodeInfoData, RequestObjectData, ResponseNodeInfoData, ResponseObjectData, ResponseTreeInfoData } from "../../../core/types";
+import { Msg, Page, PluginEvent, RequestNodeInfoData, RequestObjectData, ResponseNodeInfoData, ResponseObjectData, ResponseSupportData, ResponseTreeInfoData } from "../../../core/types";
 import { ArrayData, BoolData, ColorData, EngineData, EnumData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectData, ObjectItemRequestData, Property, StringData, TextData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../data";
 export class TestClient {
   recv(event: PluginEvent) {}
@@ -98,8 +98,18 @@ export class TestServer {
   add(client: TestClient) {
     this.clients.push(client);
   }
+  private count: number = 0;
   recv(msg: string, data: any) {
     switch (msg) {
+      case Msg.RequestSupport: {
+        this.count++;
+        const e = new PluginEvent(Page.Background, Page.Devtools, Msg.ResponseSupport, {
+          support: this.count > 10,
+          msg: "",
+        } as ResponseSupportData);
+        this.send(e);
+        break;
+      }
       case Msg.RequestNodeInfo: {
         const id: string = (data as RequestNodeInfoData).uuid;
         const node: Node = this.testData.findNode(id);

@@ -1,4 +1,5 @@
 import CCP from "cc-plugin/src/ccp/entry-render";
+import { TinyEmitter } from "tiny-emitter";
 import { Msg, Page, PluginEvent } from "../../core/types";
 import { Terminal } from "../../scripts/terminal";
 import { TestClient, testServer } from "./test/server";
@@ -7,11 +8,7 @@ if (chrome.devtools) {
   console.log("chrome devtools");
 }
 class Bridge implements TestClient {
-  /**
-   * 把callback保存为变量，方便测试
-   */
-  public onMessage: BridgeCallback | null = null;
-
+  private emitter = new TinyEmitter();
   /**
    * 和background建立的链接
    */
@@ -32,24 +29,25 @@ class Bridge implements TestClient {
       this.connect.onMessage.addListener((event, sender: chrome.runtime.Port) => {
         const data = PluginEvent.create(event);
         console.log(...this.terminal.chunkMessage(data.toChunk()));
-        if (data.valid && this.onMessage) {
-          this.onMessage(data, sender);
+        if (data.valid && data.isTargetDevtools()) {
+          this.emitter.emit(data.msg, data.data);
         } else {
           console.log(JSON.stringify(event));
+          debugger;
         }
       });
     } else {
       testServer.add(this);
     }
   }
-
-  recv(event: PluginEvent): void {
-    this.doMessage(event);
+  on(msg: Msg, callback: Function) {
+    this.emitter.on(msg, callback);
   }
-  doMessage(data: PluginEvent) {
-    if (this.onMessage) {
-      this.onMessage(data, null);
-    }
+  recv(event: PluginEvent): void {
+    this.emit(event);
+  }
+  emit(data: PluginEvent) {
+    this.emitter.emit(data.msg, data);
   }
   send(msg: Msg, data?: any) {
     if (CCP.Adaptation.Env.isChromeDevtools) {

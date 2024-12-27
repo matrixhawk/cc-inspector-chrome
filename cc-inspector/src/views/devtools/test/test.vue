@@ -94,7 +94,7 @@ export default defineComponent({
           children: [],
         };
         const event = new PluginEvent(Page.Inject, Page.Devtools, Msg.ResponseTreeInfo, data);
-        bridge.doMessage(event);
+        bridge.emit(event);
       },
       onFrames() {
         const data: FrameDetails[] = [
