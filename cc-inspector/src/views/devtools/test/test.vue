@@ -84,7 +84,7 @@ export default defineComponent({
         console.log(...t.red("red"));
         console.log(...t.green("green"));
         console.log(...t.blue("blue"));
-        console.log(...t.chunk(event.toChunk()));
+        console.log(...t.chunkMessage(event.toChunk()));
       },
       onTestTree() {
         const data: TreeData = {

@@ -40,12 +40,13 @@ chrome.runtime.onConnect.addListener((port: chrome.runtime.Port) => {
   }
 });
 chrome.runtime.onMessage.addListener((request: PluginEvent, sender: any, sendResponse: any) => {
+  const event = PluginEvent.create(request);
   const tabID = sender.tab.id;
   const portMan: PortMan | undefined = portMgr.findPort(tabID);
   if (portMan) {
-    if (PluginEvent.check(request, Page.Content, Page.Background)) {
+    if (event.check(Page.Content, Page.Background)) {
       //  监听来自content.js发来的事件，将消息转发到devtools
-      PluginEvent.reset(request, Page.Background, Page.Devtools);
+      event.reset(Page.Background, Page.Devtools);
       console.log(`%c[Message]url:${sender.url}]\n${JSON.stringify(request)}`, "color:green");
       portMgr.sendDevtoolMsg(request);
     }

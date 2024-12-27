@@ -30,10 +30,12 @@ class Bridge implements TestClient {
       })
 
       this.connect.onMessage.addListener((event, sender: chrome.runtime.Port) => {
-        console.log(...this.terminal.message(JSON.stringify(event)));
         const data = PluginEvent.create(event);
-        if (this.onMessage) {
+        console.log(...this.terminal.chunkMessage(data.toChunk()));
+        if (data.valid && this.onMessage) {
           this.onMessage(data, sender);
+        } else {
+          console.log(JSON.stringify(event));
         }
       });
 

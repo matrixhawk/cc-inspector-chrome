@@ -11,6 +11,7 @@ export enum Page {
 }
 
 export enum Msg {
+  None = "None",
   /**
    * 具体的节点信息
    */
@@ -50,6 +51,15 @@ export enum Msg {
 }
 
 export class PluginEvent {
+  public static FLAG = "cc-inspector";
+  /**
+   * 增加一个消息的标记位，方便知道是自己插件的消息
+   */
+  flag: string = PluginEvent.FLAG;
+  /**
+   * 消息是否有效
+   */
+  valid: boolean = false;
   /**
    * 消息的类型
    */
@@ -84,21 +94,32 @@ export class PluginEvent {
     if (typeof data === "string") {
       obj = JSON.stringify(data)
     } else if (typeof data === "object") {
-
+      obj = data;
     } else {
       debugger;
     }
-    const cls = data as PluginEvent;
-    return new PluginEvent(cls.source, cls.target, cls.msg, cls.data);
+
+    const ret = new PluginEvent(Page.None, Page.None, Msg.None, null);
+    if (obj.flag !== PluginEvent.FLAG) {
+      ret.valid = false;
+    } else {
+      const cls = data as PluginEvent;
+      ret.source = cls.source;
+      ret.target = cls.target;
+      ret.msg = cls.msg;
+      ret.data = cls.data;
+      ret.valid = true;
+    }
+    return ret;
   }
-  static check(event: PluginEvent, source: Page, target: Page) {
-    return event && source && target && event.source === source && event.target === target;
+  check(source: Page, target: Page) {
+    return source && target && this.source === source && this.target === target;
   }
 
-  static reset(event: PluginEvent, source: Page | null, target: Page | null) {
-    if (event && source && target) {
-      event.source = source;
-      event.target = target;
+  reset(source: Page | null, target: Page | null) {
+    if (source && target) {
+      this.source = source;
+      this.target = target;
     }
   }
 
@@ -110,10 +131,11 @@ export class PluginEvent {
   }
   toChunk(): Chunk[] {
     return [
-      new Chunk(this.msg).color("white").background("black").margin('0 0 0 5px').padding("0 6px"),
-      new Chunk(this.source).color('white').background("red").padding('0 4px').margin('0 0 0 0px'),
+      new Chunk(new Date().toLocaleString()).color("white").background("black").padding('0 4px'),
+      new Chunk(this.source).color('white').background("red").padding('0 4px').margin('0 0 0 5px'),
       new Chunk('=>').color('black').background("yellow").bold(),
-      new Chunk(this.target, true).color("white").background("green").padding('0 4px'),
+      new Chunk(this.target, false).color("white").background("green").padding('0 4px'),
+      new Chunk(this.msg, true).color("white").background("black").margin('0 0 0 5px').padding("0 6px"),
       new Chunk(JSON.stringify(this.data))
     ];
   }

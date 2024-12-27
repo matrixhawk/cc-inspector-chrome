@@ -395,7 +395,7 @@ export default defineComponent({
       bridge.send(Msg.TreeInfo, id);
     }
     function onChangeFrame() {
-      const id = toRaw(frameID.value);
+      const id = Number(toRaw(frameID.value));
       bridge.send(Msg.UseFrame, id);
     }
     const elLeft = ref<HTMLDivElement>();

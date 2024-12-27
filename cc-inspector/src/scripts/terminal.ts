@@ -12,8 +12,8 @@ export class Chunk {
    */
   style: string[] = [];
   constructor(v: string, newline: boolean = false) {
-    this.value = v
-    this.newline = newline
+    this.value = v;
+    this.newline = newline;
   }
   color(c: string) {
     this.style.push(`color:${c}`);
@@ -47,10 +47,10 @@ export class Chunk {
     return this;
   }
   toValue() {
-    return `%c${this.value}${this.newline ? '\n' : ''}`
+    return `%c${this.value}${this.newline ? "\n" : ""}`;
   }
   toStyle() {
-    return this.style.join(';')
+    return this.style.join(";");
   }
 }
 
@@ -58,7 +58,7 @@ export class Terminal {
   /**
    * 标签
    */
-  tag = 'terminal';
+  tag = "terminal";
   /**
    * 子标签
    */
@@ -66,46 +66,51 @@ export class Terminal {
   /**
    * 标签的颜色
    */
-  tagColor = 'blue';
+  tagColor = "blue";
   /**
    * 标签的背景色
    */
-  tagBackground = 'yellow';
+  tagBackground = "yellow";
   /**
    * 日志文本的颜色
    */
-  txtColor = 'black';
+  txtColor = "black";
   private chunks: Chunk[] = [];
   constructor(tag: string) {
     this.tag = tag;
   }
   init(): string[] {
-    this.txtColor = 'black';
+    this.txtColor = "black";
     this.subTag = "init";
     return this.log();
   }
 
   public log(message: string = "", newline: boolean = false): string[] {
-    const txt = new Chunk(message).color(this.txtColor).background('#e6e6e6').marginLeft("5px")
+    const txt = new Chunk(message).color(this.txtColor).background("#e6e6e6").marginLeft("5px");
     return this.doChunk(newline, [txt]);
   }
-  public chunk(chunk: Chunk[]) {
+  public chunkMessage(chunk: Chunk[]) {
     this.subTag = "message";
-    return this.doChunk(false, chunk)
+    return this.doChunk(false, chunk);
+  }
+
+  public chunkSend(chunk: Chunk[]) {
+    this.subTag = "send   ";
+    return this.doChunk(false, chunk);
   }
   private doChunk(newline: boolean = false, chunks: Chunk[]) {
     this.chunks = [];
-    const tag = new Chunk(this.tag).color(this.tagColor).background(this.tagBackground).padding("0 4px")
+    const tag = new Chunk(this.tag).color(this.tagColor).background(this.tagBackground).padding("0 4px");
     this.chunks.push(tag);
 
-    const subTag = new Chunk(this.subTag, newline).color(this.tagBackground).background(this.tagColor).padding("0 3px")
+    const subTag = new Chunk(this.subTag, newline).color(this.tagBackground).background(this.tagColor).padding("0 3px");
     this.chunks.push(subTag);
 
     chunks.forEach((c) => {
       this.chunks.push(c);
-    })
+    });
 
-    let head = '*';
+    let head = "*";
     for (let i = 0; i < this.chunks.length; i++) {
       const chunk = this.chunks[i];
       head += chunk.toValue();
@@ -113,7 +118,7 @@ export class Terminal {
     const ret = [head];
     this.chunks.forEach((chunk) => {
       ret.push(chunk.toStyle());
-    })
+    });
     this.reset();
     return ret;
   }
@@ -121,33 +126,38 @@ export class Terminal {
     this.subTag = "";
   }
   public blue(message: string): string[] {
-    this.txtColor = 'blue';
+    this.txtColor = "blue";
     this.subTag = "";
     return this.log(message);
   }
   public green(message: string): string[] {
-    this.txtColor = 'green';
+    this.txtColor = "green";
     this.subTag = "";
     return this.log(message);
   }
   public red(message: string): string[] {
-    this.txtColor = 'red';
+    this.txtColor = "red";
     this.subTag = "";
     return this.log(message);
   }
+  send(msg: string) {
+    this.txtColor = "black";
+    this.subTag = "send";
+    return this.log(`${msg}`);
+  }
   message(msg: string): string[] {
-    this.txtColor = 'black';
-    this.subTag = 'message';
+    this.txtColor = "black";
+    this.subTag = "message";
     return this.log(`${msg}`);
   }
   connect(msg: string): string[] {
-    this.txtColor = 'black';
-    this.subTag = 'connect';
+    this.txtColor = "black";
+    this.subTag = "connect";
     return this.log(`${msg}`);
   }
   disconnect(msg: string): string[] {
-    this.txtColor = 'black';
-    this.subTag = 'disconnect';
+    this.txtColor = "black";
+    this.subTag = "disconnect";
     return this.log(`${msg}`);
   }
 }

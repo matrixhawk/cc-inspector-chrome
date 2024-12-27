@@ -14,13 +14,13 @@ export class PortDevtools extends PortMan {
         portMgr.useFrame(data.data);
       } else {
         // 从devtools过来的消息统一派发到Content中
-        if (PluginEvent.check(data, Page.Devtools, Page.Background)) {
+        if (data.check(Page.Devtools, Page.Background)) {
           if (data.msg === Msg.TreeInfo) {
             if (portMgr.isCurrentFrme(data.data)) {
               console.log(`frameID[${data.data}]不一致`);
             }
           }
-          PluginEvent.reset(data, Page.Background, Page.Content);
+          data.reset(Page.Background, Page.Content);
           const port = portMgr.getCurrentUseContent();
           if (!port) {
             console.warn(`not find andy port`);

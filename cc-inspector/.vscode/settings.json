@@ -2,10 +2,13 @@
   "editor.formatOnSave": true,
   "editor.formatOnSaveMode": "modifications",
   "files.autoSave": "onFocusChange",
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
   "[typescript]": {
     "editor.tabSize": 2,
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "vscode.typescript-language-features",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "prettier.printWidth": 1000
   },
   "[json]": {
