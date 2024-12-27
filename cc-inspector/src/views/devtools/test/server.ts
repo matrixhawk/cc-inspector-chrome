@@ -1,5 +1,5 @@
 import { v4 } from "uuid";
-import { Msg, Page, PluginEvent } from "../../../core/types";
+import { Msg, Page, PluginEvent, RequestNodeInfoData, RequestObjectData, ResponseNodeInfoData, ResponseObjectData, ResponseTreeInfoData } from "../../../core/types";
 import { ArrayData, BoolData, ColorData, EngineData, EnumData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectData, ObjectItemRequestData, Property, StringData, TextData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../data";
 export class TestClient {
   recv(event: PluginEvent) {}
@@ -100,8 +100,8 @@ export class TestServer {
   }
   recv(msg: string, data: any) {
     switch (msg) {
-      case Msg.NodeInfo: {
-        const id: string = data as string;
+      case Msg.RequestNodeInfo: {
+        const id: string = (data as RequestNodeInfoData).uuid;
         const node: Node = this.testData.findNode(id);
         let group = [];
         if (node) {
@@ -111,37 +111,37 @@ export class TestServer {
           group.push(g);
         }
         const ret: NodeInfoData = new NodeInfoData(id, group);
-        const event = new PluginEvent(Page.Background, Page.Devtools, Msg.NodeInfo, ret);
+        const event = new PluginEvent(Page.Background, Page.Devtools, Msg.ResponseNodeInfo, ret as ResponseNodeInfoData);
         this.send(event);
         break;
       }
-      case Msg.TreeInfo: {
+      case Msg.RequstTreeInfo: {
         const ret: TreeData = new TreeData();
         this.testData.toTreeData(ret);
-        const event = new PluginEvent(Page.Inject, Page.Devtools, Msg.TreeInfo, ret);
+        const event = new PluginEvent(Page.Inject, Page.Devtools, Msg.ResponseTreeInfo, ret as ResponseTreeInfoData);
         this.send(event);
         break;
       }
-      case Msg.SetProperty: {
+      case Msg.RequestSetProperty: {
         console.log(data);
         break;
       }
-      case Msg.GetObjectItemData: {
-        const objData = data as ObjectData;
+      case Msg.RequestObjectItemData: {
+        const objData: RequestObjectData = data as ObjectData;
         const info = this.testData.findInfo(objData.id);
         if (info && info instanceof ObjectData) {
           const ret: ObjectItemRequestData = {
             id: objData.id,
             data: info.testProperty(),
           };
-          const event = new PluginEvent(Page.Inject, Page.Devtools, Msg.GetObjectItemData, ret);
+          const event = new PluginEvent(Page.Inject, Page.Devtools, Msg.ResponseObjectItemData, ret as ResponseObjectData);
           this.send(event);
         } else {
           console.warn("not found data: ", objData.id);
         }
         break;
       }
-      case Msg.LogData: {
+      case Msg.RequestLogData: {
         console.log(data);
         break;
       }

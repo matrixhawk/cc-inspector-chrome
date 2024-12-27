@@ -15,7 +15,7 @@
 import ccui from "@xuyanfeng/cc-ui";
 import { storeToRefs } from "pinia";
 import { defineComponent, ref } from "vue";
-import { Msg, Page, PluginEvent } from "../../../core/types";
+import { Msg, Page, PluginEvent, ResponseUpdateFramesData } from "../../../core/types";
 import { Terminal } from "../../../scripts/terminal";
 import { bridge } from "../bridge";
 import { FrameDetails, Group, InvalidData, NodeInfoData, TreeData } from "../data";
@@ -31,7 +31,8 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const { config } = storeToRefs(appStore());
-    const show = ref(__DEV__);
+    // 仅在web环境显示
+    const show = ref(__DEV__ && !(chrome && chrome.runtime));
     // 测试发送的是纯数据
     const testData = {
       uuid: "d1NHXHs35F1rbFJZKeigkl",
@@ -74,7 +75,7 @@ export default defineComponent({
       },
       onTerminal() {
         const t = new Terminal("flag");
-        const event = new PluginEvent(Page.Background, Page.Background, Msg.NodeInfo, "");
+        const event = new PluginEvent(Page.Background, Page.Background, Msg.ResponseTreeInfo, "");
         console.log(...t.message("1"));
         console.log(...t.log("newline", true));
         console.log(...t.log("oneline", false));
@@ -92,7 +93,7 @@ export default defineComponent({
           active: true,
           children: [],
         };
-        const event = new PluginEvent(Page.Inject, Page.Devtools, Msg.TreeInfo, data);
+        const event = new PluginEvent(Page.Inject, Page.Devtools, Msg.ResponseTreeInfo, data);
         bridge.doMessage(event);
       },
       onFrames() {
@@ -100,16 +101,16 @@ export default defineComponent({
           { url: "url1", frameID: 1 },
           { url: "url2", frameID: 2 },
         ];
-        const event = new PluginEvent(Page.Background, Page.Devtools, Msg.UpdateFrames, data);
+        const event = new PluginEvent(Page.Background, Page.Devtools, Msg.ResponseUpdateFrames, data as ResponseUpdateFramesData);
         testServer.send(event);
       },
       onTestNodeInfo() {
-        const event = new PluginEvent(Page.Background, Page.Devtools, Msg.NodeInfo, testData);
+        const event = new PluginEvent(Page.Background, Page.Devtools, Msg.ResponseTreeInfo, testData);
         testServer.send(event);
       },
       onNull() {
         const data = new NodeInfoData("", [new Group("", "1").buildProperty("dependAssets", new InvalidData("Null"))]);
-        const event = new PluginEvent(Page.Background, Page.Devtools, Msg.NodeInfo, data);
+        const event = new PluginEvent(Page.Background, Page.Devtools, Msg.ResponseTreeInfo, data);
         testServer.send(event);
       },
     };

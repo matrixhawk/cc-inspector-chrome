@@ -1,5 +1,5 @@
 import { ChromeConst } from "cc-plugin/src/chrome/const";
-import { Msg, Page, PluginEvent } from "../../core/types";
+import { Msg, Page, PluginEvent, RequestSupportData } from "../../core/types";
 import { Terminal } from "../terminal";
 import { PortMan } from "./portMan";
 import { portMgr } from "./portMgr";
@@ -15,12 +15,7 @@ function onTabConnect(tab: chrome.tabs.Tab, port: chrome.runtime.Port) {
     debugger;
     return;
   }
-  let portMan = portMgr.findPort(tab.id);
-  if (portMan) {
-    // 一个port发起多次发起链接，以最后一次的为数据通讯基准
-    // portMgr.removePort(portMan);
-  }
-  portMan = portMgr.addPort(tab, port);
+  const portMan = portMgr.addPort(tab, port);
   portMan.init();
 }
 chrome.runtime.onConnect.addListener((port: chrome.runtime.Port) => {
@@ -60,7 +55,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (id && id > -1) {
       let portMan = portMgr.findPort(id);
       if (portMan) {
-        let data = new PluginEvent(Page.Background, Page.Content, Msg.Support);
+        const data = new PluginEvent(Page.Background, Page.Content, Msg.RequestSupport, {} as RequestSupportData);
         portMgr.sendContentMsg(data);
       }
     }

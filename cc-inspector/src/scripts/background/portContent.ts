@@ -1,11 +1,28 @@
 import { PluginEvent } from "../../core/types";
+import { FrameDetails } from "../../views/devtools/data";
 import { PortMan } from "./portMan";
 import { portMgr } from "./portMgr";
 
 export class PortContent extends PortMan {
+  protected frameID: number = 0;
+  constructor(tab: chrome.tabs.Tab, port: chrome.runtime.Port) {
+    super(tab, port);
+    this.frameID = port.sender.frameId || 0;
+  }
+  getFrameDetais(): FrameDetails {
+    return {
+      url: this.url,
+      frameID: this.frameID,
+    };
+  }
   init(): void {
-    // content连上来要同时devtools更新
-    portMgr._updateFrames();
+    // 使用新连上来的content
+    const { frameId } = this.port.sender;
+    if (frameId !== undefined) {
+      portMgr.useFrame(frameId);
+    }
+    // 新的content连上来，需要更新devtools
+    portMgr.updateFrames();
     this.onDisconnect = (disPort: chrome.runtime.Port) => {
       /**
        *  const index = this.content.findIndex((el) =>
@@ -16,7 +33,7 @@ export class PortContent extends PortMan {
        */
       // content失去链接需要更新Devtools
       portMgr.removePort(this);
-      portMgr._updateFrames();
+      portMgr.updateFrames();
     };
     this.onMessage = (data: PluginEvent) => {
       // content的数据一般都是要同步到devtools

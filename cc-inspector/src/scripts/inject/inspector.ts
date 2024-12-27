@@ -1,6 +1,6 @@
 // eval 注入脚本的代码,变量尽量使用var,后来发现在import之后,let会自动变为var
 import { uniq } from "lodash";
-import { Msg, PluginEvent } from "../../core/types";
+import { Msg, PluginEvent, RequestNodeInfoData, RequestLogData, RequestObjectData, RequestSetPropertyData, ResponseNodeInfoData, ResponseObjectData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
 import { ArrayData, BoolData, ColorData, DataType, EngineData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectData, ObjectItemRequestData, Property, StringData, TreeData, Vec2Data, Vec3Data } from "../../views/devtools/data";
 import { InjectEvent } from "./event";
 import { getValue, trySetValueWithConfig } from "./setValue";
@@ -25,22 +25,22 @@ export class Inspector extends InjectEvent {
   }
   onMessage(pluginEvent: PluginEvent): void {
     switch (pluginEvent.msg) {
-      case Msg.Support: {
-        let isCocosGame = this._isCocosGame();
+      case Msg.RequestSupport: {
+        const isCocosGame = this._isCocosGame();
         this.notifySupportGame(isCocosGame);
         break;
       }
-      case Msg.TreeInfo: {
+      case Msg.RequstTreeInfo: {
         this.updateTreeInfo();
         break;
       }
-      case Msg.NodeInfo: {
-        let nodeUUID = pluginEvent.data;
-        this.getNodeInfo(nodeUUID);
+      case Msg.RequestNodeInfo: {
+        const data = pluginEvent.data as RequestNodeInfoData;
+        this.getNodeInfo(data.uuid);
         break;
       }
-      case Msg.SetProperty: {
-        const data: Info = pluginEvent.data;
+      case Msg.RequestSetProperty: {
+        const data: RequestSetPropertyData = pluginEvent.data;
         let value = data.data;
         if (data.type === DataType.Color) {
           // @ts-ignore
@@ -48,22 +48,22 @@ export class Inspector extends InjectEvent {
         }
 
         if (this.setValue(data.path, value)) {
-          this.sendMsgToContent(Msg.UpdateProperty, data);
+          this.sendMsgToContent(Msg.ResponseSetProperty, data as ResponseSetPropertyData);
         } else {
           console.warn(`设置失败：${data.path}`);
         }
         break;
       }
-      case Msg.LogData: {
-        const data: string[] = pluginEvent.data;
+      case Msg.RequestLogData: {
+        const data: RequestLogData = pluginEvent.data;
         const value = getValue(this.inspectorGameMemoryStorage, data);
         // 直接写console.log会被tree shaking
         const logFunction = console.log;
         logFunction(value);
         break;
       }
-      case Msg.GetObjectItemData: {
-        const data: ObjectData = pluginEvent.data;
+      case Msg.RequestObjectItemData: {
+        const data: RequestObjectData = pluginEvent.data;
         let val = getValue(this.inspectorGameMemoryStorage, data.path);
         if (val) {
           let itemData: Property[] = this._buildObjectItemData({
@@ -76,7 +76,7 @@ export class Inspector extends InjectEvent {
             id: data.id,
             data: itemData,
           };
-          this.sendMsgToContent(Msg.GetObjectItemData, result);
+          this.sendMsgToContent(Msg.ResponseObjectItemData, result as ResponseObjectData);
         }
         break;
       }
@@ -88,7 +88,7 @@ export class Inspector extends InjectEvent {
   }
 
   notifySupportGame(b: boolean) {
-    this.sendMsgToContent(Msg.Support, b);
+    this.sendMsgToContent(Msg.ResponseSupport, { support: b, msg: "" } as ResponseSupportData);
   }
 
   updateTreeInfo() {
@@ -99,7 +99,7 @@ export class Inspector extends InjectEvent {
       if (scene) {
         let treeData = new TreeData();
         this.getNodeChildren(scene, treeData);
-        this.sendMsgToContent(Msg.TreeInfo, treeData);
+        this.sendMsgToContent(Msg.ResponseTreeInfo, treeData as ResponseTreeInfoData);
       } else {
         console.warn("can't execute api : cc.director.getScene");
         this.notifySupportGame(false);
@@ -588,7 +588,7 @@ export class Inspector extends InjectEvent {
         groupData.push(compGroup);
       }
       const data: NodeInfoData = new NodeInfoData(uuid, groupData);
-      this.sendMsgToContent(Msg.NodeInfo, data);
+      this.sendMsgToContent(Msg.ResponseNodeInfo, data as ResponseNodeInfoData);
     } else {
       // 未获取到节点数据
       console.log("未获取到节点数据");

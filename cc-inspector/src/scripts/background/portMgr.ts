@@ -1,5 +1,5 @@
-import { FrameDetails } from "views/devtools/data";
-import { Msg, Page, PluginEvent } from "../../core/types";
+import { Msg, Page, PluginEvent, RequestSupportData, ResponseUpdateFramesData } from "../../core/types";
+import { FrameDetails } from "../../views/devtools/data";
 import { Terminal } from "../terminal";
 import { PortContent } from "./portContent";
 import { PortDevtools } from "./portDevtools";
@@ -22,18 +22,19 @@ export class PortMgr {
   public findPort(id: number): PortMan | null {
     return this.portArray.find((el) => el.id === id) || null;
   }
-  public _updateFrames() {
+  /**
+   * 通知devtools更新
+   */
+  public updateFrames() {
     // 将content类型的port收集起来，同步到devtools
     const data: FrameDetails[] = [];
     this.portArray.forEach((item) => {
-      if (item.isConnectPort()) {
-        data.push({
-          url: item.port.sender?.url || "",
-          frameID: item.port.sender?.frameId || 0,
-        });
+      if (item.isContent()) {
+        const frame = (item as PortContent).getFrameDetais();
+        data.push(frame);
       }
     });
-    const event = new PluginEvent(Page.Background, Page.Devtools, Msg.UpdateFrames, data);
+    const event = new PluginEvent(Page.Background, Page.Devtools, Msg.ResponseUpdateFrames, data as ResponseUpdateFramesData);
     this.sendDevtoolMsg(event);
   }
 
@@ -89,38 +90,34 @@ export class PortMgr {
   }
 
   sendContentMsg(data: PluginEvent) {
-    this.getCurrentUseContent()?.postMessage(data);
+    this.getCurrentUsePort()?.send(data);
   }
   sendDevtoolMsg(data: PluginEvent) {
-    const portManArray = this.portArray.filter((el) => el.isDevtoolsPort());
+    const portManArray = this.portArray.filter((el) => el.isDevtools());
     if (portManArray.length) {
       portManArray.forEach((portMan) => {
-        portMan.port.postMessage(data);
+        portMan.send(data);
       });
     } else {
       console.log("not find devtools port");
     }
   }
-  getCurrentUseContent(): chrome.runtime.Port | null {
+  getCurrentUsePort(): PortMan | null {
     const portMan = this.portArray.find((portMan: PortMan) => {
-      const el = portMan.port;
-      const b1 = el.sender?.frameId !== undefined;
-      const b2 = el.sender.frameId === this.currentUseContentFrameID;
-      return b1 && b2;
+      return portMan.isContent() && portMan.isUseing(this.currentUseContentFrameID);
     });
-    if (portMan) {
-      return portMan.port;
-    } else {
-      return null;
-    }
+    return portMan || null;
   }
   useFrame(id: number) {
     this.currentUseContentFrameID = id;
     // 更新这个frame的tree
-    const sendData = new PluginEvent(Page.Background, Page.Content, Msg.Support);
-    this.getCurrentUseContent()?.postMessage(sendData);
+    const sendData = new PluginEvent(Page.Background, Page.Content, Msg.RequestSupport, {} as RequestSupportData);
+    this.getCurrentUsePort()?.send(sendData);
   }
   isCurrentFrme(id: number) {
+    if (typeof id !== "number") {
+      throw new Error("id must be number");
+    }
     return this.currentUseContentFrameID === id;
   }
 }

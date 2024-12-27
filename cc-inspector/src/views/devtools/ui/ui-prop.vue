@@ -32,7 +32,7 @@
 import ccui from "@xuyanfeng/cc-ui";
 import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
 import { defineComponent, onMounted, PropType, ref, toRaw, watch } from "vue";
-import { Msg } from "../../../core/types";
+import { Msg, RequestSetPropertyData } from "../../../core/types";
 import { bridge } from "../bridge";
 import Bus, { BusMsg } from "../bus";
 import { EngineData, EnumData, ImageData, Info, NumberData, Property, StringData, TextData, Vec2Data, Vec3Data } from "../data";
@@ -81,7 +81,6 @@ export default defineComponent({
       expand,
       subData,
       formatValue(data: any) {
-        console.log(data);
         if (data === null) {
           return "null";
         } else if (data === undefined) {
@@ -139,7 +138,7 @@ export default defineComponent({
       onChangeValue() {
         if (!props.value.readonly) {
           const raw = toRaw(props.value);
-          bridge.send(Msg.SetProperty, raw);
+          bridge.send(Msg.RequestSetProperty, raw as RequestSetPropertyData);
         }
       },
     };

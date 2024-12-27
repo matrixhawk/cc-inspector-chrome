@@ -45,10 +45,10 @@ import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
 import { storeToRefs } from "pinia";
 import { defineComponent, nextTick, onMounted, reactive, ref, toRaw, watch } from "vue";
 import PluginConfig from "../../../cc-plugin.config";
-import { Msg, PluginEvent } from "../../core/types";
+import { Msg, PluginEvent, RequestNodeInfoData, RequestSupportData, RequestTreeInfoData, RequestLogData, RequestObjectData, RequestUseFrameData, ResponseObjectData, ResponseSetPropertyData, ResponseSupportData } from "../../core/types";
 import { bridge } from "./bridge";
 import Bus, { BusMsg } from "./bus";
-import { EngineData, FrameDetails, Info, NodeInfoData, ObjectData, ObjectItemRequestData, TreeData } from "./data";
+import { EngineData, FrameDetails, NodeInfoData, ObjectData, TreeData } from "./data";
 import { appStore, RefreshType } from "./store";
 import Test from "./test/test.vue";
 import Properties from "./ui/propertys.vue";
@@ -174,7 +174,7 @@ export default defineComponent({
     const elTree = ref<typeof CCTree>();
     function _initChromeRuntimeConnect() {
       const msgFunctionMap: Record<string, Function> = {};
-      msgFunctionMap[Msg.TreeInfo] = (data: Array<TreeData>) => {
+      msgFunctionMap[Msg.ResponseTreeInfo] = (data: Array<TreeData>) => {
         isShowDebug.value = true;
         if (!Array.isArray(data)) {
           data = [data];
@@ -189,7 +189,9 @@ export default defineComponent({
           });
         }
       };
-      msgFunctionMap[Msg.Support] = (isCocosGame: boolean) => {
+      msgFunctionMap[Msg.ResponseSupport] = (data: ResponseSupportData) => {
+        debugger;
+        const isCocosGame: boolean = data.support;
         isShowDebug.value = isCocosGame;
         if (isCocosGame) {
           syncSettings();
@@ -201,9 +203,10 @@ export default defineComponent({
           selectedUUID = null;
         }
       };
-      msgFunctionMap[Msg.NodeInfo] = (eventData: NodeInfoData) => {
+      msgFunctionMap[Msg.ResponseNodeInfo] = (eventData: NodeInfoData) => {
         isShowDebug.value = true;
         try {
+          // 因为要用到class的一些属性，传递过来的是纯数据，所以需要重新序列化一下
           const nodeInfo = new NodeInfoData(eventData.uuid, eventData.group).parse(eventData);
           treeItemData.value = nodeInfo;
         } catch (error) {
@@ -214,7 +217,7 @@ export default defineComponent({
       msgFunctionMap[Msg.MemoryInfo] = (eventData: any) => {
         memory.value = eventData;
       };
-      msgFunctionMap[Msg.UpdateProperty] = (data: Info) => {
+      msgFunctionMap[Msg.ResponseSetProperty] = (data: ResponseSetPropertyData) => {
         const uuid = data.path[0];
         const key = data.path[1];
         const value = data.data;
@@ -239,7 +242,7 @@ export default defineComponent({
           }
         }
       };
-      msgFunctionMap[Msg.UpdateFrames] = (details: FrameDetails[]) => {
+      msgFunctionMap[Msg.ResponseUpdateFrames] = (details: FrameDetails[]) => {
         // 先把iframes里面无效的清空了
         iframes.value = iframes.value.filter((item) => {
           details.find((el) => el.frameID === item.value);
@@ -263,7 +266,7 @@ export default defineComponent({
           onChangeFrame();
         }
       };
-      msgFunctionMap[Msg.GetObjectItemData] = (requestData: ObjectItemRequestData) => {
+      msgFunctionMap[Msg.ResponseObjectItemData] = (requestData: ResponseObjectData) => {
         if (requestData.id !== null) {
           let findIndex = requestList.findIndex((el) => el.id === requestData.id);
           if (findIndex > -1) {
@@ -277,7 +280,6 @@ export default defineComponent({
         if (!data) {
           return;
         }
-        debugger;
         if (data.isTargetDevtools()) {
           PluginEvent.finish(data);
           const { msg } = data;
@@ -303,7 +305,7 @@ export default defineComponent({
       false
     );
     Bus.on(BusMsg.ShowPlace, (data: EngineData) => {
-      console.log(data);
+      console.log(toRaw(data));
       _expand(data.engineUUID);
     });
     Bus.on(BusMsg.RequestObjectData, (data: ObjectData, cb: Function) => {
@@ -311,13 +313,13 @@ export default defineComponent({
         return;
       }
       requestList.push({ id: data.id, cb });
-      bridge.send(Msg.GetObjectItemData, data);
+      bridge.send(Msg.RequestObjectItemData, data as RequestObjectData);
     });
     Bus.on(BusMsg.UpdateSettings, () => {
       syncSettings();
     });
     Bus.on(BusMsg.LogData, (data: string[]) => {
-      bridge.send(Msg.LogData, data);
+      bridge.send(Msg.RequestLogData, data as RequestLogData);
     });
     onMounted(() => {
       syncSettings();
@@ -382,7 +384,7 @@ export default defineComponent({
     }
     function updateNodeInfo() {
       if (selectedUUID) {
-        bridge.send(Msg.NodeInfo, selectedUUID);
+        bridge.send(Msg.RequestNodeInfo, { uuid: selectedUUID } as RequestNodeInfoData);
       }
     }
     let selectedUUID: string | null = null;
@@ -391,11 +393,11 @@ export default defineComponent({
     }
     function onBtnClickUpdateTree() {
       const id = toRaw(frameID.value);
-      bridge.send(Msg.TreeInfo, id);
+      bridge.send(Msg.RequstTreeInfo, { frameID: id } as RequestTreeInfoData);
     }
     function onChangeFrame() {
       const id = Number(toRaw(frameID.value));
-      bridge.send(Msg.UseFrame, id);
+      bridge.send(Msg.RequestUseFrame, { id } as RequestUseFrameData);
     }
     const elLeft = ref<HTMLDivElement>();
     const version = ref(PluginConfig.manifest.version);
@@ -454,7 +456,7 @@ export default defineComponent({
       },
 
       onBtnClickUpdatePage() {
-        bridge.send(Msg.Support);
+        bridge.send(Msg.RequestSupport, {} as RequestSupportData);
       },
       onMemoryTest() {
         bridge.send(Msg.MemoryInfo);

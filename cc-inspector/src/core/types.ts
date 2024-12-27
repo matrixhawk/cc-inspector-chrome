@@ -1,4 +1,5 @@
 import { Chunk } from "../scripts/terminal";
+import { FrameDetails, Info, NodeInfoData, ObjectData, ObjectItemRequestData, TreeData } from "../views/devtools/data";
 
 export enum Page {
   None = "None",
@@ -10,21 +11,65 @@ export enum Page {
   Options = "Options",
 }
 
+// #region 定义接受发送的数据声明，方便定位
+export interface RequestTreeInfoData {
+  /**
+   * 当前正在使用的frameID
+   */
+  frameID: number;
+}
+export type ResponseTreeInfoData = TreeData;
+
+export interface RequestNodeInfoData {
+  /**
+   * 节点的UUID
+   */
+  uuid: string;
+}
+export type ResponseNodeInfoData = NodeInfoData;
+
+export interface RequestSupportData {}
+export interface ResponseSupportData {
+  /**
+   * 是否支持
+   */
+  support: boolean;
+  /**
+   * 消息
+   */
+  msg: string;
+}
+
+export type ResponseUpdateFramesData = FrameDetails[];
+
+export interface RequestUseFrameData {
+  id: number;
+}
+export type RequestSetPropertyData = Info;
+export type ResponseSetPropertyData = Info;
+export type RequestLogData = string[];
+export type RequestObjectData = ObjectData;
+export type ResponseObjectData = ObjectItemRequestData;
 export enum Msg {
   None = "None",
   /**
    * 具体的节点信息
    */
-  NodeInfo = "node-info",
+  RequestNodeInfo = "request-node-info",
+  ResponseNodeInfo = "response-node-info",
   /**
    * 节点树信息
    */
-  TreeInfo = "tree-info",
+  RequstTreeInfo = "request-tree-info",
+  ResponseTreeInfo = "response-tree-info",
   /**
    * 游戏支持信息
    */
-  Support = "game-support",// 
-  MemoryInfo = "memory-info",//
+  RequestSupport = "request-support",
+  ResponseSupport = "response-support",
+
+  ResponseMemoryInfo = "response-memory-info",
+  MemoryInfo = "memory-info",
   /**
    * 当前页面信息
    */
@@ -36,18 +81,16 @@ export enum Msg {
   /**
    * 更新页面的frame
    */
-  UpdateFrames = "UpdateFrames",
-  UseFrame = "UseFrame",
-  GetObjectItemData = "GetObjectItemData",
-  LogData = "LogData",
-  /**
-   * 设置node属性
-   */
-  SetProperty = "set-property",
-  /**
-   * 更新属性
-   */
-  UpdateProperty = "update-property",
+  ResponseUpdateFrames = "response-update-frames",
+  RequestUseFrame = "request-use-frame",
+
+  RequestObjectItemData = "request-object-item-data",
+  ResponseObjectItemData = "response-object-item-data",
+
+  RequestLogData = "request-log-data",
+
+  RequestSetProperty = "request-set-property",
+  ResponseSetProperty = "update-property",
 }
 
 export class PluginEvent {
@@ -92,7 +135,7 @@ export class PluginEvent {
   static create(data: any): PluginEvent {
     let obj = data;
     if (typeof data === "string") {
-      obj = JSON.stringify(data)
+      obj = JSON.stringify(data);
     } else if (typeof data === "object") {
       obj = data;
     } else {
@@ -124,20 +167,13 @@ export class PluginEvent {
   }
 
   /**
-   * 
+   *
    */
   static finish(event: PluginEvent) {
     event.source = event.target = null;
   }
   toChunk(): Chunk[] {
-    return [
-      new Chunk(new Date().toLocaleString()).color("white").background("black").padding('0 4px'),
-      new Chunk(this.source).color('white').background("red").padding('0 4px').margin('0 0 0 5px'),
-      new Chunk('=>').color('black').background("yellow").bold(),
-      new Chunk(this.target, false).color("white").background("green").padding('0 4px'),
-      new Chunk(this.msg, true).color("white").background("black").margin('0 0 0 5px').padding("0 6px"),
-      new Chunk(JSON.stringify(this.data))
-    ];
+    return [new Chunk(new Date().toLocaleString()).color("white").background("black").padding("0 4px"), new Chunk(this.source).color("white").background("red").padding("0 4px").margin("0 0 0 5px"), new Chunk("=>").color("black").background("yellow").bold(), new Chunk(this.target, false).color("white").background("green").padding("0 4px"), new Chunk(this.msg, true).color("white").background("black").margin("0 0 0 5px").padding("0 6px"), new Chunk(JSON.stringify(this.data))];
   }
   constructor(source: Page, target: Page, msg: Msg, data?: any) {
     if (PageInclude(target)) {
@@ -146,7 +182,7 @@ export class PluginEvent {
       this.msg = msg;
       this.data = data;
     } else {
-      console.warn(`无效的target: ${target}`)
+      console.warn(`无效的target: ${target}`);
     }
   }
 }
@@ -157,7 +193,7 @@ function inEnum(enumValues: any, value: Page | Msg) {
       //@ts-ignore
       let itemEnum = enumValues[key] as string;
       if (itemEnum === value) {
-        return true
+        return true;
       }
     }
   }
@@ -168,7 +204,6 @@ export function PageInclude(page: Page) {
   return inEnum(Page, page);
 }
 
-
 export function MsgInclude(msg: Msg) {
-  return inEnum(Msg, msg)
+  return inEnum(Msg, msg);
 }

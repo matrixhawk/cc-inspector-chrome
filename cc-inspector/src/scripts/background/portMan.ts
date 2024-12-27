@@ -12,7 +12,7 @@ export abstract class PortMan {
   public id: number | null = null;
   public title: string = "";
   public url: string = "";
-  public port: chrome.runtime.Port | null = null;
+  protected port: chrome.runtime.Port | null = null;
   public tab: chrome.tabs.Tab | null = null;
   public onDisconnect: (port: chrome.runtime.Port) => void | null = null;
   public onMessage: (data: PluginEvent) => void | null = null;
@@ -24,14 +24,12 @@ export abstract class PortMan {
     this.tab = tab;
     this.name = port.name;
     this.id = tab.id;
-    this.url = tab.url;
+    this.url = port.sender.url;
     this.title = tab.title;
     this.terminal = new Terminal(`Port-${this.name}`);
     port.onMessage.addListener((data: any, port: chrome.runtime.Port) => {
       const event = PluginEvent.create(data);
       console.log(...this.terminal.chunkMessage(event.toChunk()));
-      // 如果多个页面都监听 onMessage 事件，对于某一次事件只有第一次调用 sendResponse() 能成功发出回应，所有其他回应将被忽略。
-      // port.postMessage(data);
       if (event.valid && this.onMessage) {
         this.onMessage(event);
       } else {
@@ -47,10 +45,27 @@ export abstract class PortMan {
   }
   abstract init(): void;
 
-  isConnectPort() {
+  isContent() {
     return this.name === Page.Content;
   }
-  isDevtoolsPort() {
+  isDevtools() {
     return this.name === Page.Devtools;
+  }
+  isUseing(id: number) {
+    if (!this.port) {
+      return false;
+    }
+    if (!this.port.sender) {
+      return false;
+    }
+    if (this.port.sender.frameId === undefined) {
+      return false;
+    }
+    return this.port.sender.frameId === id;
+  }
+  send(data: PluginEvent) {
+    if (this.port) {
+      this.port.postMessage(data);
+    }
   }
 }

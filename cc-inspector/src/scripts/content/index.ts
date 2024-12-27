@@ -1,7 +1,7 @@
 // content.js 和原始界面共享DOM，具有操作dom的能力
 // 但是不共享js,要想访问页面js,只能通过注入的方式
 import { ChromeConst } from "cc-plugin/src/chrome/const";
-import { Msg, Page, PluginEvent } from "../../core/types";
+import { Msg, Page, PluginEvent, ResponseSupportData } from "../../core/types";
 import { DocumentEvent } from "../const";
 import { Terminal } from "../terminal";
 
@@ -63,10 +63,10 @@ connect.onMessage.addListener((data: PluginEvent, sender: chrome.runtime.Port) =
 
 function checkGame() {
   let gameCanvas = document.querySelector("#GameCanvas");
-  const sendData = new PluginEvent(Page.Content, Page.Devtools, Msg.Support, {
+  const sendData = new PluginEvent(Page.Content, Page.Devtools, Msg.ResponseSupport, {
     support: !!gameCanvas,
     msg: "未发现GameCanvas,不支持调试游戏!",
-  });
+  } as ResponseSupportData);
   if (connect) {
     connect.postMessage(sendData);
   } else {
@@ -76,4 +76,4 @@ function checkGame() {
 }
 
 injectScript(ChromeConst.script.inject);
-checkGame();
+// checkGame();

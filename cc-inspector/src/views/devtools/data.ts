@@ -105,7 +105,13 @@ export interface ObjectItemRequestData {
 }
 
 export interface FrameDetails {
+  /**
+   * 网页的frameID
+   */
   frameID: number;
+  /**
+   * 网页的url
+   */
   url: string;
 }
 

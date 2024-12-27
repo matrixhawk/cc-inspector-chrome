@@ -1,5 +1,7 @@
 import CCP from "cc-plugin/src/ccp/entry-render";
 import { ChromeConst } from "cc-plugin/src/chrome/const";
+import { Msg, RequestSupportData } from "../../core/types";
+import { bridge } from "./bridge";
 export function init() {
   if (chrome && chrome.devtools) {
     // 对应的是Elements面板的边栏
@@ -17,8 +19,7 @@ export function init() {
       console.log("[CC-Inspector] Dev Panel Created!");
       panel.onShown.addListener((window) => {
         // 面板显示，查询是否是cocos游戏
-        console.log("panel show");
-        // bridge.sendToBackground(Msg.Support, null)
+        bridge.send(Msg.RequestSupport, {} as RequestSupportData);
       });
       panel.onHidden.addListener(() => {
         // 面板隐藏
