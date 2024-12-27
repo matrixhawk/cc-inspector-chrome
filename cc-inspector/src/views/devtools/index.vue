@@ -29,10 +29,7 @@
         <Properties v-if="treeItemData" :data="treeItemData"></Properties>
       </div>
     </div>
-    <div v-show="!isShowDebug" class="no-find">
-      <span>no games created by cocos creator found!</span>
-      <i class="fresh iconfont icon_refresh" @click="onBtnClickUpdatePage"></i>
-    </div>
+    <Find v-if="!isShowDebug"></Find>
     <CCDialog></CCDialog>
     <CCFootBar :version="version"></CCFootBar>
   </div>
@@ -45,10 +42,11 @@ import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
 import { storeToRefs } from "pinia";
 import { defineComponent, nextTick, onMounted, reactive, ref, toRaw, watch } from "vue";
 import PluginConfig from "../../../cc-plugin.config";
-import { Msg, PluginEvent, RequestNodeInfoData, RequestSupportData, RequestTreeInfoData, RequestLogData, RequestObjectData, RequestUseFrameData, ResponseObjectData, ResponseSetPropertyData, ResponseSupportData } from "../../core/types";
+import { Msg, PluginEvent, RequestLogData, RequestNodeInfoData, RequestObjectData, RequestTreeInfoData, RequestUseFrameData, ResponseObjectData, ResponseSetPropertyData, ResponseSupportData } from "../../core/types";
 import { bridge } from "./bridge";
 import Bus, { BusMsg } from "./bus";
 import { EngineData, FrameDetails, NodeInfoData, ObjectData, TreeData } from "./data";
+import Find from "./find.vue";
 import { appStore, RefreshType } from "./store";
 import Test from "./test/test.vue";
 import Properties from "./ui/propertys.vue";
@@ -61,7 +59,7 @@ interface FrameInfo {
 }
 
 export default defineComponent({
-  components: { Test, CCFootBar, CCDialog, CCTree, CCDivider, CCButtonGroup, Properties, SettingsVue, CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor },
+  components: { Find, Test, CCFootBar, CCDialog, CCTree, CCDivider, CCButtonGroup, Properties, SettingsVue, CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor },
   name: "devtools",
   props: {},
   setup(props, ctx) {
@@ -242,24 +240,14 @@ export default defineComponent({
           }
         }
       };
-      msgFunctionMap[Msg.ResponseUpdateFrames] = (details: FrameDetails[]) => {
-        // 先把iframes里面无效的清空了
-        iframes.value = iframes.value.filter((item) => {
-          details.find((el) => el.frameID === item.value);
+      msgFunctionMap[Msg.ResponseUpdateFrames] = (resFrames: FrameDetails[]) => {
+        iframes.value = resFrames.map((item) => {
+          return {
+            label: item.url,
+            value: item.frameID,
+          };
         });
 
-        // 同步配置
-        details.forEach((item) => {
-          let findItem = iframes.value.find((el) => el.value === item.frameID);
-          if (findItem) {
-            findItem.label = item.url;
-          } else {
-            iframes.value.push({
-              label: item.url,
-              value: item.frameID,
-            });
-          }
-        });
         // 第一次获取到frame配置后，自动获取frame数据
         if (frameID === null && iframes.value.length > 0 && !iframes.value.find((el) => el.value === frameID.value)) {
           frameID.value = iframes[0].value;
@@ -455,9 +443,6 @@ export default defineComponent({
         }
       },
 
-      onBtnClickUpdatePage() {
-        bridge.send(Msg.RequestSupport, {} as RequestSupportData);
-      },
       onMemoryTest() {
         bridge.send(Msg.MemoryInfo);
       },
@@ -506,36 +491,6 @@ export default defineComponent({
       margin: 0 3px;
       margin-right: 5px;
       user-select: none;
-    }
-  }
-
-  .no-find {
-    display: flex;
-    flex: 1;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
-
-    span {
-      margin-right: 20px;
-      color: white;
-      font-size: 20px;
-      user-select: none;
-    }
-
-    .fresh {
-      cursor: pointer;
-      color: white;
-      font-size: 20px;
-
-      &:hover {
-        color: #cef57b;
-      }
-
-      &:active {
-        color: #ffaa00;
-      }
     }
   }
 
