@@ -9,6 +9,7 @@ export enum BusMsg {
    * 开关定时器，方便测试
    */
   EnableSchedule = "EnableSchedule",
+  SelectNode = "SelectNode",
 }
 
 export const Bus = new TinyEmitter();

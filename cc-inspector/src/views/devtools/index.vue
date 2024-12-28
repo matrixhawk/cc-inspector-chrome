@@ -60,9 +60,11 @@ export default defineComponent({
       checkSupport();
     });
     onMounted(() => {
+      Bus.on(BusMsg.EnableSchedule, funcEnableSchedule);
       timer.create();
     });
     onUnmounted(() => {
+      Bus.off(BusMsg.EnableSchedule, funcEnableSchedule);
       timer.clean();
     });
     // 问题：没有上下文的权限，只能操作DOM
@@ -82,13 +84,13 @@ export default defineComponent({
         }
       });
     }
-    Bus.on(BusMsg.EnableSchedule, (b: boolean) => {
+    const funcEnableSchedule = (b: boolean) => {
       if (b) {
         timer.create();
       } else {
         timer.clean();
       }
-    });
+    };
     bridge.on(Msg.ResponseTreeInfo, (event: PluginEvent) => {
       let data: Array<TreeData> = event.data;
       isShowDebug.value = true;

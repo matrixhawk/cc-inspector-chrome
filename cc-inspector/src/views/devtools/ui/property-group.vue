@@ -14,7 +14,7 @@
 
 <script lang="ts">
 import ccui from "@xuyanfeng/cc-ui";
-import { defineComponent, PropType, ref, toRaw, watch } from "vue";
+import { defineComponent, onMounted, onUnmounted, PropType, ref, toRaw, watch } from "vue";
 import { Msg, RequestLogData } from "../../../core/types";
 import { bridge } from "../bridge";
 import { Bus, BusMsg } from "../bus";
@@ -23,16 +23,7 @@ import UiProp from "./ui-prop.vue";
 const { CCInput, CCSection, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } = ccui.components;
 export default defineComponent({
   name: "property-group",
-  components: {
-    UiProp,
-    CCSection,
-    CCInput,
-    CCButton,
-    CCInputNumber,
-    CCSelect,
-    CCCheckBox,
-    CCColor,
-  },
+  components: { UiProp, CCSection, CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor },
   props: {
     group: {
       type: Object as PropType<Group>,
@@ -42,8 +33,14 @@ export default defineComponent({
     },
   },
   setup(props, context) {
-    Bus.on(BusMsg.FoldAllGroup, (b: boolean) => {
+    const funcFoldAllGroup = (b: boolean) => {
       fold.value = b;
+    };
+    onMounted(() => {
+      Bus.on(BusMsg.FoldAllGroup, funcFoldAllGroup);
+    });
+    onUnmounted(() => {
+      Bus.off(BusMsg.FoldAllGroup, funcFoldAllGroup);
     });
     const fold = ref(false);
     watch(

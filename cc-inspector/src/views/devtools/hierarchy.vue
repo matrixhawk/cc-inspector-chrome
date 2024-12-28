@@ -14,7 +14,7 @@
 import ccui from "@xuyanfeng/cc-ui";
 import { storeToRefs } from "pinia";
 import { defineComponent, nextTick, onMounted, onUnmounted, ref, toRaw, watch } from "vue";
-import { Msg, PluginEvent, RequestNodeInfoData, RequestTreeInfoData, ResponseSetPropertyData } from "../../core/types";
+import { Msg, PluginEvent, RequestTreeInfoData, ResponseSetPropertyData } from "../../core/types";
 import { bridge } from "./bridge";
 import { Bus, BusMsg } from "./bus";
 import { EngineData, TreeData } from "./data";
@@ -26,24 +26,28 @@ export default defineComponent({
   components: { CCButtonGroup, CCInput, CCTree, CCDock },
   setup() {
     onMounted(() => {});
-    Bus.on(BusMsg.ShowPlace, (data: EngineData) => {
+    const funcShowPlace = (data: EngineData) => {
       console.log(toRaw(data));
       _expand(data.engineUUID);
-    });
-    Bus.on(BusMsg.EnableSchedule, (b: boolean) => {
+    };
+    const funcEnableSchedule = (b: boolean) => {
       if (b) {
         timer.create();
       } else {
         timer.clean();
       }
-    });
+    };
     const timer: Timer = new Timer(() => {
       updateTree();
     });
     onMounted(() => {
+      Bus.on(BusMsg.ShowPlace, funcShowPlace);
+      Bus.on(BusMsg.EnableSchedule, funcEnableSchedule);
       timer.create();
     });
     onUnmounted(() => {
+      Bus.off(BusMsg.ShowPlace, funcShowPlace);
+      Bus.off(BusMsg.EnableSchedule, funcEnableSchedule);
       timer.clean();
     });
     function _expand(uuid: string) {
@@ -93,11 +97,6 @@ export default defineComponent({
     const matchCase = ref<boolean>(false);
     const elTree = ref<typeof CCTree>();
     const treeData = ref<TreeData[]>([]);
-    function updateNodeInfo() {
-      if (selectedUUID) {
-        bridge.send(Msg.RequestNodeInfo, { uuid: selectedUUID } as RequestNodeInfoData);
-      }
-    }
     let selectedUUID: string | null = null;
     bridge.on(Msg.ResponseTreeInfo, (event: PluginEvent) => {
       let data: Array<TreeData> = event.data;
@@ -139,6 +138,10 @@ export default defineComponent({
       }
     });
     const expandedKeys = ref<Array<string>>([]);
+    function updateSelect(uuid: string | null) {
+      selectedUUID = uuid;
+      Bus.emit(BusMsg.SelectNode, uuid);
+    }
     return {
       expandedKeys,
       elTree,
@@ -147,14 +150,13 @@ export default defineComponent({
       matchCase,
       frameID,
       handleNodeUnclick() {
-        selectedUUID = null;
+        updateSelect(null);
       },
       handleNodeClick(data: TreeData | null) {
         if (data) {
-          selectedUUID = data.id;
-          updateNodeInfo();
+          updateSelect(data.id);
         } else {
-          selectedUUID = null;
+          updateSelect(null);
         }
       },
       onNodeExpand(data: TreeData) {

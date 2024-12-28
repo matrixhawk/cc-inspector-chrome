@@ -7,17 +7,50 @@
 </template>
 <script lang="ts">
 import ccui from "@xuyanfeng/cc-ui";
-import { defineComponent, ref } from "vue";
-import { Msg, PluginEvent, RequestObjectData, ResponseObjectData, ResponseSupportData } from "../../core/types";
+import { defineComponent, onMounted, onUnmounted, ref } from "vue";
+import { Msg, PluginEvent, RequestNodeInfoData, RequestObjectData, ResponseObjectData, ResponseSupportData } from "../../core/types";
 import { bridge } from "./bridge";
 import { Bus, BusMsg } from "./bus";
 import { NodeInfoData, ObjectData } from "./data";
+import { Timer } from "./timer";
 import Properties from "./ui/propertys.vue";
 const { CCDock } = ccui.components;
 export default defineComponent({
   components: { Properties, CCDock },
   setup() {
+    function updateNodeInfo() {
+      if (selectedUUID) {
+        console.log(`update node info: ${selectedUUID}`);
+        bridge.send(Msg.RequestNodeInfo, { uuid: selectedUUID } as RequestNodeInfoData);
+      } else {
+        // TODO: 需要检查当前的这个节点是否有效
+        treeItemData.value = null;
+      }
+    }
+    const timer = new Timer(updateNodeInfo);
     const treeItemData = ref<NodeInfoData | null>(null);
+    const funcEnableSchedule = (b: boolean) => {
+      if (b) {
+        timer.create();
+      } else {
+        timer.clean();
+      }
+    };
+    let selectedUUID: string | null = null;
+    const funSelectNode = (uuid: string | null) => {
+      selectedUUID = uuid;
+      updateNodeInfo();
+    };
+    onMounted(() => {
+      Bus.on(BusMsg.SelectNode, funSelectNode);
+      Bus.on(BusMsg.EnableSchedule, funcEnableSchedule);
+      timer.create();
+    });
+    onUnmounted(() => {
+      Bus.off(BusMsg.SelectNode, funSelectNode);
+      Bus.off(BusMsg.EnableSchedule, funcEnableSchedule);
+      timer.clean();
+    });
     bridge.on(Msg.ResponseSupport, (event: PluginEvent) => {
       let data: ResponseSupportData = event.data;
       const isCocosGame: boolean = data.support;
@@ -41,7 +74,6 @@ export default defineComponent({
      * 请求属性的列表，如果一个属性请求失败，会阻断后续的相同请求，因为都已经失败了，就没必要再响应请求了
      */
     const requestList: Array<{ id: string; cb: Function }> = [];
-
     bridge.on(Msg.ResponseObjectItemData, (event: PluginEvent) => {
       const requestData: ResponseObjectData = event.data;
       if (requestData.id !== null) {
@@ -59,8 +91,6 @@ export default defineComponent({
       requestList.push({ id: data.id, cb });
       bridge.send(Msg.RequestObjectItemData, data as RequestObjectData);
     });
-    // TODO: 需要检查当前的这个节点是否有效
-    // treeItemData.value = null;
     return {
       treeItemData,
     };
