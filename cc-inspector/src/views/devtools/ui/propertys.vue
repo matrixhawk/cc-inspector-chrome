@@ -1,5 +1,5 @@
 <template>
-  <div class="prop">
+  <div class="prop ccui-scrollbar">
     <PropertyGroup v-for="(group, index) in data.group" :key="index" :group="group"></PropertyGroup>
   </div>
 </template>
@@ -47,5 +47,6 @@ export default defineComponent({
 <style scoped lang="less">
 .prop {
   color: white;
+  overflow: auto;
 }
 </style>

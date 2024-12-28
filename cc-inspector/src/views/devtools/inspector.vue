@@ -1,12 +1,15 @@
 <template>
   <div class="right">
     <CCDock name="Inspector">
-      <Properties v-if="treeItemData" :data="treeItemData"></Properties>
+      <div class="inspector" @contextmenu.prevent.stop="onMenu">
+        <Properties v-if="treeItemData" :data="treeItemData"></Properties>
+      </div>
     </CCDock>
   </div>
 </template>
 <script lang="ts">
 import ccui from "@xuyanfeng/cc-ui";
+import { IUiMenuItem } from "@xuyanfeng/cc-ui/types/cc-menu/const";
 import { defineComponent, onMounted, onUnmounted, ref } from "vue";
 import { Msg, PluginEvent, RequestNodeInfoData, RequestObjectData, ResponseObjectData, ResponseSupportData } from "../../core/types";
 import { bridge } from "./bridge";
@@ -93,6 +96,16 @@ export default defineComponent({
     });
     return {
       treeItemData,
+      onMenu(evnet: MouseEvent) {
+        const menus: IUiMenuItem[] = [];
+        menus.push({
+          name: "update node info",
+          callback: () => {
+            updateNodeInfo();
+          },
+        });
+        ccui.menu.showMenuByMouseEvent(evnet, menus);
+      },
     };
   },
 });
@@ -103,17 +116,11 @@ export default defineComponent({
   display: flex;
   overflow-x: hidden;
   overflow-y: overlay;
-
-  &::-webkit-scrollbar {
-    width: 6px;
-    background: #999;
-    border-radius: 2px;
-    height: 6px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: #333;
-    border-radius: 2px;
+  .inspector {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
   }
 }
 </style>

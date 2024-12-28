@@ -6,12 +6,13 @@
           <i class="matchCase iconfont icon_font_size" @click.stop="onChangeCase" title="match case" :style="{ color: matchCase ? 'red' : '' }"></i>
         </slot>
       </CCInput>
-      <CCTree style="flex: 1" ref="elTree" :expand-keys="expandedKeys" :default-expand-all="false" :value="treeData" @node-expand="onNodeExpand" @node-collapse="onNodeCollapse" @node-click="handleNodeClick" @node-unclick="handleNodeUnclick"></CCTree>
+      <CCTree @contextmenu.prevent.stop="onMenu" style="flex: 1" ref="elTree" :expand-keys="expandedKeys" :default-expand-all="false" :value="treeData" @node-expand="onNodeExpand" @node-collapse="onNodeCollapse" @node-click="handleNodeClick" @node-unclick="handleNodeUnclick"></CCTree>
     </CCDock>
   </div>
 </template>
 <script lang="ts">
 import ccui from "@xuyanfeng/cc-ui";
+import { IUiMenuItem } from "@xuyanfeng/cc-ui/types/cc-menu/const";
 import { storeToRefs } from "pinia";
 import { defineComponent, nextTick, onMounted, onUnmounted, ref, toRaw, watch } from "vue";
 import { Msg, PluginEvent, RequestTreeInfoData, ResponseSetPropertyData } from "../../core/types";
@@ -186,6 +187,33 @@ export default defineComponent({
             return data?.name?.toLowerCase().indexOf(value.toLowerCase()) !== -1;
           }
         }
+      },
+      onMenu(event: MouseEvent) {
+        const menus: IUiMenuItem[] = [];
+        menus.push({
+          name: "update hierarchy",
+          enabled: true,
+          callback: () => {
+            updateTree();
+          },
+        });
+        if (selectedUUID) {
+          menus.push({
+            name: "visible",
+            enabled: true,
+            callback: () => {
+              console.log("visible");
+            },
+          });
+          menus.push({
+            name: "destroy",
+            enabled: false,
+            callback: () => {
+              console.log("destroy");
+            },
+          });
+        }
+        ccui.menu.showMenuByMouseEvent(event, menus);
       },
       onChangeCase() {
         matchCase.value = !matchCase.value;

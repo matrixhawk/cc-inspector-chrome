@@ -18,6 +18,7 @@
     </div>
     <Find v-if="!isShowDebug"></Find>
     <CCDialog></CCDialog>
+    <CCMenu></CCMenu>
     <CCFootBar :version="version"></CCFootBar>
   </div>
 </template>
@@ -41,14 +42,14 @@ import { Timer } from "./timer";
 import Properties from "./ui/propertys.vue";
 import SettingsVue from "./ui/settings.vue";
 import { checkSupport } from "./util";
-const { CCTree, CCFootBar, CCDialog, CCInput, CCButton, CCInputNumber, CCSelect, CCButtonGroup, CCCheckBox, CCColor, CCDivider } = ccui.components;
+const { CCTree, CCFootBar, CCMenu, CCDialog, CCInput, CCButton, CCInputNumber, CCSelect, CCButtonGroup, CCCheckBox, CCColor, CCDivider } = ccui.components;
 interface FrameInfo {
   label: string;
   value: number;
 }
 
 export default defineComponent({
-  components: { Find, Inspector, Hierarchy, Test, CCFootBar, CCDialog, CCTree, CCDivider, CCButtonGroup, Properties, SettingsVue, CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor },
+  components: { Find, Inspector, CCMenu, Hierarchy, Test, CCFootBar, CCDialog, CCTree, CCDivider, CCButtonGroup, Properties, SettingsVue, CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor },
   name: "devtools",
   props: {},
   setup(props, ctx) {
@@ -206,7 +207,7 @@ export default defineComponent({
     display: flex;
     flex: 1;
     flex-direction: row;
-    overflow: auto;
+    overflow: hidden;
   }
 }
 </style>
