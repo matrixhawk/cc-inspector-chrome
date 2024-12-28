@@ -30,7 +30,7 @@ class Bridge implements TestClient {
         const data = PluginEvent.create(event);
         console.log(...this.terminal.chunkMessage(data.toChunk()));
         if (data.valid && data.isTargetDevtools()) {
-          this.emitter.emit(data.msg, data.data);
+          this.emitter.emit(data.msg, data);
         } else {
           console.log(JSON.stringify(event));
           debugger;

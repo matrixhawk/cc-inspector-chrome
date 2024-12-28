@@ -90,7 +90,7 @@ export enum Msg {
   RequestLogData = "request-log-data",
 
   RequestSetProperty = "request-set-property",
-  ResponseSetProperty = "update-property",
+  ResponseSetProperty = "response-set-property",
 }
 
 export class PluginEvent {

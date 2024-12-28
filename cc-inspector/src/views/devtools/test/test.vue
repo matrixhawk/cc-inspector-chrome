@@ -44,7 +44,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const { config } = storeToRefs(appStore());
     // 仅在web环境显示
-    const show = ref(__DEV__ && !(chrome && chrome.runtime));
+    const show = ref(__DEV__);
     // 测试发送的是纯数据
     const testData = {
       uuid: "d1NHXHs35F1rbFJZKeigkl",
