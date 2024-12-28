@@ -1,30 +1,35 @@
 <template>
   <div class="right">
-    <Properties v-if="treeItemData" :data="treeItemData"></Properties>
+    <CCDock name="Inspector">
+      <Properties v-if="treeItemData" :data="treeItemData"></Properties>
+    </CCDock>
   </div>
 </template>
 <script lang="ts">
 import ccui from "@xuyanfeng/cc-ui";
 import { defineComponent, ref } from "vue";
-import { Msg, RequestObjectData, ResponseObjectData, ResponseSupportData } from "../../core/types";
+import { Msg, PluginEvent, RequestObjectData, ResponseObjectData, ResponseSupportData } from "../../core/types";
 import { bridge } from "./bridge";
 import { Bus, BusMsg } from "./bus";
 import { NodeInfoData, ObjectData } from "./data";
 import Properties from "./ui/propertys.vue";
+const { CCDock } = ccui.components;
 export default defineComponent({
-  components: { Properties },
+  components: { Properties, CCDock },
   setup() {
     const treeItemData = ref<NodeInfoData | null>(null);
-    bridge.on(Msg.ResponseSupport, (data: ResponseSupportData) => {
+    bridge.on(Msg.ResponseSupport, (event: PluginEvent) => {
+      let data: ResponseSupportData = event.data;
       const isCocosGame: boolean = data.support;
       if (isCocosGame) {
       } else {
         treeItemData.value = null;
       }
     });
-    bridge.on(Msg.ResponseNodeInfo, (eventData: NodeInfoData) => {
+    bridge.on(Msg.ResponseNodeInfo, (event: PluginEvent) => {
       try {
         // 因为要用到class的一些属性，传递过来的是纯数据，所以需要重新序列化一下
+        let eventData: NodeInfoData = event.data;
         const nodeInfo = new NodeInfoData(eventData.uuid, eventData.group).parse(eventData);
         treeItemData.value = nodeInfo;
       } catch (error) {
@@ -37,7 +42,8 @@ export default defineComponent({
      */
     const requestList: Array<{ id: string; cb: Function }> = [];
 
-    bridge.on(Msg.ResponseObjectItemData, (requestData: ResponseObjectData) => {
+    bridge.on(Msg.ResponseObjectItemData, (event: PluginEvent) => {
+      const requestData: ResponseObjectData = event.data;
       if (requestData.id !== null) {
         let findIndex = requestList.findIndex((el) => el.id === requestData.id);
         if (findIndex > -1) {
@@ -64,6 +70,7 @@ export default defineComponent({
 <style lang="less" scoped>
 .right {
   flex: 1;
+  display: flex;
   overflow-x: hidden;
   overflow-y: overlay;
 

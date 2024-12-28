@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import Bus, { BusMsg } from "../bus";
+import { Bus, BusMsg } from "../bus";
 import { EngineData } from "../data";
 export default defineComponent({
   name: "property-engine",

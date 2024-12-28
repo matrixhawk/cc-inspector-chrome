@@ -98,13 +98,12 @@ export class TestServer {
   add(client: TestClient) {
     this.clients.push(client);
   }
-  private count: number = 0;
+  public support: boolean = true;
   recv(msg: string, data: any) {
     switch (msg) {
       case Msg.RequestSupport: {
-        this.count++;
         const e = new PluginEvent(Page.Background, Page.Devtools, Msg.ResponseSupport, {
-          support: this.count > 10,
+          support: this.support,
           msg: "",
         } as ResponseSupportData);
         this.send(e);

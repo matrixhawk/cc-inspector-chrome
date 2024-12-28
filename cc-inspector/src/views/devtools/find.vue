@@ -5,25 +5,11 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted } from "vue";
-import { Msg, RequestSupportData } from "../../core/types";
-import { bridge } from "./bridge";
+import { defineComponent } from "vue";
+import { checkSupport } from "./util";
 export default defineComponent({
   name: "find",
   setup(props) {
-    let timer: NodeJS.Timer = null;
-    onMounted(() => {
-      timer = setInterval(() => {
-        checkSupport();
-      }, 300);
-    });
-    onUnmounted(() => {
-      clearInterval(timer);
-    });
-
-    function checkSupport() {
-      bridge.send(Msg.RequestSupport, {} as RequestSupportData);
-    }
     return {
       onBtnClickUpdatePage() {
         checkSupport();

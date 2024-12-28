@@ -34,7 +34,7 @@ import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
 import { defineComponent, onMounted, PropType, ref, toRaw, watch } from "vue";
 import { Msg, RequestSetPropertyData } from "../../../core/types";
 import { bridge } from "../bridge";
-import Bus, { BusMsg } from "../bus";
+import { Bus, BusMsg } from "../bus";
 import { EngineData, EnumData, ImageData, Info, NumberData, Property, StringData, TextData, Vec2Data, Vec3Data } from "../data";
 import Engine from "./property-engine.vue";
 import PropertyImage from "./property-image.vue";

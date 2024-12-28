@@ -1,13 +1,24 @@
 <template>
   <div v-if="show" class="test">
     <CCSection name="功能测试" :expand="config.expandTest" @change="onExpandTest">
-      <CCButton @click="onClickHasCocosGame">Has CocosGame</CCButton>
-      <CCButton @click="onClickNoCocosGame">No CocosGame</CCButton>
-      <CCButton @click="onTestTree">init tree data</CCButton>
-      <CCButton @click="onFrames">test frame</CCButton>
-      <CCButton @click="onTestNodeInfo">test node info</CCButton>
-      <CCButton @click="onNull">test null</CCButton>
-      <CCButton @click="onTerminal">onTerminal</CCButton>
+      <div>
+        <CCProp name="tree" align="left">
+          <CCButton @click="onTestTree1">tree1</CCButton>
+          <CCButton @click="onTestTree2">tree2</CCButton>
+          <CCButton @click="onTestNodeInfo">test node info</CCButton>
+        </CCProp>
+        <CCProp name="test" align="left">
+          <CCButton @click="onFrames">test frame</CCButton>
+          <CCButton @click="onNull">test null</CCButton>
+          <CCButton @click="onTerminal">terminal</CCButton>
+        </CCProp>
+        <CCProp name="cocos game" align="left">
+          <CCCheckBox :value="true" @change="onChangeCocosGame"></CCCheckBox>
+        </CCProp>
+        <CCProp name="timer" align="left">
+          <CCCheckBox :value="true" @change="onChangeTimer"></CCCheckBox>
+        </CCProp>
+      </div>
     </CCSection>
   </div>
 </template>
@@ -18,13 +29,14 @@ import { defineComponent, ref } from "vue";
 import { Msg, Page, PluginEvent, ResponseUpdateFramesData } from "../../../core/types";
 import { Terminal } from "../../../scripts/terminal";
 import { bridge } from "../bridge";
+import { Bus, BusMsg } from "../bus";
 import { FrameDetails, Group, InvalidData, NodeInfoData, TreeData } from "../data";
 import { appStore } from "../store";
 import { testServer } from "./server";
-const { CCButton, CCSection } = ccui.components;
+const { CCButton, CCSection, CCCheckBox, CCProp } = ccui.components;
 export default defineComponent({
   name: "test",
-  components: { CCButton, CCSection },
+  components: { CCButton, CCSection, CCCheckBox, CCProp },
   emits: ["validGame"],
   props: {
     isCocosGame: { type: Boolean, default: false },
@@ -67,11 +79,12 @@ export default defineComponent({
         config.value.expandTest = v;
         appStore().save();
       },
-      onClickHasCocosGame() {
-        emit("validGame", true);
+
+      onChangeCocosGame(b: boolean) {
+        testServer.support = b;
       },
-      onClickNoCocosGame() {
-        emit("validGame", false);
+      onChangeTimer(b: boolean) {
+        Bus.emit(BusMsg.EnableSchedule, b);
       },
       onTerminal() {
         const t = new Terminal("flag");
@@ -86,12 +99,30 @@ export default defineComponent({
         console.log(...t.blue("blue"));
         console.log(...t.chunkMessage(event.toChunk()));
       },
-      onTestTree() {
+      onTestTree1() {
+        const data: TreeData = {
+          id: "11",
+          text: "11",
+          active: true,
+          children: [{ id: "22", text: "22", active: true, children: [] }],
+        };
+        const event = new PluginEvent(Page.Inject, Page.Devtools, Msg.ResponseTreeInfo, data);
+        bridge.emit(event);
+      },
+      onTestTree2() {
         const data: TreeData = {
           id: "1",
-          text: "root",
+          text: "1",
           active: true,
-          children: [],
+          children: [
+            {
+              id: "2",
+              text: "2",
+              active: true,
+              children: [{ id: "3", text: "3", active: true, children: [] }],
+            },
+            { id: "4", text: "4", active: true, children: [] },
+          ],
         };
         const event = new PluginEvent(Page.Inject, Page.Devtools, Msg.ResponseTreeInfo, data);
         bridge.emit(event);

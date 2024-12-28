@@ -1,11 +1,11 @@
 <template>
   <div id="devtools">
-    <Test @valid-game="testValidGame"> </Test>
+    <Test> </Test>
     <div class="head" v-show="iframes.length > 1">
       <div class="label">inspect target:</div>
       <CCSelect v-model:value="frameID" @change="onChangeFrame" :data="getFramesData()"> </CCSelect>
     </div>
-    <div v-show="isShowDebug" class="find">
+    <div v-if="isShowDebug" class="find">
       <div v-if="false">
         <CCButton type="success" @click="onMemoryTest">内存测试</CCButton>
         <span>JS堆栈限制: {{ memory.performance.jsHeapSizeLimit }}</span>
@@ -26,9 +26,9 @@
 import ccui from "@xuyanfeng/cc-ui";
 import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
 import { storeToRefs } from "pinia";
-import { defineComponent, ref, toRaw } from "vue";
+import { defineComponent, onMounted, onUnmounted, ref, toRaw } from "vue";
 import PluginConfig from "../../../cc-plugin.config";
-import { Msg, RequestLogData, RequestUseFrameData, ResponseSupportData } from "../../core/types";
+import { Msg, PluginEvent, RequestUseFrameData, ResponseSupportData } from "../../core/types";
 import { bridge } from "./bridge";
 import { Bus, BusMsg } from "./bus";
 import { FrameDetails, NodeInfoData, TreeData } from "./data";
@@ -37,8 +37,10 @@ import Hierarchy from "./hierarchy.vue";
 import Inspector from "./inspector.vue";
 import { appStore } from "./store";
 import Test from "./test/test.vue";
+import { Timer } from "./timer";
 import Properties from "./ui/propertys.vue";
 import SettingsVue from "./ui/settings.vue";
+import { checkSupport } from "./util";
 const { CCTree, CCFootBar, CCDialog, CCInput, CCButton, CCInputNumber, CCSelect, CCButtonGroup, CCCheckBox, CCColor, CCDivider } = ccui.components;
 interface FrameInfo {
   label: string;
@@ -54,7 +56,15 @@ export default defineComponent({
     const isShowDebug = ref<boolean>(false);
     const iframes = ref<Array<FrameInfo>>([]);
     const { config, frameID } = storeToRefs(appStore());
-
+    const timer = new Timer(() => {
+      checkSupport();
+    });
+    onMounted(() => {
+      timer.create();
+    });
+    onUnmounted(() => {
+      timer.clean();
+    });
     // 问题：没有上下文的权限，只能操作DOM
     function _executeScript(para: Object) {
       // chrome.tabs.executeScript()//v2版本使用的函数
@@ -72,21 +82,31 @@ export default defineComponent({
         }
       });
     }
-
-    bridge.on(Msg.ResponseTreeInfo, (data: Array<TreeData>) => {
+    Bus.on(BusMsg.EnableSchedule, (b: boolean) => {
+      if (b) {
+        timer.create();
+      } else {
+        timer.clean();
+      }
+    });
+    bridge.on(Msg.ResponseTreeInfo, (event: PluginEvent) => {
+      let data: Array<TreeData> = event.data;
       isShowDebug.value = true;
     });
-    bridge.on(Msg.ResponseSupport, (data: ResponseSupportData) => {
+    bridge.on(Msg.ResponseSupport, (event: PluginEvent) => {
+      let data: ResponseSupportData = event.data;
       const isCocosGame: boolean = data.support;
       isShowDebug.value = isCocosGame;
     });
-    bridge.on(Msg.ResponseNodeInfo, (eventData: NodeInfoData) => {
+    bridge.on(Msg.ResponseNodeInfo, (event: PluginEvent) => {
+      let eventData: NodeInfoData = event.data;
       isShowDebug.value = true;
     });
     bridge.on(Msg.MemoryInfo, (eventData: any) => {
       memory.value = eventData;
     });
-    bridge.on(Msg.ResponseUpdateFrames, (resFrames: FrameDetails[]) => {
+    bridge.on(Msg.ResponseUpdateFrames, (event: PluginEvent) => {
+      let resFrames: FrameDetails[] = event.data;
       iframes.value = resFrames.map((item) => {
         return {
           label: item.url,
@@ -131,9 +151,7 @@ export default defineComponent({
       frameID,
       iframes,
       isShowDebug,
-      testValidGame(b: boolean) {
-        isShowDebug.value = !!b;
-      },
+
       getFramesData(): Option[] {
         const frames: FrameInfo[] = toRaw(iframes.value);
         const options: Option[] = [];
