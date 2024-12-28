@@ -58,25 +58,40 @@ export default defineComponent({
     const expand = ref(false);
     onMounted(() => {
       expand.value = false;
-      if (props.value.isArray()) {
-        subData.value = props.value.data;
-      } else {
-        subData.value = null;
-      }
+      freshSubData(props.value);
     });
     watch(
       () => props.value,
-      (v) => {
-        expand.value = false;
-        if (v.isArray()) {
-          subData.value = v.data;
-        } else {
-          subData.value = null;
+      (newData, oldData) => {
+        if (newData.id !== oldData.id) {
+          // 只有id不相等了，才折叠，因为数据是在定时刷新
+          expand.value = false;
         }
+        freshSubData(newData);
       }
     );
     const subData = ref<Array<Property> | null>(null);
-
+    function freshSubData(data: Info) {
+      const rawExpand = toRaw(expand.value);
+      if (!rawExpand) {
+        return;
+      }
+      const rawSubData = toRaw(subData.value);
+      if (rawSubData !== null) {
+        return;
+      }
+      const rawValue = toRaw(data);
+      if (!rawValue) {
+        return;
+      }
+      if (rawValue.isArray()) {
+        subData.value = data.data;
+      } else if (rawValue.isObject()) {
+        Bus.emit(BusMsg.RequestObjectData, rawValue, (info: Property[]) => {
+          subData.value = info;
+        });
+      }
+    }
     return {
       expand,
       subData,
@@ -122,18 +137,7 @@ export default defineComponent({
         }
       },
       onClickFold(v: boolean) {
-        if (props.value.isArray()) {
-          return;
-        }
-        const s = toRaw(subData.value);
-        const e = toRaw(expand.value);
-        const rawValue = toRaw(props.value);
-        if (rawValue && rawValue.isObject() && s === null && e === true) {
-          // 请求object的item数据
-          Bus.emit(BusMsg.RequestObjectData, rawValue, (info: Property[]) => {
-            subData.value = info;
-          });
-        }
+        freshSubData(props.value);
       },
       onChangeValue() {
         if (!props.value.readonly) {
