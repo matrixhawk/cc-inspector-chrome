@@ -1,5 +1,6 @@
 import { ITreeData } from "@xuyanfeng/cc-ui/types/cc-tree/const";
 import { v4 } from "uuid";
+import { getSimpleProperties } from "./comp";
 export enum DataType {
   Number = "Number",
   String = "String",
@@ -563,12 +564,20 @@ export class Group {
     this.name = name;
     this.id = id || "";
   }
-  parse(data: Group) {
+  isSimple(name: string): boolean {
+    const arr = getSimpleProperties(this.name);
+    const b = arr.find((el) => el === name);
+    return !!b;
+  }
+  parse(data: Group, simple: boolean = false) {
     this.id = data.id;
     this.name = data.name;
     this.data = [];
     for (let i = 0; i < data.data.length; i++) {
       const item = data.data[i];
+      if (simple && !this.isSimple(item.name)) {
+        continue;
+      }
       const property = new Property(item.name, item.value).parse(item);
       this.data.push(property);
     }
@@ -619,12 +628,12 @@ export class NodeInfoData {
   /**
    * 将json数据解析成NodeInfoData
    */
-  parse(data: NodeInfoData) {
+  parse(data: NodeInfoData, simple: boolean = false) {
     this.uuid = data.uuid;
     this.group = [];
     for (let i = 0; i < data.group.length; i++) {
       const item = data.group[i];
-      const group = new Group(item.name, item.id).parse(item);
+      const group = new Group(item.name, item.id).parse(item, simple);
       this.group.push(group);
     }
     return this;

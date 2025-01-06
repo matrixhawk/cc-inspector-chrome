@@ -126,6 +126,11 @@ export class TestServer {
     this.testData.buildChild("str2").buildComponent("group6").buildProperty("str2", new StringData("str2"));
 
     this.testData.buildChild("Invalid").buildComponent("group7").buildProperty("NaN", new InvalidData(NaN)).buildProperty("null", new InvalidData(null)).buildProperty("Infinity", new InvalidData(Infinity)).buildProperty("undefined", new InvalidData(undefined));
+    this.testData
+      .buildChild("comp")
+      .buildComponent("node-2") //
+      .buildProperty("rotation", new NumberData(0))
+      .buildProperty("max", new NumberData(100));
   }
   add(client: TestClient) {
     this.clients.push(client);

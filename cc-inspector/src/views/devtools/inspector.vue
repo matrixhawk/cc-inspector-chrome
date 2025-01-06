@@ -62,11 +62,12 @@ export default defineComponent({
         treeItemData.value = null;
       }
     });
+    let simpleProperties = true;
     bridge.on(Msg.ResponseNodeInfo, (event: PluginEvent) => {
       try {
         // 因为要用到class的一些属性，传递过来的是纯数据，所以需要重新序列化一下
         let eventData: NodeInfoData = event.data;
-        const nodeInfo = new NodeInfoData(eventData.uuid, eventData.group).parse(eventData);
+        const nodeInfo = new NodeInfoData(eventData.uuid, eventData.group).parse(eventData, simpleProperties);
         treeItemData.value = nodeInfo;
       } catch (error) {
         console.error(error);
@@ -82,6 +83,12 @@ export default defineComponent({
           name: "update node info",
           callback: () => {
             updateNodeInfo();
+          },
+        });
+        menus.push({
+          name: simpleProperties ? "show more properties" : "show simple properties",
+          callback: () => {
+            simpleProperties = !simpleProperties;
           },
         });
         ccui.menu.showMenuByMouseEvent(evnet, menus);
