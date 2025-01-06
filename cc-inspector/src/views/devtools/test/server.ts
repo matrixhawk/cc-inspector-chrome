@@ -1,6 +1,6 @@
 import { v4 } from "uuid";
-import { Msg, Page, PluginEvent, RequestNodeInfoData, RequestObjectData, ResponseNodeInfoData, ResponseObjectData, ResponseSupportData, ResponseTreeInfoData } from "../../../core/types";
-import { ArrayData, BoolData, ColorData, EngineData, EnumData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectData, ObjectItemRequestData, Property, StringData, TextData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../data";
+import { Msg, Page, PluginEvent, RequestNodeInfoData, ResponseNodeInfoData, ResponseSupportData, ResponseTreeInfoData } from "../../../core/types";
+import { ArrayData, BoolData, ColorData, EngineData, EnumData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectData, Property, StringData, TextData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../data";
 export class TestClient {
   recv(event: PluginEvent) {}
 }
@@ -81,9 +81,41 @@ export class TestServer {
   private clients: TestClient[] = [];
   private testData: Node = new Node("scene");
   constructor() {
-    this.testData.buildChild("base").buildComponent("group1").buildProperty("bool", new BoolData(true)).buildProperty("text", new TextData("text")).buildProperty("number", new NumberData(100)).buildProperty("string", new StringData("string")).buildProperty("enum", new EnumData().test()).buildProperty("color", new ColorData("#f00")).buildProperty("image", new ImageData().test());
-    this.testData.buildChild("vec").buildComponent("group2").buildProperty("number", new NumberData(200)).buildProperty("vec2", new Vec2Data().test()).buildProperty("vec3", new Vec3Data().test()).buildProperty("vec4", new Vec4Data().test());
-    this.testData.buildChild("obj/arr").buildComponent("group3").buildProperty("array", new ArrayData().test()).buildProperty("object", new ObjectData().test()).buildProperty("arr_arr", new ArrayData().testSub());
+    this.testData
+      .buildChild("base")
+      .buildComponent("group-base") //
+      .buildProperty("bool", new BoolData(true))
+      .buildProperty("text", new TextData("text"))
+      .buildProperty("number", new NumberData(100))
+      .buildProperty("string", new StringData("string"))
+      .buildProperty("enum", new EnumData().test())
+      .buildProperty("color", new ColorData("#f00"))
+      .buildProperty("image", new ImageData().test());
+    this.testData
+      .buildChild("vec")
+      .buildComponent("group-vec") //
+      .buildProperty("number", new NumberData(200))
+      .buildProperty("vec2", new Vec2Data().test())
+      .buildProperty("vec3", new Vec3Data().test())
+      .buildProperty("vec4", new Vec4Data().test());
+    this.testData
+      .buildChild("arr")
+      .buildComponent("group-arr") //
+      .buildProperty("array[t/b/n]", new ArrayData().testNormal()); //
+    this.testData
+      .buildChild("obj") //
+      .buildComponent("group-obj")
+      .buildProperty("object", new ObjectData().testNormal()); //
+
+    this.testData
+      .buildChild("arr[arr]")
+      .buildComponent("group-arr[arr]") //
+      .buildProperty("arr", new ArrayData().testArray()); //
+
+    this.testData
+      .buildChild("arr[obj]")
+      .buildComponent("group-arr[obj]") //
+      .buildProperty("arr", new ArrayData().testObject()); //
     this.testData.buildChild("engine").buildComponent("group4").buildProperty("node", new EngineData().init("name", "cc_Node", "uuid")).buildProperty("sprite", new EngineData().init("name", "cc_Sprite", "uuid")).buildProperty("label", new EngineData().init("name", "cc_Label", "uuid")).buildProperty("un_known", new EngineData().init("name", "un_known", "uuid"));
 
     const c = this.testData.buildChild("str1");
@@ -132,22 +164,8 @@ export class TestServer {
         break;
       }
       case Msg.RequestSetProperty: {
-        console.log(data);
-        break;
-      }
-      case Msg.RequestObjectItemData: {
-        const objData: RequestObjectData = data as ObjectData;
-        const info = this.testData.findInfo(objData.id);
-        if (info && info instanceof ObjectData) {
-          const ret: ObjectItemRequestData = {
-            id: objData.id,
-            data: info.testProperty(),
-          };
-          const event = new PluginEvent(Page.Inject, Page.Devtools, Msg.ResponseObjectItemData, ret as ResponseObjectData);
-          this.send(event);
-        } else {
-          console.warn("not found data: ", objData.id);
-        }
+        const i = data as Info;
+        console.log(i);
         break;
       }
       case Msg.RequestLogData: {

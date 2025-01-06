@@ -48,8 +48,7 @@ export interface RequestUseFrameData {
 export type RequestSetPropertyData = Info;
 export type ResponseSetPropertyData = Info;
 export type RequestLogData = string[];
-export type RequestObjectData = ObjectData;
-export type ResponseObjectData = ObjectItemRequestData;
+export type ResponseErrorData = string;
 export enum Msg {
   None = "None",
   /**
@@ -84,13 +83,12 @@ export enum Msg {
   ResponseUpdateFrames = "response-update-frames",
   RequestUseFrame = "request-use-frame",
 
-  RequestObjectItemData = "request-object-item-data",
-  ResponseObjectItemData = "response-object-item-data",
-
   RequestLogData = "request-log-data",
 
   RequestSetProperty = "request-set-property",
   ResponseSetProperty = "response-set-property",
+
+  ResponseError = "response-error",
 }
 
 export class PluginEvent {

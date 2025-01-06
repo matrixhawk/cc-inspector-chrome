@@ -165,17 +165,25 @@ export class ArrayData extends Info {
     this.data.push(info);
     return this;
   }
-  test() {
-    this.add(new Property("item1", new TextData("text")));
-    this.add(new Property("item2", new BoolData(true)));
-    this.add(new Property("item3", new NumberData(100)));
+  testNormal() {
+    this.add(new Property("arr-text", new TextData("text")));
+    this.add(new Property("arr-bool", new BoolData(true)));
+    this.add(new Property("arr-number", new NumberData(100)));
+    return this;
+  }
+  testObject() {
+    this.add(new Property("obj", new ObjectData().testNormal()));
+    return this;
+  }
+  testArray() {
+    this.add(new Property("arr", new ArrayData().testNormal()));
     return this;
   }
   testSub() {
-    this.add(new Property("item1", new TextData("text")));
+    this.add(new Property("text", new TextData("text")));
     const sub = new ArrayData();
-    sub.add(new Property("sub", new StringData("sub")));
-    this.add(new Property("arr", sub));
+    sub.add(new Property("string", new StringData("sub")));
+    this.add(new Property("array", sub));
     return this;
   }
   public isArray(): boolean {
@@ -185,48 +193,52 @@ export class ArrayData extends Info {
     return true;
   }
 }
-
-export class ObjectDataItem extends Info {}
-
 export class ObjectData extends Info {
   /**
-   * object的简单描述快照，类似chrome的console，{a:'fff',b:xxx}
-   * 主要是为了防止Object的数据过大，无限递归
+   * 对于object无限递归的情况，会自动中断
+   * 本质上和Array区别不是很大
    */
-  data: string = "";
+  data: Array<Property> = [];
   constructor() {
     super();
     this.type = DataType.Object;
   }
   parse(data: ObjectData) {
     super.parse(data);
-    this.data = data.data;
+    for (let i = 0; i < data.data.length; i++) {
+      const item = data.data[i];
+      const property = new Property(item.name, item.value).parse(item);
+      this.data.push(property);
+    }
     return this;
   }
 
-  test() {
-    this.data = JSON.stringify({ fack: "test" });
+  add(info: Property) {
+    this.data.push(info);
     return this;
   }
-  testProperty(): Property[] {
-    const obj: Object = JSON.parse(this.data);
-    const properties: Property[] = [];
-    for (let key in obj) {
-      if (typeof obj[key] === "string") {
-        properties.push(new Property(key, new StringData(obj[key])));
-      } else if (typeof obj[key] === "number") {
-        properties.push(new Property(key, new NumberData(obj[key])));
-      } else if (typeof obj[key] === "boolean") {
-        properties.push(new Property(key, new BoolData(obj[key])));
-      }
-    }
-    return properties;
+  testNormal() {
+    this.add(new Property("obj-text", new TextData("text")));
+    this.add(new Property("obj-bool", new BoolData(true)));
+    this.add(new Property("obj-number", new NumberData(100)));
+    return this;
+  }
+  testObject() {
+    this.add(new Property("obj", new ObjectData().testNormal()));
+    return this;
+  }
+  testArray() {
+    this.add(new Property("array", new ArrayData().testNormal()));
+    return this;
   }
   public isObject(): boolean {
     return true;
   }
   public isArrayOrObject(): boolean {
     return true;
+  }
+  public getInfo() {
+    return `${this.id}: ${this.path.join("/")}`;
   }
 }
 
@@ -566,6 +578,7 @@ export class Group {
     this.data.push(property);
   }
   buildProperty(name: string, info: Info) {
+    info.path.push(name);
     const property = new Property(name, info);
     this.addProperty(property);
     return this;

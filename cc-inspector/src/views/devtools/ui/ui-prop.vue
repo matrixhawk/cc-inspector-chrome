@@ -16,12 +16,12 @@
         <CCColor v-if="value.isColor()" :show-color-text="true" :disabled="value.readonly" v-model:color="value.data" @change="onChangeValue"> </CCColor>
         <PropertyImage v-if="value.isImage()" v-model:data="(value as ImageData)"></PropertyImage>
         <Engine v-if="value.isEngine()" v-model:data="(value as EngineData)"> </Engine>
-        <div v-if="value.isObject() && !expand" class="objectDesc">{{ value.data }}</div>
+        <div v-if="value.isObject() && !expand" class="objectDesc"></div>
         <div v-if="value.isArray()" class="array">Array[{{ value.data.length }}]</div>
       </div>
     </CCProp>
     <div v-if="value && value.isArrayOrObject()">
-      <div v-show="expand && subData">
+      <div v-show="expand && subData && subData.length">
         <UiProp v-for="(arr, index) in subData" :key="index" :indent="indent + 1" :value="arr.value" :name="getName(value.isArray(), arr)"> </UiProp>
       </div>
     </div>
@@ -34,8 +34,7 @@ import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
 import { defineComponent, onMounted, PropType, ref, toRaw, watch } from "vue";
 import { Msg, RequestSetPropertyData } from "../../../core/types";
 import { bridge } from "../bridge";
-import { Bus, BusMsg } from "../bus";
-import { EngineData, EnumData, ImageData, Info, NumberData, Property, StringData, TextData, Vec2Data, Vec3Data } from "../data";
+import { ArrayData, EngineData, EnumData, ImageData, Info, NumberData, ObjectData, Property, StringData, TextData, Vec2Data, Vec3Data } from "../data";
 import Engine from "./property-engine.vue";
 import PropertyImage from "./property-image.vue";
 const { CCInput, CCTextarea, CCProp, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } = ccui.components;
@@ -66,18 +65,15 @@ export default defineComponent({
         if (newData.id !== oldData.id) {
           // 只有id不相等了，才折叠，因为数据是在定时刷新
           expand.value = false;
+          subData.value = [];
         }
         freshSubData(newData);
       }
     );
-    const subData = ref<Array<Property> | null>(null);
+    const subData = ref<Array<Property>>([]);
     function freshSubData(data: Info) {
       const rawExpand = toRaw(expand.value);
       if (!rawExpand) {
-        return;
-      }
-      const rawSubData = toRaw(subData.value);
-      if (rawSubData !== null) {
         return;
       }
       const rawValue = toRaw(data);
@@ -85,11 +81,9 @@ export default defineComponent({
         return;
       }
       if (rawValue.isArray()) {
-        subData.value = data.data;
+        subData.value = (data as ArrayData).data;
       } else if (rawValue.isObject()) {
-        Bus.emit(BusMsg.RequestObjectData, rawValue, (info: Property[]) => {
-          subData.value = info;
-        });
+        subData.value = (data as ObjectData).data;
       }
     }
     return {

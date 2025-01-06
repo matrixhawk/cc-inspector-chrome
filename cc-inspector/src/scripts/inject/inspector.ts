@@ -1,7 +1,7 @@
 // eval 注入脚本的代码,变量尽量使用var,后来发现在import之后,let会自动变为var
 import { uniq } from "lodash";
-import { Msg, PluginEvent, RequestNodeInfoData, RequestLogData, RequestObjectData, RequestSetPropertyData, ResponseNodeInfoData, ResponseObjectData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
-import { ArrayData, BoolData, ColorData, DataType, EngineData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectData, ObjectItemRequestData, Property, StringData, TreeData, Vec2Data, Vec3Data } from "../../views/devtools/data";
+import { Msg, PluginEvent, RequestLogData, RequestNodeInfoData, RequestSetPropertyData, ResponseNodeInfoData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
+import { ArrayData, BoolData, ColorData, DataType, EngineData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectData, Property, StringData, TreeData, Vec2Data, Vec3Data } from "../../views/devtools/data";
 import { InjectEvent } from "./event";
 import { getValue, trySetValueWithConfig } from "./setValue";
 import { BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOptions } from "./types";
@@ -60,24 +60,6 @@ export class Inspector extends InjectEvent {
         // 直接写console.log会被tree shaking
         const logFunction = console.log;
         logFunction(value);
-        break;
-      }
-      case Msg.RequestObjectItemData: {
-        const data: RequestObjectData = pluginEvent.data;
-        let val = getValue(this.inspectorGameMemoryStorage, data.path);
-        if (val) {
-          let itemData: Property[] = this._buildObjectItemData({
-            data: data,
-            path: data.path,
-            value: val,
-            filterKey: false,
-          });
-          let result: ObjectItemRequestData = {
-            id: data.id,
-            data: itemData,
-          };
-          this.sendMsgToContent(Msg.ResponseObjectItemData, result as ResponseObjectData);
-        }
         break;
       }
     }
@@ -486,7 +468,8 @@ export class Inspector extends InjectEvent {
       }
       desc[key] = keyDesc;
     }
-    data.data = JSON.stringify(desc);
+    data.data = [];
+    //JSON.stringify(desc);
     return data;
   }
 
@@ -576,16 +559,20 @@ export class Inspector extends InjectEvent {
     let node = this.inspectorGameMemoryStorage[uuid];
     if (node) {
       let groupData = [];
-      // 收集节点信息
-      let nodeGroup = this._getGroupData(node);
-      groupData.push(nodeGroup);
-      // 收集组件信息
-      const nodeComp = node._components;
-      for (let i = 0; i < nodeComp.length; i++) {
-        let itemComp = nodeComp[i];
-        this.inspectorGameMemoryStorage[itemComp.uuid] = itemComp;
-        let compGroup = this._getGroupData(itemComp);
-        groupData.push(compGroup);
+      if (node.isValid) {
+        // 收集节点信息
+        let nodeGroup = this._getGroupData(node);
+        groupData.push(nodeGroup);
+        // 收集组件信息
+        const nodeComp = node._components;
+        if (nodeComp) {
+          for (let i = 0; i < nodeComp.length; i++) {
+            let itemComp = nodeComp[i];
+            this.inspectorGameMemoryStorage[itemComp.uuid] = itemComp;
+            let compGroup = this._getGroupData(itemComp);
+            groupData.push(compGroup);
+          }
+        }
       }
       const data: NodeInfoData = new NodeInfoData(uuid, groupData);
       this.sendMsgToContent(Msg.ResponseNodeInfo, data as ResponseNodeInfoData);

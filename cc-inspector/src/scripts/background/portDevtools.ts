@@ -25,7 +25,7 @@ export class PortDevtools extends PortMan {
           data.reset(Page.Background, Page.Content);
           const port = portMgr.getCurrentUsePort();
           if (!port) {
-            console.warn(`not find andy port`);
+            console.warn(`not find any port`);
             return;
           }
           port.send(data);

@@ -108,6 +108,10 @@ export default defineComponent({
     bridge.on(Msg.MemoryInfo, (eventData: any) => {
       memory.value = eventData;
     });
+    bridge.on(Msg.ResponseError, (event: PluginEvent) => {
+      const err: string = event.data;
+      ccui.footbar.showError(err);
+    });
     bridge.on(Msg.ResponseUpdateFrames, (event: PluginEvent) => {
       let resFrames: FrameDetails[] = event.data;
       iframes.value = resFrames.map((item) => {

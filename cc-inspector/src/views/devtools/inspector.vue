@@ -11,10 +11,10 @@
 import ccui from "@xuyanfeng/cc-ui";
 import { IUiMenuItem } from "@xuyanfeng/cc-ui/types/cc-menu/const";
 import { defineComponent, onMounted, onUnmounted, ref } from "vue";
-import { Msg, PluginEvent, RequestNodeInfoData, RequestObjectData, ResponseObjectData, ResponseSupportData } from "../../core/types";
+import { Msg, PluginEvent, RequestNodeInfoData, ResponseSupportData } from "../../core/types";
 import { bridge } from "./bridge";
 import { Bus, BusMsg } from "./bus";
-import { NodeInfoData, ObjectData } from "./data";
+import { NodeInfoData } from "./data";
 import { Timer } from "./timer";
 import Properties from "./ui/propertys.vue";
 const { CCDock } = ccui.components;
@@ -73,27 +73,7 @@ export default defineComponent({
         ccui.footbar.showError(error, { title: "parse property error" });
       }
     });
-    /**
-     * 请求属性的列表，如果一个属性请求失败，会阻断后续的相同请求，因为都已经失败了，就没必要再响应请求了
-     */
-    const requestList: Array<{ id: string; cb: Function }> = [];
-    bridge.on(Msg.ResponseObjectItemData, (event: PluginEvent) => {
-      const requestData: ResponseObjectData = event.data;
-      if (requestData.id !== null) {
-        let findIndex = requestList.findIndex((el) => el.id === requestData.id);
-        if (findIndex > -1) {
-          let del = requestList.splice(findIndex, 1)[0];
-          del.cb(requestData.data);
-        }
-      }
-    });
-    Bus.on(BusMsg.RequestObjectData, (data: ObjectData, cb: Function) => {
-      if (!data.id || requestList.find((el) => el.id === data.id)) {
-        return;
-      }
-      requestList.push({ id: data.id, cb });
-      bridge.send(Msg.RequestObjectItemData, data as RequestObjectData);
-    });
+
     return {
       treeItemData,
       onMenu(evnet: MouseEvent) {
