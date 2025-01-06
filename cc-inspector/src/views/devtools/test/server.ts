@@ -1,5 +1,6 @@
 import { v4 } from "uuid";
 import { Msg, Page, PluginEvent, RequestNodeInfoData, ResponseNodeInfoData, ResponseSupportData, ResponseTreeInfoData } from "../../../core/types";
+import { VisibleProp } from "../comp";
 import { ArrayData, BoolData, ColorData, EngineData, EnumData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectData, Property, StringData, TextData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../data";
 export class TestClient {
   recv(event: PluginEvent) {}
@@ -125,11 +126,19 @@ export class TestServer {
 
     this.testData.buildChild("str2").buildComponent("group6").buildProperty("str2", new StringData("str2"));
 
-    this.testData.buildChild("Invalid").buildComponent("group7").buildProperty("NaN", new InvalidData(NaN)).buildProperty("null", new InvalidData(null)).buildProperty("Infinity", new InvalidData(Infinity)).buildProperty("undefined", new InvalidData(undefined));
+    this.testData
+      .buildChild("Invalid")
+      .buildComponent("group7")
+      .buildProperty("NaN", new InvalidData(NaN)) //
+      .buildProperty("null", new InvalidData(null))
+      .buildProperty("Infinity", new InvalidData(Infinity))
+      .buildProperty(VisibleProp.Active, new BoolData(true))
+      .buildProperty("undefined", new InvalidData(undefined));
     this.testData
       .buildChild("comp")
       .buildComponent("node-2") //
       .buildProperty("rotation", new NumberData(0))
+      .buildProperty(VisibleProp.Enabled, new BoolData(true))
       .buildProperty("max", new NumberData(100));
   }
   add(client: TestClient) {

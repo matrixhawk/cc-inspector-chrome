@@ -13,5 +13,9 @@ export function getSimpleProperties(typeName: string): string[] {
   config[CompType.Node2] = ["position", "rotation", "scale", "anchor", "size", "color", "opacity", "skew", "group"];
   config[CompType.Label2] = ["string", "horizontalAlign", "verticalAlign", "fontSize", "lineHeight", "overflow", "font", "fontFamily", "ebableBold", "enableItalic", "enableUnderline", "underlineHeight", "cacheMode", "useSystemFont"];
   config[CompType.Spirte2] = ["atlas", "spriteFrame", "type", "sizeMode"];
-  return config[typeName];
+  return config[typeName] || [];
 }
+export const VisibleProp = {
+  Active: "active",
+  Enabled: "enabled",
+};

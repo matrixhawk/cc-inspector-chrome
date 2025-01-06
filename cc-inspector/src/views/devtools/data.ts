@@ -1,6 +1,6 @@
 import { ITreeData } from "@xuyanfeng/cc-ui/types/cc-tree/const";
 import { v4 } from "uuid";
-import { getSimpleProperties } from "./comp";
+import { getSimpleProperties, VisibleProp } from "./comp";
 export enum DataType {
   Number = "Number",
   String = "String",
@@ -565,9 +565,18 @@ export class Group {
     this.id = id || "";
   }
   isSimple(name: string): boolean {
+    if (name === VisibleProp.Active || name === VisibleProp.Enabled) {
+      return true;
+    }
+
     const arr = getSimpleProperties(this.name);
-    const b = arr.find((el) => el === name);
-    return !!b;
+    if (arr.length) {
+      const b = arr.find((el) => el === name);
+      return !!b;
+    } else {
+      // 这个类型，没有追加精简属性的配置，默认都是精简属性
+      return true;
+    }
   }
   parse(data: Group, simple: boolean = false) {
     this.id = data.id;

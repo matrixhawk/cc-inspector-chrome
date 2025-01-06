@@ -1,6 +1,11 @@
 <template>
   <div class="property-group">
     <CCSection :expand="!fold" :name="group.name" :expand-by-full-header="true" :auto-slot-header="true">
+      <template v-slot:title>
+        <div v-if="visible" @click.stop="">
+          <CCCheckBox :value="visible.data" @change="onChangeVisible"> </CCCheckBox>
+        </div>
+      </template>
       <template v-slot:header>
         <div style="flex: 1"></div>
         <i style="" @click.stop="onLog" class="print iconfont icon_print"></i>
@@ -15,11 +20,12 @@
 <script lang="ts">
 import ccui from "@xuyanfeng/cc-ui";
 import { defineComponent, onMounted, onUnmounted, PropType, ref, toRaw, watch } from "vue";
-import { Msg, RequestLogData } from "../../../core/types";
+import { Msg, RequestLogData, RequestSetPropertyData } from "../../../core/types";
 import { bridge } from "../bridge";
 import { Bus, BusMsg } from "../bus";
-import { Group } from "../data";
+import { BoolData, Group, Info, Property } from "../data";
 import UiProp from "./ui-prop.vue";
+import { VisibleProp } from "../comp";
 const { CCInput, CCSection, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } = ccui.components;
 export default defineComponent({
   name: "property-group",
@@ -43,14 +49,33 @@ export default defineComponent({
       Bus.off(BusMsg.FoldAllGroup, funcFoldAllGroup);
     });
     const fold = ref(false);
+    const visible = ref<Info | null>(null);
+    let visibleTarget: Property = null;
     watch(
       () => props.group,
       (v) => {
-        // console.log(v);
+        freshVisible();
       }
     );
+    function freshVisible() {
+      visibleTarget = props.group.data.find((el) => {
+        return el.name === VisibleProp.Enabled || el.name == VisibleProp.Active;
+      });
+      if (visibleTarget) {
+        visible.value = visibleTarget.value;
+      } else {
+        visible.value = null;
+      }
+    }
+    freshVisible();
     return {
       fold,
+      visible,
+      onChangeVisible(b: boolean) {
+        const raw: BoolData = toRaw<Info>(visibleTarget.value) as BoolData;
+        raw.data = b;
+        bridge.send(Msg.RequestSetProperty, raw as RequestSetPropertyData);
+      },
       onLog() {
         const raw = toRaw(props);
         const data = [raw.group.id];
