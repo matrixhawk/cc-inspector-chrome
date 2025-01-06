@@ -1,10 +1,10 @@
 import { ChromeConst } from "cc-plugin/src/chrome/const";
-import { Msg, Page, PluginEvent, RequestSupportData } from "../../core/types";
+import { debugLog, Msg, Page, PluginEvent, RequestSupportData } from "../../core/types";
 import { Terminal } from "../terminal";
 import { PortMan } from "./portMan";
 import { portMgr } from "./portMgr";
 const terminal = new Terminal(Page.Background);
-console.log(...terminal.init());
+debugLog && console.log(...terminal.init());
 function isDevtools(port: chrome.runtime.Port) {
   const devtoolsUrl = `chrome-extension://${port.sender?.id}/${ChromeConst.html.devtools}`;
   if (port.sender?.url === devtoolsUrl) {

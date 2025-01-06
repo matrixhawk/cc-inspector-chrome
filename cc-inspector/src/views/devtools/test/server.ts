@@ -186,6 +186,13 @@ export class TestServer {
         console.log(data);
         break;
       }
+      case Msg.RequestVisible: {
+        const node: Node = this.testData.findNode(data);
+        if (node) {
+          node.active = !node.active;
+        }
+        break;
+      }
       default:
         break;
     }

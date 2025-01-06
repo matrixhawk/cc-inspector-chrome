@@ -87,6 +87,8 @@ export enum Msg {
 
   RequestSetProperty = "request-set-property",
   ResponseSetProperty = "response-set-property",
+  RequestVisible = "request-visible",
+  RequestDestroy = "request-destroy",
 
   ResponseError = "response-error",
 }
@@ -205,3 +207,4 @@ export function PageInclude(page: Page) {
 export function MsgInclude(msg: Msg) {
   return inEnum(Msg, msg);
 }
+export const debugLog: boolean = false;

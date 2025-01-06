@@ -1,4 +1,4 @@
-import { Msg, Page, PluginEvent, RequestSupportData, ResponseUpdateFramesData } from "../../core/types";
+import { debugLog, Msg, Page, PluginEvent, RequestSupportData, ResponseUpdateFramesData } from "../../core/types";
 import { FrameDetails } from "../../views/devtools/data";
 import { Terminal } from "../terminal";
 import { PortContent } from "./portContent";
@@ -76,9 +76,9 @@ export class PortMgr {
 
     if (arr.length) {
       // console.table(arr)
-      console.log(...this.terminal.log(str.join("\n"), true));
+      debugLog && console.log(...this.terminal.log(str.join("\n"), true));
     } else {
-      console.log(...this.terminal.log("no port connected"));
+      debugLog && console.log(...this.terminal.log("no port connected"));
     }
   }
   public removePort(item: PortMan) {

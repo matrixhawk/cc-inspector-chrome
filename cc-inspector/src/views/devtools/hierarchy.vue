@@ -13,6 +13,7 @@
 <script lang="ts">
 import ccui from "@xuyanfeng/cc-ui";
 import { IUiMenuItem } from "@xuyanfeng/cc-ui/types/cc-menu/const";
+import Mousetrap, { MousetrapInstance } from "mousetrap";
 import { storeToRefs } from "pinia";
 import { defineComponent, nextTick, onMounted, onUnmounted, ref, toRaw, watch } from "vue";
 import { Msg, PluginEvent, RequestTreeInfoData, ResponseSetPropertyData } from "../../core/types";
@@ -26,7 +27,6 @@ export default defineComponent({
   name: "hierarchy",
   components: { CCButtonGroup, CCInput, CCTree, CCDock },
   setup() {
-    onMounted(() => {});
     const funcShowPlace = (data: EngineData) => {
       console.log(toRaw(data));
       _expand(data.engineUUID);
@@ -41,12 +41,27 @@ export default defineComponent({
     const timer: Timer = new Timer(() => {
       updateTree();
     });
+    let ins: MousetrapInstance | null = null;
+    function onQuickVisible() {
+      console.log("onQuickVisible");
+      if (selectedUUID) {
+        bridge.send(Msg.RequestVisible, selectedUUID);
+      }
+    }
     onMounted(() => {
+      if (elTree.value) {
+        const el = toRaw(elTree.value);
+        ins = new Mousetrap(el.treeElement);
+        ins.bind(["space"], onQuickVisible, "keydown");
+      }
       Bus.on(BusMsg.ShowPlace, funcShowPlace);
       Bus.on(BusMsg.EnableSchedule, funcEnableSchedule);
       timer.create();
     });
     onUnmounted(() => {
+      if (ins) {
+        ins.unbind(["space"], "keydown");
+      }
       Bus.off(BusMsg.ShowPlace, funcShowPlace);
       Bus.off(BusMsg.EnableSchedule, funcEnableSchedule);
       timer.clean();
@@ -96,7 +111,7 @@ export default defineComponent({
     });
     const { config, frameID } = storeToRefs(appStore());
     const matchCase = ref<boolean>(false);
-    const elTree = ref<typeof CCTree>();
+    const elTree = ref<typeof CCTree>(null);
     const treeData = ref<TreeData[]>([]);
     let selectedUUID: string | null = null;
     bridge.on(Msg.ResponseTreeInfo, (event: PluginEvent) => {
@@ -199,17 +214,17 @@ export default defineComponent({
         });
         if (selectedUUID) {
           menus.push({
-            name: "visible",
+            name: "visible (sapce)",
             enabled: true,
             callback: () => {
-              console.log("visible");
+              onQuickVisible();
             },
           });
           menus.push({
             name: "destroy",
-            enabled: false,
+            enabled: true,
             callback: () => {
-              console.log("destroy");
+              bridge.send(Msg.RequestDestroy, selectedUUID);
             },
           });
         }

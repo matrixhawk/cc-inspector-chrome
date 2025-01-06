@@ -1,12 +1,12 @@
 // content.js 和原始界面共享DOM，具有操作dom的能力
 // 但是不共享js,要想访问页面js,只能通过注入的方式
 import { ChromeConst } from "cc-plugin/src/chrome/const";
-import { Msg, Page, PluginEvent, ResponseSupportData } from "../../core/types";
+import { debugLog, Msg, Page, PluginEvent, ResponseSupportData } from "../../core/types";
 import { DocumentEvent } from "../const";
 import { Terminal } from "../terminal";
 
 const terminal = new Terminal(Page.Content);
-console.log(...terminal.init());
+debugLog && console.log(...terminal.init());
 
 // #region 注入脚本
 export function injectScript(url: string) {
@@ -19,9 +19,9 @@ export function injectScript(url: string) {
       document.head.removeChild(script);
     };
     document.head.appendChild(script);
-    console.log(...terminal.green(`inject script success: ${content}`));
+    debugLog && console.log(...terminal.green(`inject script success: ${content}`));
   } else {
-    console.log(...terminal.red("inject script failed"));
+    debugLog && console.log(...terminal.red("inject script failed"));
   }
 }
 
@@ -29,13 +29,13 @@ export function injectScript(url: string) {
 document.addEventListener(DocumentEvent.Inject2Content, (event: CustomEvent) => {
   let data: PluginEvent = PluginEvent.create(event.detail);
   if (data.valid && data.check(Page.Inject, Page.Content)) {
-    console.log(...terminal.chunkMessage(data.toChunk()));
+    debugLog && console.log(...terminal.chunkMessage(data.toChunk()));
     data.reset(Page.Content, Page.Devtools);
     if (connect) {
       // 接受来自inject.js的消息数据,然后中转到background.js
       connect.postMessage(data);
     } else {
-      console.log(...terminal.log(`connect is null`));
+      debugLog && console.log(...terminal.log(`connect is null`));
       throw new Error("connect is null");
     }
   } else {
@@ -45,16 +45,16 @@ document.addEventListener(DocumentEvent.Inject2Content, (event: CustomEvent) => 
 // #region 和background通讯
 let connect: chrome.runtime.Port = chrome.runtime.connect({ name: Page.Content });
 connect.onDisconnect.addListener(() => {
-  console.log(...terminal.disconnect(""));
+  debugLog && console.log(...terminal.disconnect(""));
   connect = null;
 });
 connect.onMessage.addListener((data: PluginEvent, sender: chrome.runtime.Port) => {
   const event = PluginEvent.create(data);
   if (event.valid && event.check(Page.Background, Page.Content)) {
-    console.log(...terminal.chunkMessage(event.toChunk()));
+    debugLog && console.log(...terminal.chunkMessage(event.toChunk()));
     event.reset(Page.Content, Page.Inject);
     const e = new CustomEvent(DocumentEvent.Content2Inject, { detail: event });
-    console.log(...terminal.chunkSend(event.toChunk()));
+    debugLog && console.log(...terminal.chunkSend(event.toChunk()));
     document.dispatchEvent(e);
   } else {
     throw new Error(`invalid data: ${data}`);
@@ -70,7 +70,7 @@ function checkGame() {
   if (connect) {
     connect.postMessage(sendData);
   } else {
-    console.log(...terminal.log(`connect is null`));
+    debugLog && console.log(...terminal.log(`connect is null`));
     throw new Error("connect is null");
   }
 }

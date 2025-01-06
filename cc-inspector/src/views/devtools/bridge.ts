@@ -1,6 +1,6 @@
 import CCP from "cc-plugin/src/ccp/entry-render";
 import { TinyEmitter } from "tiny-emitter";
-import { Msg, Page, PluginEvent } from "../../core/types";
+import { debugLog, Msg, Page, PluginEvent } from "../../core/types";
 import { Terminal } from "../../scripts/terminal";
 import { TestClient, testServer } from "./test/server";
 export type BridgeCallback = (data: PluginEvent, sender: chrome.runtime.Port) => void;
@@ -22,13 +22,13 @@ class Bridge implements TestClient {
     if (CCP.Adaptation.Env.isChromeRuntime) {
       this.connect = chrome.runtime.connect({ name: Page.Devtools });
       this.connect.onDisconnect.addListener(() => {
-        console.log(...this.terminal.disconnect(""));
+        debugLog && console.log(...this.terminal.disconnect(""));
         this.connect = null;
       });
 
       this.connect.onMessage.addListener((event, sender: chrome.runtime.Port) => {
         const data = PluginEvent.create(event);
-        console.log(...this.terminal.chunkMessage(data.toChunk()));
+        debugLog && console.log(...this.terminal.chunkMessage(data.toChunk()));
         if (data.valid && data.isTargetDevtools()) {
           this.emitter.emit(data.msg, data);
         } else {

@@ -1,4 +1,4 @@
-import { Page, PluginEvent } from "../../core/types";
+import { debugLog, Page, PluginEvent } from "../../core/types";
 import { Terminal } from "../terminal";
 
 export abstract class PortMan {
@@ -29,15 +29,15 @@ export abstract class PortMan {
     this.terminal = new Terminal(`Port-${this.name}`);
     port.onMessage.addListener((data: any, port: chrome.runtime.Port) => {
       const event = PluginEvent.create(data);
-      console.log(...this.terminal.chunkMessage(event.toChunk()));
+      debugLog && console.log(...this.terminal.chunkMessage(event.toChunk()));
       if (event.valid && this.onMessage) {
         this.onMessage(event);
       } else {
-        console.log(...this.terminal.log(JSON.stringify(data)));
+        debugLog && console.log(...this.terminal.log(JSON.stringify(data)));
       }
     });
     port.onDisconnect.addListener((port: chrome.runtime.Port) => {
-      console.log(...this.terminal.disconnect(""));
+      debugLog && console.log(...this.terminal.disconnect(""));
       if (this.onDisconnect) {
         this.onDisconnect(port);
       }

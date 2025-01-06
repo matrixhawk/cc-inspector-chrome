@@ -26,7 +26,7 @@
 import ccui from "@xuyanfeng/cc-ui";
 import { storeToRefs } from "pinia";
 import { defineComponent, ref } from "vue";
-import { Msg, Page, PluginEvent, ResponseUpdateFramesData } from "../../../core/types";
+import { debugLog, Msg, Page, PluginEvent, ResponseUpdateFramesData } from "../../../core/types";
 import { Terminal } from "../../../scripts/terminal";
 import { bridge } from "../bridge";
 import { Bus, BusMsg } from "../bus";
@@ -89,15 +89,15 @@ export default defineComponent({
       onTerminal() {
         const t = new Terminal("flag");
         const event = new PluginEvent(Page.Background, Page.Background, Msg.ResponseTreeInfo, "");
-        console.log(...t.message("1"));
-        console.log(...t.log("newline", true));
-        console.log(...t.log("oneline", false));
-        console.log(...t.disconnect("disconnect"));
-        console.log(...t.connect("connect"));
-        console.log(...t.red("red"));
-        console.log(...t.green("green"));
-        console.log(...t.blue("blue"));
-        console.log(...t.chunkMessage(event.toChunk()));
+        debugLog && console.log(...t.message("1"));
+        debugLog && console.log(...t.log("newline", true));
+        debugLog && console.log(...t.log("oneline", false));
+        debugLog && console.log(...t.disconnect("disconnect"));
+        debugLog && console.log(...t.connect("connect"));
+        debugLog && console.log(...t.red("red"));
+        debugLog && console.log(...t.green("green"));
+        debugLog && console.log(...t.blue("blue"));
+        debugLog && console.log(...t.chunkMessage(event.toChunk()));
       },
       onTestTree1() {
         const data: TreeData = {

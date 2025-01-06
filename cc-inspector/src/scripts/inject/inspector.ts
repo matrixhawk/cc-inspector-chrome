@@ -1,6 +1,6 @@
 // eval 注入脚本的代码,变量尽量使用var,后来发现在import之后,let会自动变为var
 import { uniq } from "lodash";
-import { Msg, PluginEvent, RequestLogData, RequestNodeInfoData, RequestSetPropertyData, ResponseNodeInfoData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
+import { debugLog, Msg, PluginEvent, RequestLogData, RequestNodeInfoData, RequestSetPropertyData, ResponseNodeInfoData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
 import { ArrayData, BoolData, ColorData, DataType, EngineData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectData, Property, StringData, TreeData, Vec2Data, Vec3Data } from "../../views/devtools/data";
 import { InjectEvent } from "./event";
 import { getValue, trySetValueWithConfig } from "./setValue";
@@ -62,10 +62,26 @@ export class Inspector extends InjectEvent {
         logFunction(value);
         break;
       }
+      case Msg.RequestVisible: {
+        const uuid: string = pluginEvent.data;
+        const node = this.inspectorGameMemoryStorage[uuid];
+        if (node) {
+          node.active = !node.active;
+        }
+        break;
+      }
+      case Msg.RequestDestroy: {
+        const uuid: string = pluginEvent.data;
+        const node = this.inspectorGameMemoryStorage[uuid];
+        if (node && node.isValid && node.destroy) {
+          node.destroy();
+        }
+        break;
+      }
     }
   }
   init() {
-    console.log(...this.terminal.init());
+    debugLog && console.log(...this.terminal.init());
     this.watchIsCocosGame();
   }
 
