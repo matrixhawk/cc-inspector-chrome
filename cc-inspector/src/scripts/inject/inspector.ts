@@ -1,7 +1,7 @@
 // eval 注入脚本的代码,变量尽量使用var,后来发现在import之后,let会自动变为var
 import { uniq } from "lodash";
 import { debugLog, Msg, PluginEvent, RequestLogData, RequestNodeInfoData, RequestSetPropertyData, ResponseNodeInfoData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
-import { ArrayData, BoolData, ColorData, DataType, EngineData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectData, Property, StringData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../../views/devtools/data";
+import { ArrayData, BoolData, ColorData, DataType, EngineData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectCircleData, ObjectData, Property, StringData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../../views/devtools/data";
 import { InjectEvent } from "./event";
 import { getValue, trySetValueWithConfig } from "./setValue";
 import { BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOptions } from "./types";
@@ -421,11 +421,18 @@ export class Inspector extends InjectEvent {
     }
     if (typeof propertyValue === "object") {
       // 空{} MaterialVariant 2.4.0
-      info = this._buildObjectData({
-        data: new ObjectData(),
-        path: path,
-        value: propertyValue,
-      });
+      try {
+        JSON.stringify(propertyValue);
+        info = this._buildObjectData({
+          data: new ObjectData(),
+          path: path,
+          value: propertyValue,
+        });
+      } catch {
+        // Object存在循环引用的情况
+        info = new ObjectCircleData();
+      }
+
       if (info) {
         return make(info);
       }

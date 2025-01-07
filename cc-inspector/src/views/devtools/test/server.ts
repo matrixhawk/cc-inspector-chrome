@@ -1,7 +1,7 @@
 import { v4 } from "uuid";
 import { Msg, Page, PluginEvent, RequestNodeInfoData, ResponseNodeInfoData, ResponseSupportData, ResponseTreeInfoData } from "../../../core/types";
 import { VisibleProp } from "../comp";
-import { ArrayData, BoolData, ColorData, EngineData, EnumData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectData, Property, StringData, TextData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../data";
+import { ArrayData, BoolData, ColorData, EngineData, EnumData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectCircleData, ObjectData, Property, StringData, TextData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../data";
 export class TestClient {
   recv(event: PluginEvent) {}
 }
@@ -107,6 +107,10 @@ export class TestServer {
       .buildChild("obj") //
       .buildComponent("group-obj")
       .buildProperty("object", new ObjectData().testNormal()); //
+    this.testData
+      .buildChild("obj-circle")
+      .buildComponent("group-obj-circle") //
+      .buildProperty("circle", new ObjectCircleData());
 
     this.testData
       .buildChild("arr[arr]")

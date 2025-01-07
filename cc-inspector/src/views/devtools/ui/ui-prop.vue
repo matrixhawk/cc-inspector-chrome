@@ -18,6 +18,7 @@
         <Engine v-if="value.isEngine()" v-model:data="(value as EngineData)"> </Engine>
         <div v-if="value.isObject() && !expand" class="objectDesc"></div>
         <div v-if="value.isArray()" class="array">Array[{{ value.data.length }}]</div>
+        <div v-if="value.isObjectCircle()" class="circle-obj" @click="onLogToConsole">circle object can't display, click to log in console</div>
       </div>
     </CCProp>
     <div v-if="value && value.isArrayOrObject()">
@@ -32,7 +33,7 @@
 import ccui from "@xuyanfeng/cc-ui";
 import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
 import { defineComponent, onMounted, PropType, ref, toRaw, watch } from "vue";
-import { Msg, RequestSetPropertyData } from "../../../core/types";
+import { Msg, RequestLogData, RequestSetPropertyData } from "../../../core/types";
 import { bridge } from "../bridge";
 import { ArrayData, EngineData, EnumData, ImageData, Info, NumberData, ObjectData, Property, StringData, TextData, Vec2Data, Vec3Data } from "../data";
 import Engine from "./property-engine.vue";
@@ -139,6 +140,10 @@ export default defineComponent({
           bridge.send(Msg.RequestSetProperty, raw as RequestSetPropertyData);
         }
       },
+      onLogToConsole() {
+        const data = toRaw(props.value.path);
+        bridge.send(Msg.RequestLogData, data as RequestLogData);
+      },
     };
   },
 });
@@ -177,6 +182,21 @@ export default defineComponent({
       flex-direction: column;
       color: #d2d2d2;
       font-size: 12px;
+    }
+    .circle-obj {
+      user-select: none;
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 12px;
+      color: gray;
+      &:hover {
+        color: white;
+      }
+      &:active {
+        color: chocolate;
+      }
     }
 
     .vec {

@@ -14,7 +14,7 @@ export enum DataType {
   Invalid = "Invalid",
   Array = "Array", // 暂时在控制台打印下
   Object = "Object",
-  ObjectItem = "ObjectItem",
+  ObjectCircle = "ObjectCircle",
   Image = "Image", // 图片
   Engine = "Engine", // 引擎的类型：cc.Node, cc.Sprite, cc.Label等。。。
 }
@@ -70,6 +70,9 @@ export class Info {
     return false;
   }
   public isObject(): boolean {
+    return false;
+  }
+  public isObjectCircle(): boolean {
     return false;
   }
   public isImage(): boolean {
@@ -200,6 +203,19 @@ export class ArrayData extends Info {
     return true;
   }
   public isArrayOrObject(): boolean {
+    return true;
+  }
+}
+export class ObjectCircleData extends Info {
+  constructor() {
+    super();
+    this.type = DataType.ObjectCircle;
+  }
+  parse(data: ObjectCircleData) {
+    super.parse(data);
+    return this;
+  }
+  public isObjectCircle(): boolean {
     return true;
   }
 }
@@ -553,7 +569,9 @@ export class Property {
       case DataType.Invalid:
         this.value = new InvalidData(data.value).parse(data.value as InvalidData);
         break;
-      case DataType.ObjectItem:
+      case DataType.ObjectCircle:
+        this.value = new ObjectCircleData().parse(data.value as ObjectCircleData);
+        break;
       default:
         throw new Error(`not support type: ${typeof data === "string" ? data : JSON.stringify(data)}`);
     }
