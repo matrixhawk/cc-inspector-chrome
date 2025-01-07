@@ -117,14 +117,22 @@ export class TestServer {
       .buildChild("arr[obj]")
       .buildComponent("group-arr[obj]") //
       .buildProperty("arr", new ArrayData().testObject()); //
-    this.testData.buildChild("engine").buildComponent("group4").buildProperty("node", new EngineData().init("name", "cc_Node", "uuid")).buildProperty("sprite", new EngineData().init("name", "cc_Sprite", "uuid")).buildProperty("label", new EngineData().init("name", "cc_Label", "uuid")).buildProperty("un_known", new EngineData().init("name", "un_known", "uuid"));
 
-    const c = this.testData.buildChild("str1");
-    c.active = false;
-    c.buildComponent("group51").buildProperty("str1", new StringData("str1"));
-    c.buildComponent("group52").buildProperty("num", new NumberData(200));
+    const node = this.testData.buildChild("str1");
+    node.active = false;
+    const comp = node.buildComponent("group51");
+    comp.buildProperty("str1", new StringData("str1"));
+    node.buildComponent("group52").buildProperty("num", new NumberData(200));
 
     this.testData.buildChild("str2").buildComponent("group6").buildProperty("str2", new StringData("str2"));
+
+    this.testData
+      .buildChild("engine")
+      .buildComponent("group4") //
+      .buildProperty("node", new EngineData().init(node.name, "cc_Node", node.id))
+      .buildProperty("sprite", new EngineData().init(node.name, "cc_Sprite", node.id))
+      .buildProperty("label", new EngineData().init(node.name, "cc_Label", node.id))
+      .buildProperty("un_known", new EngineData().init(comp.name, "un_known", comp.id, node.id));
 
     this.testData
       .buildChild("Invalid")

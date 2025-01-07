@@ -1,6 +1,6 @@
 <template>
   <div id="devtools">
-    <Test> </Test>
+    <Test v-if="false"> </Test>
     <div class="head" v-show="iframes.length > 1">
       <div class="label">inspect target:</div>
       <CCSelect v-model:value="frameID" @change="onChangeFrame" :data="getFramesData()"> </CCSelect>

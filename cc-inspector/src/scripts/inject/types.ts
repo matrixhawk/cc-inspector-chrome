@@ -4,7 +4,6 @@ export interface BuildObjectOptions {
   path: string[];
   value: Object;
   data: ObjectData;
-  filterKey: boolean;
 }
 
 export interface BuildArrayOptions {

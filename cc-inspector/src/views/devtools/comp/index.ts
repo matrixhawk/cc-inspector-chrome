@@ -4,11 +4,140 @@ export enum CompType {
   Label = "cc.Label",
   Widget = "cc.Widget",
   Camera = "cc.Camera",
+  Canvas = "cc.Canvas",
+  Mask = "cc.Mask",
+  ScrollView = "cc.ScrollView",
   UITransform = "cc.UITransform",
+  ParticleSystem = "cc.ParticleSystem",
+  EditBox = "cc.EditBox",
+  TiledTile = "cc.TiledTile",
+  Light = "cc.Light",
+  VideoPlayer = "cc.VideoPlayer",
+  MeshRenderer = "cc.MeshRenderer",
+  ProgressBar = "cc.ProgressBar",
+  RichText = "cc.RichText",
+  Slider = "cc.Slider",
+  PageView = "cc.PageView",
+  Webview = "cc.WebView",
+  ToggleGroup = "cc.ToggleGroup",
+  ToggleContainer = "cc.ToggleContainer",
+  Toggle = "cc.Toggle",
+  Button = "cc.Button",
 }
 
 export function getSimpleProperties(typeName: string): string[] {
   const config = {};
+  config[CompType.Button] = [
+    "target", //
+    "interactable",
+    "enableAutoGrayEffect",
+    "transition",
+    "duration",
+    "zoomScale",
+    "normalColor",
+    "normalSprite",
+    "pressedColor",
+    "pressedSprite",
+    "disabledColor",
+    "disabledSprite",
+    "hoverColor",
+    "hoverSprite",
+    "duration",
+  ];
+  config[CompType.Toggle] = [
+    "target",
+    "interactable",
+    "enableAutoGrayEffect",
+    "transition", //
+    "duration",
+    "zoomScale",
+    "isChecked",
+    "checkMark",
+    "toggleGroup",
+  ];
+  config[CompType.ToggleContainer] = ["allowSwitchOff"];
+  config[CompType.ToggleGroup] = ["allowSwitchOff"];
+  config[CompType.Webview] = ["url"];
+  config[CompType.PageView] = [
+    "content",
+    "sizeMode",
+    "direction",
+    "scrollThreshold",
+    "autoPageTurningThreshold", //
+    "inertia",
+    "brake",
+    "elastic",
+    "bounceDuration",
+    "indicator",
+    "pageTurningSpeed",
+    "pageTurningEventTiming",
+    "cancelInnerEvents",
+  ];
+  config[CompType.Slider] = ["handle", "direction", "progress"];
+  config[CompType.RichText] = [
+    "string",
+    "horizontalAlign",
+    "fontSize",
+    "font",
+    "fontFamily",
+    "useSystemFont",
+    "cacheMode",
+    "maxWidth",
+    "lineHeight",
+    "imageAtlas",
+    "handleTouchEvent", //
+  ];
+  config[CompType.ProgressBar] = [
+    "barSprite",
+    "mode",
+    "totalLength",
+    "progress",
+    "reverse", //
+  ];
+  config[CompType.MeshRenderer] = [
+    "materials", //
+    "mesh",
+    "receiveShadows",
+    "shadowCastingMode",
+    "enableAutoBatch",
+  ];
+  config[CompType.VideoPlayer] = [
+    "resourceType",
+    "clip",
+    "currentTime",
+    "volume",
+    "mute",
+    "keepAspectRatio",
+    "isFullscreen",
+    "stayOnBottom", //
+  ];
+  config[CompType.Light] = [
+    "type",
+    "color",
+    "intensity", //
+    "range",
+    "shadowType",
+    "range",
+    "spotAngle",
+    "spotExp",
+  ];
+  config[CompType.TiledTile] = ["x", "y", "grid"];
+  config[CompType.EditBox] = [
+    "string",
+    "placeholder", //
+    "background",
+    "textLabel",
+    "placeholderLabel",
+    "keyboardReturnType",
+    "inputFlag",
+    "inputMode",
+    "maxLength",
+    "tabIndex",
+  ];
+  config[CompType.ParticleSystem] = [
+    "playOnLoad", //
+    "autoRemoveOnFinish",
+  ];
   config[CompType.Node] = [
     "position", //
     "rotation",
@@ -68,6 +197,29 @@ export function getSimpleProperties(typeName: string): string[] {
     "spriteAtlas",
     "trim",
     "type",
+  ];
+  config[CompType.ScrollView] = [
+    "bounceDuration",
+    "content", //
+    "horizontal",
+    "vertical",
+    "inertia",
+    "brake",
+    "elastic",
+    "bounceDuration",
+    "verticalScrollBar",
+  ];
+  config[CompType.Mask] = [
+    "alphaThreshold",
+    "inverted",
+    "segments", //
+    "spriteFrame",
+    "type",
+  ];
+  config[CompType.Canvas] = [
+    "fitWidth",
+    "fitHeight", //
+    "designResolution",
   ];
   return config[typeName] || [];
 }

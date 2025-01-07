@@ -1,16 +1,13 @@
 <template>
-  <div class="property-engine">
+  <div class="property-engine" @click="onPlaceInTree">
     <i class="icon iconfont" :class="getEngineTypeIcon()"></i>
     <div class="type">{{ data.engineType }}</div>
     <div class="name">{{ data.engineName }}</div>
-    <div class="place" @click="onPlaceInTree">
-      <i class="iconfont icon_place"></i>
-    </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType, toRaw } from "vue";
 import { Bus, BusMsg } from "../bus";
 import { EngineData } from "../data";
 export default defineComponent({
@@ -25,7 +22,7 @@ export default defineComponent({
   setup(props, context) {
     return {
       onPlaceInTree() {
-        Bus.emit(BusMsg.ShowPlace, props.data);
+        Bus.emit(BusMsg.ShowPlace, toRaw(props.data));
       },
       getEngineTypeIcon() {
         switch (props.data.engineType) {
@@ -49,6 +46,7 @@ export default defineComponent({
 <style scoped lang="less">
 @my-height: 20px;
 .property-engine {
+  cursor: pointer;
   height: @my-height;
   box-sizing: border-box;
   flex: 1;
@@ -64,46 +62,37 @@ export default defineComponent({
   align-content: center;
   display: flex;
   flex-direction: row;
-
+  margin-right: 2px;
+  color: white;
+  &:hover {
+    color: #414141;
+  }
+  &:active {
+    color: black;
+  }
   .icon {
     font-size: 14px;
     width: @my-height;
-    margin: 0 5px;
+    margin: 0 1px 0 2px;
   }
-
   .type {
-    text-align: left;
-    flex: 1;
-    color: white;
     font-size: 12px;
-    display: flex;
-    align-content: center;
-    height: @my-height;
-    padding: 0 5px;
-    background-color: rgb(48, 158, 0);
-    align-items: center;
+    min-width: 80px;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
-
   .name {
+    user-select: none;
     font-size: 12px;
-    color: white;
     flex: 1;
     height: @my-height;
-    background-color: rgb(184, 157, 5);
+    background-color: #d4873d;
     display: flex;
     padding: 0 5px;
     align-items: center;
     align-content: center;
-  }
-  .place {
-    padding: 0 5px;
-    cursor: pointer;
-    &:hover {
-      color: #6d6d6d;
-    }
-    &:active {
-      color: #000000;
-    }
   }
 }
 </style>

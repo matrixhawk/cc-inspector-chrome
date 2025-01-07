@@ -121,7 +121,14 @@ export interface FrameDetails {
  */
 export class EngineData extends Info {
   public engineType: string = "";
+  /**
+   * 组件的uuid
+   */
   public engineUUID: string = "";
+  /**
+   * 组件挂在的节点，方便高亮
+   */
+  public engineNode: string = "";
   public engineName: string = "";
 
   constructor() {
@@ -133,12 +140,14 @@ export class EngineData extends Info {
     this.engineType = data.engineType;
     this.engineUUID = data.engineUUID;
     this.engineName = data.engineName;
+    this.engineNode = data.engineNode;
     return this;
   }
-  init(name: string, type: string, uuid: string) {
+  init(name: string, type: string, uuid: string, node: string = "") {
     this.engineName = name;
     this.engineType = type;
     this.engineUUID = uuid;
+    this.engineNode = node || uuid;
     return this;
   }
   public isEngine(): boolean {

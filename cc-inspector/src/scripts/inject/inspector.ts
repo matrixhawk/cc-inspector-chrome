@@ -1,7 +1,7 @@
 // eval 注入脚本的代码,变量尽量使用var,后来发现在import之后,let会自动变为var
 import { uniq } from "lodash";
 import { debugLog, Msg, PluginEvent, RequestLogData, RequestNodeInfoData, RequestSetPropertyData, ResponseNodeInfoData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
-import { ArrayData, BoolData, ColorData, DataType, EngineData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectData, Property, StringData, TreeData, Vec2Data, Vec3Data } from "../../views/devtools/data";
+import { ArrayData, BoolData, ColorData, DataType, EngineData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectData, Property, StringData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../../views/devtools/data";
 import { InjectEvent } from "./event";
 import { getValue, trySetValueWithConfig } from "./setValue";
 import { BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOptions } from "./types";
@@ -284,6 +284,15 @@ export class Inspector extends InjectEvent {
     return null;
   }
 
+  private getUrl() {
+    const url = window.location.href;
+    const arr = url.split("/");
+    if (arr[arr.length - 1].indexOf(".html") > -1) {
+      arr.pop();
+    }
+    const ret = arr.join("/");
+    return ret;
+  }
   _buildImageData(options: BuildImageOptions) {
     const ctor: Function = options.ctor;
     const value: Object = options.value;
@@ -294,7 +303,7 @@ export class Inspector extends InjectEvent {
       // 2.4.6 没有了这个属性
       if (value.hasOwnProperty("_textureFilename")) {
         //@ts-ignore
-        data.data = `${window.location.origin}/${value._textureFilename}`;
+        data.data = `${this.getUrl()}/${value._textureFilename}`;
       } else {
         data.data = null;
       }
@@ -303,104 +312,125 @@ export class Inspector extends InjectEvent {
     return null;
   }
 
-  _genInfoData(node: any, key: string | number, path: Array<string>, filterKey = true): Info | null {
-    let propertyValue = node[key];
-    let info = null;
-    let invalidType = this._isInvalidValue(propertyValue);
-    if (invalidType) {
-      info = new InvalidData(invalidType);
-    } else {
-      switch (typeof propertyValue) {
-        case "boolean":
-          info = new BoolData(propertyValue);
-          break;
-        case "number":
-          info = new NumberData(propertyValue);
-          break;
-        case "string":
-          info = new StringData(propertyValue);
-          break;
-        default:
-          //@ts-ignore
-          if (propertyValue instanceof cc.Color) {
-            let hex = propertyValue.toHEX();
-            info = new ColorData(`#${hex}`);
-          } else if (Array.isArray(propertyValue)) {
-            let keys: number[] = [];
-            for (let i = 0; i < propertyValue.length; i++) {
-              keys.push(i);
-            }
-            info = this._buildArrayData({
-              data: new ArrayData(),
-              path: path,
-              value: propertyValue,
-              keys: keys,
-            });
-          } else {
-            !info &&
-              (info = this._buildVecData({
-                // @ts-ignore
-                ctor: cc.Vec3,
-                path: path,
-                data: new Vec3Data(),
-                keys: ["x", "y", "z"],
-                value: propertyValue,
-              }));
-            !info &&
-              (info = this._buildVecData({
-                // @ts-ignore
-                ctor: cc.Vec2,
-                path: path,
-                data: new Vec2Data(),
-                keys: ["x", "y"],
-                value: propertyValue,
-              }));
-            !info &&
-              (info = this._buildImageData({
-                //@ts-ignore
-                ctor: cc.SpriteFrame,
-                data: new ImageData(),
-                path: path,
-                value: propertyValue,
-              }));
-            if (!info) {
-              if (typeof propertyValue === "object") {
-                let ctorName = propertyValue.constructor?.name;
-                if (ctorName) {
-                  if (
-                    ctorName.startsWith("cc_") ||
-                    // 2.4.0
-                    ctorName === "CCClass"
-                  ) {
-                    info = new EngineData();
-                    info.engineType = ctorName;
-                    info.engineName = propertyValue.name;
-                    info.engineUUID = propertyValue.uuid;
-                  }
-                }
-                if (!info) {
-                  // 空{}
-                  // MaterialVariant 2.4.0
-                  info = this._buildObjectData({
-                    data: new ObjectData(),
-                    path: path,
-                    value: propertyValue,
-                    filterKey: filterKey,
-                  });
-                }
-              }
-            }
-          }
-          break;
-      }
-    }
-    if (info) {
+  _genInfoData(node: any, key: string | number, path: Array<string>): Info | null {
+    const propertyValue = node[key];
+    const make = (info: Info | null) => {
       info.readonly = this._isReadonly(node, key);
       info.path = path;
-    } else {
-      console.error(`暂不支持的属性值`, propertyValue);
+      return info;
+    };
+
+    let invalidType = this._isInvalidValue(propertyValue);
+    if (invalidType) {
+      const info = new InvalidData(invalidType);
+      return make(info);
     }
-    return info;
+    switch (typeof propertyValue) {
+      case "boolean": {
+        const info = new BoolData(propertyValue);
+        return make(info);
+      }
+      case "number": {
+        const info = new NumberData(propertyValue);
+        return make(info);
+      }
+      case "string": {
+        const info = new StringData(propertyValue);
+        return make(info);
+      }
+    }
+
+    if (propertyValue instanceof cc.Color) {
+      let hex = propertyValue.toHEX();
+      const info = new ColorData(`#${hex}`);
+      return make(info);
+    }
+    if (Array.isArray(propertyValue)) {
+      let keys: number[] = [];
+      for (let i = 0; i < propertyValue.length; i++) {
+        keys.push(i);
+      }
+      const info = this._buildArrayData({
+        data: new ArrayData(),
+        path: path,
+        value: propertyValue,
+        keys: keys,
+      });
+      return make(info);
+    }
+    let info: Info = this._buildVecData({
+      ctor: cc.Size,
+      path: path,
+      data: new Vec2Data(),
+      keys: ["width", "height"],
+      value: propertyValue,
+    });
+    if (info) {
+      return make(info);
+    }
+    info = this._buildVecData({
+      // @ts-ignore
+      ctor: cc.Vec3,
+      path: path,
+      data: new Vec3Data(),
+      keys: ["x", "y", "z"],
+      value: propertyValue,
+    });
+    if (info) {
+      return make(info);
+    }
+    info = this._buildVecData({
+      // @ts-ignore
+      ctor: cc.Vec2,
+      path: path,
+      data: new Vec2Data(),
+      keys: ["x", "y"],
+      value: propertyValue,
+    });
+    if (info) {
+      return make(info);
+    }
+    info = this._buildImageData({
+      ctor: cc.SpriteFrame,
+      data: new ImageData(),
+      path: path,
+      value: propertyValue,
+    });
+    if (info) {
+      return make(info);
+    }
+    let ctorName = propertyValue.__classname__;
+    if (ctorName) {
+      const engine = new EngineData();
+      engine.engineType = ctorName;
+      engine.engineName = propertyValue.name;
+      if (propertyValue instanceof cc.Node) {
+        engine.engineNode = engine.engineNode = propertyValue.uuid;
+      } else if (propertyValue instanceof cc.Asset) {
+        engine.engineUUID = propertyValue._uuid;
+        engine.engineNode = "";
+      } else if (propertyValue instanceof cc.Component) {
+        engine.engineUUID = propertyValue.uuid;
+        if (propertyValue.node) {
+          engine.engineNode = propertyValue.node.uuid;
+        } else {
+          engine.engineNode = "";
+        }
+      }
+      return make(engine);
+    }
+    if (typeof propertyValue === "object") {
+      // 空{} MaterialVariant 2.4.0
+      info = this._buildObjectData({
+        data: new ObjectData(),
+        path: path,
+        value: propertyValue,
+      });
+      if (info) {
+        return make(info);
+      }
+    }
+    return null;
   }
 
   _buildArrayData({ value, path, data, keys }: BuildArrayOptions) {
@@ -416,21 +446,18 @@ export class Inspector extends InjectEvent {
     return data;
   }
 
-  _buildObjectItemData({ value, path, data, filterKey }: BuildObjectOptions): Property[] {
+  _buildObjectData({ value, path, data }: BuildObjectOptions) {
     let keys = Object.keys(value);
-    if (filterKey) {
-      keys = this.filterKeys(keys); // 不再进行开发者定义的数据
-    }
-    let ret: Property[] = [];
+    keys = this.filterKeys(keys);
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i];
       let propPath = path.concat(key.toString());
-      let itemData = this._genInfoData(value, key, propPath, filterKey);
+      let itemData = this._genInfoData(value, key, propPath);
       if (itemData) {
-        ret.push(new Property(key, itemData));
+        data.add(new Property(key, itemData));
       }
     }
-    return ret;
+    return data;
   }
 
   filterKeys(keys: string[]) {
@@ -453,40 +480,8 @@ export class Inspector extends InjectEvent {
     } else if (Number.isNaN(value)) {
       return "NaN";
     } else {
-      debugger;
       return false;
     }
-  }
-
-  _buildObjectData({ value, path, data, filterKey }: BuildObjectOptions) {
-    let keys = Object.keys(value);
-    if (filterKey) {
-      keys = this.filterKeys(keys);
-    }
-    //  只返回一级key，更深层级的key需要的时候，再获取，防止circle object导致的死循环
-    let desc: Record<string, any> = {};
-    for (let i = 0; i < keys.length; i++) {
-      let key = keys[i];
-      let propPath = path.concat(key.toString());
-      let propValue = (value as any)[key];
-      let keyDesc = "";
-      if (Array.isArray(propValue)) {
-        // 只收集一级key
-        propValue.forEach((item) => {});
-        keyDesc = `(${propValue.length}) [...]`;
-      } else if (this._isInvalidValue(propValue)) {
-        // 不能改变顺序
-        keyDesc = propValue;
-      } else if (typeof propValue === "object") {
-        keyDesc = `${propValue.constructor.name} {...}`;
-      } else {
-        keyDesc = propValue;
-      }
-      desc[key] = keyDesc;
-    }
-    data.data = [];
-    //JSON.stringify(desc);
-    return data;
   }
 
   private getCompName(comp: any): string {
@@ -535,12 +530,14 @@ export class Inspector extends InjectEvent {
           }
         });
         // 序列化成对的属性
-        let info: Vec2Data | Vec3Data | null = null;
+        let info: Vec2Data | Vec3Data | Vec4Data | null = null;
         let pairValues = pair.values;
         if (pairValues.length === 2) {
           info = new Vec2Data();
         } else if (pairValues.length === 3) {
           info = new Vec3Data();
+        } else if (pairValues.length === 4) {
+          info = new Vec4Data();
         }
         // todo path
         pairValues.forEach((el: string) => {
@@ -570,7 +567,6 @@ export class Inspector extends InjectEvent {
     return nodeGroup;
   }
 
-  // 获取节点信息，只获取一级key即可，后续
   getNodeInfo(uuid: string) {
     let node = this.inspectorGameMemoryStorage[uuid];
     if (node) {

@@ -28,8 +28,8 @@ export default defineComponent({
   components: { CCButtonGroup, CCInput, CCTree, CCDock },
   setup() {
     const funcShowPlace = (data: EngineData) => {
-      console.log(toRaw(data));
-      _expand(data.engineUUID);
+      console.log(data);
+      _expand(data.engineNode);
     };
     const funcEnableSchedule = (b: boolean) => {
       if (b) {
@@ -67,33 +67,9 @@ export default defineComponent({
       timer.clean();
     });
     function _expand(uuid: string) {
-      let expandKeys: Array<string> = [];
-
-      function circle(array: any) {
-        for (let i = 0; i < array.length; i++) {
-          let item = array[i];
-          expandKeys.push(item.uuid);
-          if (item.uuid === uuid) {
-            return true;
-          } else {
-            let find = circle(item.children);
-            if (find) {
-              return true;
-            } else {
-              expandKeys.pop();
-            }
-          }
-        }
+      if (elTree.value) {
+        elTree.value.handExpand(uuid, { highlight: true });
       }
-
-      circle(treeData);
-
-      expandKeys.forEach((key) => {
-        if (!expandedKeys.value.find((el) => el === key)) {
-          expandedKeys.value.push(key);
-        }
-      });
-      // 高亮uuid
     }
     function updateTree() {
       console.log("update tree info");

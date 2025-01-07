@@ -1,17 +1,17 @@
 <template>
   <div v-if="data.isImage()" class="property-image">
     <div class="box">
-      <img :src="data.data" alt="图片" class="img" />
+      <img :src="data.data" alt="图片" @click="onClickImg" class="img" />
     </div>
 
-    <div class="url" :title="data.data">{{ data.data }}</div>
+    <div class="url" :title="data.data"></div>
     <div style="flex: 1"></div>
     <i class="print iconfont icon_print" @click="onShowValueInConsole"></i>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType, toRaw } from "vue";
 import { ImageData } from "../data";
 
 export default defineComponent({
@@ -24,6 +24,12 @@ export default defineComponent({
   },
   setup(props) {
     return {
+      onClickImg() {
+        const url = toRaw(props.data.data);
+        if (url && url.startsWith("http")) {
+          window.open(url);
+        }
+      },
       onShowValueInConsole() {
         if (Array.isArray(props.data.path)) {
           let uuid = props.data.path[0];
@@ -47,7 +53,13 @@ export default defineComponent({
   align-content: center;
   align-items: center;
   height: 30px;
+  box-sizing: border-box;
+  border: 1px solid #409eff;
+  border-radius: 2px;
+  margin-right: 2px;
   .box {
+    overflow: hidden;
+    box-sizing: border-box;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -55,8 +67,11 @@ export default defineComponent({
     width: 80px;
     justify-content: center;
     .img {
+      cursor: pointer;
+      padding: 2px 0;
       height: 30px;
       width: 30px;
+      box-sizing: border-box;
       object-fit: contain;
     }
   }
