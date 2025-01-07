@@ -63,20 +63,11 @@ export default defineComponent({
     watch(
       () => props.value,
       (newData, oldData) => {
-        if (newData.id !== oldData.id) {
-          // 只有id不相等了，才折叠，因为数据是在定时刷新
-          expand.value = false;
-          subData.value = [];
-        }
         freshSubData(newData);
       }
     );
     const subData = ref<Array<Property>>([]);
     function freshSubData(data: Info) {
-      const rawExpand = toRaw(expand.value);
-      if (!rawExpand) {
-        return;
-      }
       const rawValue = toRaw(data);
       if (!rawValue) {
         return;
