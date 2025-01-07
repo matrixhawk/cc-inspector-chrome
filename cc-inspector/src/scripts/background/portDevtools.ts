@@ -1,4 +1,4 @@
-import { Msg, Page, PluginEvent, RequestTreeInfoData, RequestUseFrameData } from "../../core/types";
+import { Msg, Page, PluginEvent, RequestTreeInfoData, RequestUseFrameData, ResponseSupportData } from "../../core/types";
 import { PortMan } from "./portMan";
 import { portMgr } from "./portMgr";
 
@@ -26,6 +26,8 @@ export class PortDevtools extends PortMan {
           const port = portMgr.getCurrentUsePort();
           if (!port) {
             console.warn(`not find any port`);
+            const e = new PluginEvent(Page.Background, Page.Devtools, Msg.ResponseSupport, { support: false, msg: "disconnect with game, please refresh page" } as ResponseSupportData);
+            this.send(e);
             return;
           }
           port.send(data);

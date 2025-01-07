@@ -65,7 +65,7 @@ function checkGame() {
   let gameCanvas = document.querySelector("#GameCanvas");
   const sendData = new PluginEvent(Page.Content, Page.Devtools, Msg.ResponseSupport, {
     support: !!gameCanvas,
-    msg: "未发现GameCanvas,不支持调试游戏!",
+    msg: "",
   } as ResponseSupportData);
   if (connect) {
     connect.postMessage(sendData);

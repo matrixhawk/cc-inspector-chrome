@@ -1,6 +1,6 @@
 // eval 注入脚本的代码,变量尽量使用var,后来发现在import之后,let会自动变为var
 import { uniq } from "lodash";
-import { debugLog, Msg, PluginEvent, RequestLogData, RequestNodeInfoData, RequestSetPropertyData, ResponseNodeInfoData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
+import { Msg, PluginEvent, RequestLogData, RequestNodeInfoData, RequestSetPropertyData, ResponseNodeInfoData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
 import { ArrayData, BoolData, ColorData, DataType, EngineData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectCircleData, ObjectData, Property, StringData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../../views/devtools/data";
 import { InjectEvent } from "./event";
 import { getValue, trySetValueWithConfig } from "./setValue";
@@ -81,7 +81,7 @@ export class Inspector extends InjectEvent {
     }
   }
   init() {
-    debugLog && console.log(...this.terminal.init());
+    console.log(...this.terminal.init());
     this.watchIsCocosGame();
   }
 

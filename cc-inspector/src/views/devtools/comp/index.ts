@@ -23,10 +23,20 @@ export enum CompType {
   ToggleContainer = "cc.ToggleContainer",
   Toggle = "cc.Toggle",
   Button = "cc.Button",
+  BlockInputEvents = "cc.BlockInputEvents",
+  Scene = "cc.Scene",
 }
 
 export function getSimpleProperties(typeName: string): string[] {
   const config = {};
+  config[CompType.Scene] = [
+    "autoReleaseAssets",
+    "position",
+    "scale",
+    "rotation",
+    "color", //
+  ];
+  config[CompType.BlockInputEvents] = ["enabled"];
   config[CompType.Button] = [
     "target", //
     "interactable",
