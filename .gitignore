@@ -9,3 +9,5 @@ cc-inspector/yalc.lock
 cc-inspector/chrome/
 cc-inspector/dist/
 cc-inspector/yarn-error.log
+cc-inspector/chrome.zip
+cc-inspector/chrome.crx
