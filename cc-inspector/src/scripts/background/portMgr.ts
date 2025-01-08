@@ -13,8 +13,10 @@ export class PortMgr {
   public portArray: Array<PortMan> = [];
   /**
    * 当前正在通讯的frameID，因为游戏可能被好几个iframe嵌套
+   *
+   * 不同的tab，使用的当前frameID可以不一样
    */
-  public currentUseContentFrameID = 0;
+  public tabUseFrameID: Record<number, number> = {};
   private terminal = new Terminal("PortMgr");
 
   public findPort(id: number): PortMan | null {
@@ -101,12 +103,12 @@ export class PortMgr {
   }
   getCurrentUsePort(tabID: number): PortMan | null {
     const portMan = this.portArray.find((portMan: PortMan) => {
-      return portMan.isContent() && portMan.tabID === tabID && portMan.isUseing(this.currentUseContentFrameID);
+      return portMan.isContent() && portMan.tabID === tabID && portMan.isUseing(this.tabUseFrameID[tabID]);
     });
     return portMan || null;
   }
   useFrame(id: number, tabID: number) {
-    this.currentUseContentFrameID = id;
+    this.tabUseFrameID[tabID] = id;
     const event = new PluginEvent(Page.Background, Page.Devtools, Msg.ResponseUpdateFrames, { id } as ResponseUseFrameData);
     this.sendDevtoolMsg(event, tabID);
   }

@@ -21,7 +21,7 @@ export class PortContent extends PortMan {
     this.onDisconnect = (disPort: chrome.runtime.Port) => {
       // content失去链接需要更新Devtools
       portMgr.removePort(this);
-      if (portMgr.currentUseContentFrameID === this.frameID) {
+      if (portMgr.tabUseFrameID[this.tabID] === this.frameID) {
         portMgr.useFrame(0, this.tabID);
       }
     };
