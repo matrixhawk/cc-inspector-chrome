@@ -62,7 +62,28 @@ export default defineComponent({
     });
     onMounted(() => {
       ccui.footbar.showTipsArray({
-        tips: ["press space in the hierarchy to quickly control the display and hiding of nodes"],
+        tips: [
+          "Press space in the hierarchy to quickly control the display and hiding of nodes", //
+          "If you encounter any problems during use, please feel free to contact me",
+        ],
+      });
+      ccui.footbar.registerCmd({
+        icon: "github",
+        cb: () => {
+          window.open("https://github.com/tidys/cc-inspector-chrome");
+        },
+      });
+      ccui.footbar.registerCmd({
+        icon: "qq",
+        cb: () => {
+          window.open("https://jq.qq.com/?_wv=1027&k=5SdPdy2");
+        },
+      });
+      ccui.footbar.registerCmd({
+        icon: "support",
+        cb: () => {
+          window.open("https://github.com/tidys/cc-inspector-chrome/issues");
+        },
       });
       Bus.on(BusMsg.EnableSchedule, funcEnableSchedule);
       timer.create();

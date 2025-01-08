@@ -1,7 +1,16 @@
 <template>
   <div class="options">
-    <div class="text">哈哈，让你发现了</div>
-    <div class="text">不过这里什么都没有</div>
+    <ul>
+      <li>
+        <div class="money">
+          <div class="tips">support me with WeChat Pay</div>
+          <img class="png" src="./res/money.png" alt="" />
+        </div>
+      </li>
+      <li>
+        <a target="_blank" href="https://patreon.com/inspector_game?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink">support me with Patreon</a>
+      </li>
+    </ul>
   </div>
 </template>
 <script lang="ts">
@@ -22,10 +31,17 @@ export default defineComponent({
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  font-size: 30px;
+  user-select: none;
+  .png {
+    width: auto;
+    height: 130px;
+  }
 
-  .text {
-    user-select: none;
-    font-size: 40px;
+  .tips {
+    text-align: center;
+    width: 100%;
+    color: #000000;
   }
 }
 </style>
