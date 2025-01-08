@@ -201,6 +201,9 @@ export class Inspector extends InjectEvent {
       "quat",
       "node",
       "components",
+      "enabledInHierarchy",
+      "hideFlags",
+      "isValid",
       "parent",
       // 生命周期函数
       "onFocusInEditor",
@@ -214,6 +217,14 @@ export class Inspector extends InjectEvent {
       "onDisable",
       "onDestroy",
       "onLoad",
+      "internalLateUpdate",
+      "internalOnDestroy",
+      "internalOnEnable",
+      "internalOnDisable",
+      "internalUpdate",
+      "internalPreload",
+      "internalOnLoad",
+      "internalStart",
     ];
     const keyHidden = this.getAllPropertyDescriptors(node);
     const keyVisible1 = Object.keys(node); // Object不走原型链

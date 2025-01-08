@@ -25,10 +25,16 @@ export enum CompType {
   Button = "cc.Button",
   BlockInputEvents = "cc.BlockInputEvents",
   Scene = "cc.Scene",
+  Animation = "cc.Animation",
 }
 
 export function getSimpleProperties(typeName: string): string[] {
   const config = {};
+  config[CompType.Animation] = [
+    "defaultClip", //
+    "clips",
+    "playOnLoad",
+  ];
   config[CompType.Scene] = [
     "autoReleaseAssets",
     "position",

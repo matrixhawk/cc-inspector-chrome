@@ -74,7 +74,9 @@ export default defineComponent({
       const tabID = chrome.devtools.inspectedWindow.tabId;
       chrome.scripting.executeScript({ files: ["js/execute.js"], target: { tabId: tabID } }, (results: chrome.scripting.InjectionResult[]) => {});
     }
-
+    ccui.footbar.showTipsArray({
+      tips: ["press space in the hierarchy to quickly control the display and hiding of nodes"],
+    });
     function _inspectedCode() {
       let injectCode = "";
       chrome.devtools.inspectedWindow.eval(injectCode, (result, isException) => {
@@ -120,12 +122,6 @@ export default defineComponent({
           value: item.frameID,
         };
       });
-
-      // 第一次获取到frame配置后，自动获取frame数据
-      if (frameID === null && iframes.value.length > 0 && !iframes.value.find((el) => el.value === frameID.value)) {
-        frameID.value = iframes[0].value;
-        onChangeFrame();
-      }
     });
 
     const memory = ref<{
@@ -148,6 +144,7 @@ export default defineComponent({
     function onChangeFrame() {
       const id = Number(toRaw(frameID.value));
       bridge.send(Msg.RequestUseFrame, { id } as RequestUseFrameData);
+      Bus.emit(BusMsg.ChangeContent, { id } as RequestUseFrameData);
     }
     const elLeft = ref<HTMLDivElement>();
     const version = ref(PluginConfig.manifest.version);

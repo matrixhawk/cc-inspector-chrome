@@ -26,7 +26,6 @@ export default defineComponent({
         console.log(`update node info: ${selectedUUID}`);
         bridge.send(Msg.RequestNodeInfo, { uuid: selectedUUID } as RequestNodeInfoData);
       } else {
-        // TODO: 需要检查当前的这个节点是否有效
         treeItemData.value = null;
       }
     }
@@ -44,12 +43,19 @@ export default defineComponent({
       selectedUUID = uuid;
       updateNodeInfo();
     };
+    function changeContent() {
+      selectedUUID = null;
+      treeItemData.value = null;
+    }
+
     onMounted(() => {
+      Bus.on(BusMsg.ChangeContent, changeContent);
       Bus.on(BusMsg.SelectNode, funSelectNode);
       Bus.on(BusMsg.EnableSchedule, funcEnableSchedule);
       timer.create();
     });
     onUnmounted(() => {
+      Bus.off(BusMsg.ChangeContent, changeContent);
       Bus.off(BusMsg.SelectNode, funSelectNode);
       Bus.off(BusMsg.EnableSchedule, funcEnableSchedule);
       timer.clean();

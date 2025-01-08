@@ -1,38 +1,27 @@
-import { Msg, Page, PluginEvent, RequestTreeInfoData, RequestUseFrameData, ResponseSupportData } from "../../core/types";
+import { Msg, Page, PluginEvent, RequestUseFrameData, ResponseSupportData } from "../../core/types";
 import { PortMan } from "./portMan";
 import { portMgr } from "./portMgr";
 
 export class PortDevtools extends PortMan {
   init(): void {
-    // 当devtools链接后，主动同步frames数据
-    portMgr.updateFrames();
     this.onDisconnect = () => {
       portMgr.removePort(this);
     };
     this.onMessage = (data: PluginEvent) => {
       if (data.msg === Msg.RequestUseFrame) {
+        // 因为devtool是定时器驱动，这里改变了content，后续就会将数据派发到对应的content中去
         portMgr.useFrame((data.data as RequestUseFrameData).id);
       } else {
-        // 从devtools过来的消息统一派发到Content中
+        // 从devtools过来的消息统一派发到目标content中
         if (data.check(Page.Devtools, Page.Background)) {
-          if (data.msg === Msg.RequstTreeInfo) {
-            const d = data.data as RequestTreeInfoData;
-            if (!portMgr.isCurrentFrme(d.frameID)) {
-              console.log(`frameID[${data.data}]不一致`);
-              debugger;
-            }
-          }
           data.reset(Page.Background, Page.Content);
           const port = portMgr.getCurrentUsePort();
-          if (!port) {
-            console.warn(`not find any port`);
+          if (port) {
+            port.send(data);
+          } else {
             const e = new PluginEvent(Page.Background, Page.Devtools, Msg.ResponseSupport, { support: false, msg: "disconnect with game, please refresh page" } as ResponseSupportData);
             this.send(e);
-            return;
           }
-          port.send(data);
-        } else {
-          debugger;
         }
       }
     };

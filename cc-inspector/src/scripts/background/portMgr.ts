@@ -56,6 +56,7 @@ export class PortMgr {
     }
     if (portMan) {
       this.portArray.push(portMan);
+      this.updateFrames();
       this.logState();
       return portMan;
     }
@@ -85,6 +86,7 @@ export class PortMgr {
     let index = this.portArray.findIndex((el) => el === item);
     if (index > -1) {
       this.portArray.splice(index, 1);
+      this.updateFrames();
       this.logState();
     }
   }
@@ -110,15 +112,6 @@ export class PortMgr {
   }
   useFrame(id: number) {
     this.currentUseContentFrameID = id;
-    // 更新这个frame的tree
-    const sendData = new PluginEvent(Page.Background, Page.Content, Msg.RequestSupport, {} as RequestSupportData);
-    this.getCurrentUsePort()?.send(sendData);
-  }
-  isCurrentFrme(id: number) {
-    if (typeof id !== "number") {
-      throw new Error("id must be number");
-    }
-    return this.currentUseContentFrameID === id;
   }
 }
 export const portMgr = new PortMgr();

@@ -16,7 +16,7 @@ import { IUiMenuItem } from "@xuyanfeng/cc-ui/types/cc-menu/const";
 import Mousetrap, { MousetrapInstance } from "mousetrap";
 import { storeToRefs } from "pinia";
 import { defineComponent, nextTick, onMounted, onUnmounted, ref, toRaw, watch } from "vue";
-import { Msg, PluginEvent, RequestTreeInfoData, ResponseSetPropertyData } from "../../core/types";
+import { Msg, PluginEvent, RequestTreeInfoData, RequestUseFrameData, ResponseSetPropertyData } from "../../core/types";
 import { bridge } from "./bridge";
 import { Bus, BusMsg } from "./bus";
 import { EngineData, TreeData } from "./data";
@@ -48,12 +48,17 @@ export default defineComponent({
         bridge.send(Msg.RequestVisible, selectedUUID);
       }
     }
+    function changeContent(data: RequestUseFrameData) {
+      treeData.value = [];
+      selectedUUID = null;
+    }
     onMounted(() => {
       if (elTree.value) {
         const el = toRaw(elTree.value);
         ins = new Mousetrap(el.treeElement);
         ins.bind(["space"], onQuickVisible, "keydown");
       }
+      Bus.on(BusMsg.ChangeContent, changeContent);
       Bus.on(BusMsg.ShowPlace, funcShowPlace);
       Bus.on(BusMsg.EnableSchedule, funcEnableSchedule);
       timer.create();
@@ -62,6 +67,7 @@ export default defineComponent({
       if (ins) {
         ins.unbind(["space"], "keydown");
       }
+      Bus.off(BusMsg.ChangeContent, changeContent);
       Bus.off(BusMsg.ShowPlace, funcShowPlace);
       Bus.off(BusMsg.EnableSchedule, funcEnableSchedule);
       timer.clean();

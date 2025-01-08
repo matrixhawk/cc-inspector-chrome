@@ -75,8 +75,9 @@ export default defineComponent({
   }
 
   .url {
+    padding: 0 5px;
     flex: 1;
-    color: white;
+    color: gray;
     font-weight: normal;
     font-size: 12px;
     overflow: hidden;

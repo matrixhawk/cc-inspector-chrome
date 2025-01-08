@@ -9,6 +9,7 @@
 <script lang="ts">
 import { defineComponent, PropType, toRaw } from "vue";
 import { Bus, BusMsg } from "../bus";
+import { CompType } from "../comp";
 import { EngineData } from "../data";
 export default defineComponent({
   name: "property-engine",
@@ -25,18 +26,11 @@ export default defineComponent({
         Bus.emit(BusMsg.ShowPlace, toRaw(props.data));
       },
       getEngineTypeIcon() {
-        switch (props.data.engineType) {
-          case "cc_Sprite": {
-            return "icon_picture";
-          }
-          case "cc_Label": {
-            return "icon_text";
-          }
-          case "cc_Node": {
-            return "icon_node";
-          }
-        }
-        return "icon_unknown";
+        const map = {};
+        map[CompType.Spirte] = "icon_picture";
+        map[CompType.Label] = "icon_text";
+        map[CompType.Node] = "icon_node";
+        return map[props.data.engineType] || "icon_unknown";
       },
     };
   },

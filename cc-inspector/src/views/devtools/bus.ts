@@ -8,6 +8,7 @@ export enum BusMsg {
    * 开关定时器，方便测试
    */
   EnableSchedule = "EnableSchedule",
+  ChangeContent = "ChangeContent",
   SelectNode = "SelectNode",
 }
 
