@@ -307,6 +307,16 @@ export class Inspector extends InjectEvent {
       } else {
         data.data = null;
       }
+      const desc = [];
+      if (value["_rect"]) {
+        const rect = value["_rect"];
+        desc.push(`frame[${rect.width}*${rect.height}]`);
+      }
+      if (value["_texture"]) {
+        const texture = value["_texture"];
+        desc.push(`texture[${texture.width}*${texture.height}]`);
+      }
+      data.desc = desc.join(",");
       return data;
     }
     return null;
@@ -374,6 +384,17 @@ export class Inspector extends InjectEvent {
       path: path,
       data: new Vec3Data(),
       keys: ["x", "y", "z"],
+      value: propertyValue,
+    });
+    if (info) {
+      return make(info);
+    }
+    info = this._buildVecData({
+      // @ts-ignore
+      ctor: cc.Quat,
+      path: path,
+      data: new Vec4Data(),
+      keys: ["x", "y", "z", "w"],
       value: propertyValue,
     });
     if (info) {
