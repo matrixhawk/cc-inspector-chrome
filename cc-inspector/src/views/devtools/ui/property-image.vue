@@ -1,11 +1,9 @@
 <template>
   <div v-if="data.isImage()" class="property-image">
-    <div class="box">
+    <div class="box" v-if="data.data">
       <img :src="data.data" alt="图片" @click="onClickImg" class="img" />
     </div>
-
-    <div class="url" :title="data.data"></div>
-    <div style="flex: 1"></div>
+    <div class="url" :title="data.desc">{{ data.desc }}</div>
     <i class="print iconfont icon_print" @click="onShowValueInConsole"></i>
   </div>
 </template>
@@ -77,6 +75,7 @@ export default defineComponent({
   }
 
   .url {
+    flex: 1;
     color: white;
     font-weight: normal;
     font-size: 12px;

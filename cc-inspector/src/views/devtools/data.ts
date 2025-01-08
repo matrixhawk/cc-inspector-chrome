@@ -457,16 +457,18 @@ export class ImageData extends Info {
    * 图片的url路径
    */
   data: string = "";
-
+  desc: string = "";
   constructor() {
     super();
     this.type = DataType.Image;
     this.data = "";
+    this.desc = "";
     return this;
   }
   parse(data: ImageData) {
     super.parse(data);
     this.data = data.data;
+    this.desc = data.desc;
     return this;
   }
   test() {
