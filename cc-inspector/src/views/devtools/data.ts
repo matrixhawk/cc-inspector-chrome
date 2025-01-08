@@ -109,6 +109,7 @@ export interface ObjectItemRequestData {
 }
 
 export interface FrameDetails {
+  tabID: number;
   /**
    * 网页的frameID
    */

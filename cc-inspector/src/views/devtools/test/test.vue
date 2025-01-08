@@ -129,8 +129,8 @@ export default defineComponent({
       },
       onFrames() {
         const data: FrameDetails[] = [
-          { url: "url1", frameID: 1 },
-          { url: "url2", frameID: 2 },
+          { url: "url1", tabID: 1, frameID: 1 },
+          { url: "url2", tabID: 1, frameID: 2 },
         ];
         const event = new PluginEvent(Page.Background, Page.Devtools, Msg.ResponseUpdateFrames, data as ResponseUpdateFramesData);
         testServer.send(event);

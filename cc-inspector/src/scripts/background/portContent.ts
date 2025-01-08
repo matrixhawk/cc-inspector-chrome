@@ -11,6 +11,7 @@ export class PortContent extends PortMan {
   }
   getFrameDetais(): FrameDetails {
     return {
+      tabID: this.tabID,
       url: this.url,
       frameID: this.frameID,
     };
@@ -20,11 +21,14 @@ export class PortContent extends PortMan {
     this.onDisconnect = (disPort: chrome.runtime.Port) => {
       // content失去链接需要更新Devtools
       portMgr.removePort(this);
+      if (portMgr.currentUseContentFrameID === this.frameID) {
+        portMgr.useFrame(0, this.tabID);
+      }
     };
     this.onMessage = (data: PluginEvent) => {
       // content的数据一般都是要同步到devtools
       if (data.isTargetDevtools()) {
-        portMgr.sendDevtoolMsg(data);
+        portMgr.sendDevtoolMsg(data, this.tabID);
       } else {
         debugger;
       }

@@ -29,7 +29,7 @@ import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
 import { storeToRefs } from "pinia";
 import { defineComponent, onMounted, onUnmounted, ref, toRaw } from "vue";
 import PluginConfig from "../../../cc-plugin.config";
-import { Msg, PluginEvent, RequestUseFrameData, ResponseSupportData } from "../../core/types";
+import { Msg, PluginEvent, RequestUseFrameData, ResponseSupportData, ResponseUseFrameData } from "../../core/types";
 import { bridge } from "./bridge";
 import { Bus, BusMsg } from "./bus";
 import { FrameDetails, NodeInfoData, TreeData } from "./data";
@@ -61,6 +61,9 @@ export default defineComponent({
       checkSupport();
     });
     onMounted(() => {
+      ccui.footbar.showTipsArray({
+        tips: ["press space in the hierarchy to quickly control the display and hiding of nodes"],
+      });
       Bus.on(BusMsg.EnableSchedule, funcEnableSchedule);
       timer.create();
     });
@@ -74,9 +77,7 @@ export default defineComponent({
       const tabID = chrome.devtools.inspectedWindow.tabId;
       chrome.scripting.executeScript({ files: ["js/execute.js"], target: { tabId: tabID } }, (results: chrome.scripting.InjectionResult[]) => {});
     }
-    ccui.footbar.showTipsArray({
-      tips: ["press space in the hierarchy to quickly control the display and hiding of nodes"],
-    });
+
     function _inspectedCode() {
       let injectCode = "";
       chrome.devtools.inspectedWindow.eval(injectCode, (result, isException) => {
@@ -102,6 +103,10 @@ export default defineComponent({
       let data: ResponseSupportData = event.data;
       const isCocosGame: boolean = data.support;
       isShowDebug.value = isCocosGame;
+    });
+    bridge.on(Msg.ResponseUseFrame, (event: PluginEvent) => {
+      const data: ResponseUseFrameData = event.data;
+      frameID.value = data.id;
     });
     bridge.on(Msg.ResponseNodeInfo, (event: PluginEvent) => {
       let eventData: NodeInfoData = event.data;

@@ -1,5 +1,5 @@
 import { ChromeConst } from "cc-plugin/src/chrome/const";
-import { debugLog, Msg, Page, PluginEvent, RequestSupportData } from "../../core/types";
+import { debugLog, Page, PluginEvent } from "../../core/types";
 import { Terminal } from "../terminal";
 import { PortMan } from "./portMan";
 import { portMgr } from "./portMgr";
@@ -42,7 +42,7 @@ chrome.runtime.onMessage.addListener((request: PluginEvent, sender: any, sendRes
       //  监听来自content.js发来的事件，将消息转发到devtools
       event.reset(Page.Background, Page.Devtools);
       console.log(`%c[Message]url:${sender.url}]\n${JSON.stringify(request)}`, "color:green");
-      portMgr.sendDevtoolMsg(request);
+      portMgr.sendDevtoolMsg(request, tabID);
     }
   }
 });
@@ -53,11 +53,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     const { id } = tab;
     // -1为自己
     if (id && id > -1) {
-      let portMan = portMgr.findPort(id);
-      if (portMan) {
-        const data = new PluginEvent(Page.Background, Page.Content, Msg.RequestSupport, {} as RequestSupportData);
-        portMgr.sendContentMsg(data);
-      }
+      portMgr.useFrame(0, id);
     }
   }
 });

@@ -9,7 +9,7 @@ export abstract class PortMan {
   /**
    * tab.id作为唯一标识
    */
-  public id: number | null = null;
+  public tabID: number | null = null;
   public title: string = "";
   public url: string = "";
   protected port: chrome.runtime.Port | null = null;
@@ -23,7 +23,7 @@ export abstract class PortMan {
     this.port = port;
     this.tab = tab;
     this.name = port.name;
-    this.id = tab.id;
+    this.tabID = tab.id;
     this.url = port.sender.url;
     this.title = tab.title;
     this.terminal = new Terminal(`Port-${this.name}`);

@@ -45,6 +45,9 @@ export type ResponseUpdateFramesData = FrameDetails[];
 export interface RequestUseFrameData {
   id: number;
 }
+export interface ResponseUseFrameData {
+  id: number;
+}
 export type RequestSetPropertyData = Info;
 export type ResponseSetPropertyData = Info;
 export type RequestLogData = string[];
@@ -82,6 +85,7 @@ export enum Msg {
    */
   ResponseUpdateFrames = "response-update-frames",
   RequestUseFrame = "request-use-frame",
+  ResponseUseFrame = "response-use-frame",
 
   RequestLogData = "request-log-data",
 
