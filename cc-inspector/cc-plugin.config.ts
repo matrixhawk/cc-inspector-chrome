@@ -9,7 +9,7 @@ function i18n(key: string) {
 
 const manifest: CocosPluginManifest = {
   name: pkgName,
-  version: "2.1.0",
+  version: "2.1.1",
   description: "cc-inspector desc",
   author: "xu_yanfeng",
   main: "./src/main.ts",
