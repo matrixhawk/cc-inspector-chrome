@@ -2,7 +2,7 @@
   "author": "cc-plugin",
   "description": "cocos creator plugin",
   "devDependencies": {
-    "@types/chrome": "0.0.133",
+    "@types/chrome": "0.0.293",
     "@types/fs-extra": "9.0.1",
     "@types/kind-of": "^6.0.0",
     "@types/lodash": "^4.14.176",

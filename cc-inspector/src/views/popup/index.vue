@@ -16,6 +16,8 @@ import ccui from "@xuyanfeng/cc-ui";
 import CCP from "cc-plugin/src/ccp/entry-render";
 import { ChromeConst } from "cc-plugin/src/chrome/const";
 import { defineComponent, onMounted, ref } from "vue";
+import { Page } from "../../core/types";
+import { ga } from "../../ga";
 const { CCInput, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } = ccui.components;
 export default defineComponent({
   name: "popup",
@@ -28,6 +30,7 @@ export default defineComponent({
     CCColor,
   },
   setup(props, ctx) {
+    ga.openView(Page.Popup);
     const title = ref(CCP.manifest.name);
     const version = ref(CCP.manifest.version);
     let longConn: chrome.runtime.Port | null = null;

@@ -8,6 +8,8 @@
 
 <script lang="ts">
 import { defineComponent, PropType, toRaw } from "vue";
+import { ga } from "../../../ga";
+import { GA_EventName } from "../../../ga/type";
 import { Bus, BusMsg } from "../bus";
 import { CompType } from "../comp";
 import { EngineData } from "../data";
@@ -23,6 +25,7 @@ export default defineComponent({
   setup(props, context) {
     return {
       onPlaceInTree() {
+        ga.fireEventWithParam(GA_EventName.Inspector, BusMsg.ShowPlace);
         Bus.emit(BusMsg.ShowPlace, toRaw(props.data));
       },
       getEngineTypeIcon() {

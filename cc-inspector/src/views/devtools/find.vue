@@ -10,6 +10,8 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { Msg, PluginEvent, ResponseSupportData } from "../../core/types";
+import { ga } from "../../ga";
+import { GA_Button } from "../../ga/type";
 import { bridge } from "./bridge";
 import { checkSupport } from "./util";
 export default defineComponent({
@@ -28,6 +30,7 @@ export default defineComponent({
     return {
       msg,
       onBtnClickUpdatePage() {
+        ga.clickButton(GA_Button.FreshManual);
         checkSupport();
       },
     };

@@ -38,6 +38,9 @@ const manifest: CocosPluginManifest = {
   icon: {
     "48": "./icons/48.png",
   },
+  analysis: {
+    // googleAnalytics: "G-0S2X4Z1FE7",
+  },
   chrome: {
     version: 3,
     pem: "./crx-key.pem",

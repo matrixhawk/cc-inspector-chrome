@@ -26,6 +26,8 @@ import { Bus, BusMsg } from "../bus";
 import { BoolData, Group, Info, Property } from "../data";
 import UiProp from "./ui-prop.vue";
 import { VisibleProp } from "../comp";
+import { ga } from "../../../ga";
+import { GA_EventName } from "../../../ga/type";
 const { CCInput, CCSection, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } = ccui.components;
 export default defineComponent({
   name: "property-group",
@@ -72,11 +74,13 @@ export default defineComponent({
       fold,
       visible,
       onChangeVisible(b: boolean) {
+        ga.fireEventWithParam(GA_EventName.Inspector, "group-visible");
         const raw: BoolData = toRaw<Info>(visibleTarget.value) as BoolData;
         raw.data = b;
         bridge.send(Msg.RequestSetProperty, raw as RequestSetPropertyData);
       },
       onLog() {
+        ga.fireEventWithParam(GA_EventName.Inspector, "group-log");
         const raw = toRaw(props);
         const data = [raw.group.id];
         bridge.send(Msg.RequestLogData, data as RequestLogData);

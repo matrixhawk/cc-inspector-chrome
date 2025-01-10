@@ -34,6 +34,8 @@ import ccui from "@xuyanfeng/cc-ui";
 import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
 import { defineComponent, onMounted, PropType, ref, toRaw, watch } from "vue";
 import { Msg, RequestLogData, RequestSetPropertyData } from "../../../core/types";
+import { ga } from "../../../ga";
+import { GA_EventName } from "../../../ga/type";
 import { bridge } from "../bridge";
 import { ArrayData, EngineData, EnumData, ImageData, Info, NumberData, ObjectData, Property, StringData, TextData, Vec2Data, Vec3Data } from "../data";
 import Engine from "./property-engine.vue";
@@ -123,6 +125,7 @@ export default defineComponent({
         }
       },
       onClickFold(v: boolean) {
+        ga.fireEventWithParam(GA_EventName.Inspector, "expand/fold prop");
         freshSubData(props.value);
       },
       onChangeValue() {
@@ -132,6 +135,7 @@ export default defineComponent({
         }
       },
       onLogToConsole() {
+        ga.fireEventWithParam(GA_EventName.Inspector, "log-circle-object");
         const data = toRaw(props.value.path);
         bridge.send(Msg.RequestLogData, data as RequestLogData);
       },

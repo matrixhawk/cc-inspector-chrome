@@ -29,7 +29,9 @@ import { Option } from "@xuyanfeng/cc-ui/types/cc-select/const";
 import { storeToRefs } from "pinia";
 import { defineComponent, onMounted, onUnmounted, ref, toRaw } from "vue";
 import PluginConfig from "../../../cc-plugin.config";
-import { Msg, PluginEvent, RequestUseFrameData, ResponseSupportData, ResponseUseFrameData } from "../../core/types";
+import { Msg, Page, PluginEvent, RequestUseFrameData, ResponseSupportData, ResponseUseFrameData } from "../../core/types";
+import { ga } from "../../ga";
+import { GA_Button } from "../../ga/type";
 import { bridge } from "./bridge";
 import { Bus, BusMsg } from "./bus";
 import { FrameDetails, NodeInfoData, TreeData } from "./data";
@@ -53,6 +55,7 @@ export default defineComponent({
   name: "devtools",
   props: {},
   setup(props, ctx) {
+    ga.openView(Page.Devtools);
     appStore().init();
     const isShowDebug = ref<boolean>(false);
     const iframes = ref<Array<FrameInfo>>([]);
@@ -71,18 +74,21 @@ export default defineComponent({
         icon: "github",
         cb: () => {
           window.open("https://github.com/tidys/cc-inspector-chrome");
+          ga.clickButton(GA_Button.Github);
         },
       });
       ccui.footbar.registerCmd({
         icon: "qq",
         cb: () => {
           window.open("https://jq.qq.com/?_wv=1027&k=5SdPdy2");
+          ga.clickButton(GA_Button.QQ);
         },
       });
       ccui.footbar.registerCmd({
         icon: "support",
         cb: () => {
           window.open("https://github.com/tidys/cc-inspector-chrome/issues");
+          ga.clickButton(GA_Button.Issues);
         },
       });
       Bus.on(BusMsg.EnableSchedule, funcEnableSchedule);

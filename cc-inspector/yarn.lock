@@ -396,10 +396,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/chrome@0.0.133":
-  version "0.0.133"
-  resolved "https://mirrors.cloud.tencent.com/npm/@types/chrome/-/chrome-0.0.133.tgz#9e1d55441584ba2d5274ca84db36427da9c5dc6e"
-  integrity sha512-G8uIUdaCTBILprQvQXBWGXZxjAWbkCkFQit17cdH3zYQEwU8f/etNl8+M7e8MRz9Xj8daHaVpysneMZMx8/ldQ==
+"@types/chrome@0.0.293":
+  version "0.0.293"
+  resolved "https://mirrors.cloud.tencent.com/npm/@types/chrome/-/chrome-0.0.293.tgz#1494b081b91521d749d2a5e3602eae202729991a"
+  integrity sha512-pghCOLVHsnePWcMEHCxkAfMRx8qJWmj4lUoyF3ZpANniKz8AucIGLSld7smsrTdLUkk/p5JjOCGVDRdUDHx+uA==
   dependencies:
     "@types/filesystem" "*"
     "@types/har-format" "*"
@@ -1229,7 +1229,7 @@
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
 "@xuyanfeng/cc-ui@file:.yalc/@xuyanfeng/cc-ui":
-  version "0.2.34"
+  version "0.2.36"
   dependencies:
     axios "^1.7.2"
     chalk "^5.3.0"
@@ -1943,7 +1943,7 @@ case-sensitive-paths-webpack-plugin@^2.3.0:
   integrity sha512-roIFONhcxog0JSSWbvVAh3OocukmSgpqOH6YpMkCvav/ySIV3JKg4Dc8vYtQjYi/UxpNE36r/9v+VqTQqgkYmw==
 
 "cc-plugin@file:.yalc/cc-plugin":
-  version "2.1.68"
+  version "2.1.69"
   dependencies:
     "@babel/generator" "^7.16.8"
     "@popperjs/core" "^2.11.6"

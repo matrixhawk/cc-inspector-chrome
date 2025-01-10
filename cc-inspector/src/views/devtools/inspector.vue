@@ -17,6 +17,8 @@ import { Bus, BusMsg } from "./bus";
 import { NodeInfoData } from "./data";
 import { Timer } from "./timer";
 import Properties from "./ui/propertys.vue";
+import { ga } from "../../ga";
+import { GA_EventName } from "../../ga/type";
 const { CCDock } = ccui.components;
 export default defineComponent({
   components: { Properties, CCDock },
@@ -89,12 +91,14 @@ export default defineComponent({
           name: "update node info",
           callback: () => {
             updateNodeInfo();
+            ga.fireEventWithParam(GA_EventName.MouseMenu, "update node info");
           },
         });
         menus.push({
           name: simpleProperties ? "show more properties" : "show simple properties",
           callback: () => {
             simpleProperties = !simpleProperties;
+            ga.fireEventWithParam(GA_EventName.MouseMenu, "simple/more properties");
           },
         });
         ccui.menu.showMenuByMouseEvent(evnet, menus);

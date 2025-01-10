@@ -15,10 +15,13 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
+import { Page } from "../../core/types";
+import { ga } from "../../ga";
 export default defineComponent({
   name: "options",
   components: {},
   setup(props, ctx) {
+    ga.openView(Page.Options);
     return {};
   },
 });

@@ -17,6 +17,8 @@ import Mousetrap, { MousetrapInstance } from "mousetrap";
 import { storeToRefs } from "pinia";
 import { defineComponent, nextTick, onMounted, onUnmounted, ref, toRaw, watch } from "vue";
 import { Msg, PluginEvent, RequestTreeInfoData, RequestUseFrameData, ResponseSetPropertyData } from "../../core/types";
+import { ga } from "../../ga";
+import { GA_EventName } from "../../ga/type";
 import { bridge } from "./bridge";
 import { Bus, BusMsg } from "./bus";
 import { EngineData, TreeData } from "./data";
@@ -43,6 +45,7 @@ export default defineComponent({
     });
     let ins: MousetrapInstance | null = null;
     function onQuickVisible() {
+      ga.fireEvent(GA_EventName.SpaceVisible);
       console.log("onQuickVisible");
       if (selectedUUID) {
         bridge.send(Msg.RequestVisible, selectedUUID);
@@ -160,10 +163,12 @@ export default defineComponent({
       onNodeExpand(data: TreeData) {
         if (data.id) {
           expandedKeys.value.push(data.id);
+          ga.fireEventWithParam(GA_EventName.Hierarchy, "node expand");
         }
       },
       onNodeCollapse(data: TreeData) {
         if (data.id) {
+          ga.fireEventWithParam(GA_EventName.Hierarchy, "node collapse");
           const keys = toRaw(expandedKeys.value);
           const index = keys.findIndex((el) => el === data.id);
           if (index !== -1) {
@@ -191,6 +196,7 @@ export default defineComponent({
           name: "update hierarchy",
           enabled: true,
           callback: () => {
+            ga.fireEventWithParam(GA_EventName.MouseMenu, "update hierarchy");
             updateTree();
           },
         });
@@ -199,6 +205,7 @@ export default defineComponent({
             name: "visible (sapce)",
             enabled: true,
             callback: () => {
+              ga.fireEventWithParam(GA_EventName.MouseMenu, "visible");
               onQuickVisible();
             },
           });
@@ -206,6 +213,7 @@ export default defineComponent({
             name: "destroy",
             enabled: true,
             callback: () => {
+              ga.fireEventWithParam(GA_EventName.MouseMenu, "destroy");
               bridge.send(Msg.RequestDestroy, selectedUUID);
             },
           });
