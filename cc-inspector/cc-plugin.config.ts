@@ -9,8 +9,8 @@ function i18n(key: string) {
 
 const manifest: CocosPluginManifest = {
   name: pkgName,
-  version: "2.1.1",
-  description: "cc-inspector desc",
+  version: "2.1.2",
+  description: "Debug games made with CocosCreator and display node trees and node properties",
   author: "xu_yanfeng",
   main: "./src/main.ts",
   panels: [
