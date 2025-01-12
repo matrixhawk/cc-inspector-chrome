@@ -19,7 +19,7 @@ export class PortDevtools extends PortMan {
           if (port) {
             port.send(data);
           } else {
-            const e = new PluginEvent(Page.Background, Page.Devtools, Msg.ResponseSupport, { support: false, msg: "disconnect with game, please refresh page" } as ResponseSupportData);
+            const e = new PluginEvent(Page.Background, Page.Devtools, Msg.ResponseSupport, { support: false, msg: "disconnect with game, please refresh page", version: "" } as ResponseSupportData);
             this.send(e);
           }
         }

@@ -77,6 +77,7 @@ export enum GA_EventName {
   MouseMenu = "mouse_menu",
   Hierarchy = "hierarchy",
   Inspector = "Inspector",
+  EngineVersion = "engine_version",
 }
 export enum GA_Button {
   Github = "github",

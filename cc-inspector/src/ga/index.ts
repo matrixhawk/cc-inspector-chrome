@@ -14,7 +14,13 @@ export class GoogleAnalytics {
     }
     return clientId;
   }
+  private isChromeEnv() {
+    return !!chrome?.storage?.local?.get;
+  }
   public async fireEventWithParam(name: GA_EventName, param: string) {
+    if (!this.isChromeEnv()) {
+      return;
+    }
     const time = Date.now();
     const id = await this.getOrCreateSessionId();
     fetch(`${GA_ENDPOINT}?measurement_id=${MEASUREMENT_ID}&api_secret=${API_SECRET}`, {
@@ -35,6 +41,9 @@ export class GoogleAnalytics {
     });
   }
   public async fireEvent(name: string) {
+    if (!this.isChromeEnv()) {
+      return;
+    }
     const time = Date.now();
     const id = await this.getOrCreateSessionId();
     fetch(`${GA_ENDPOINT}?measurement_id=${MEASUREMENT_ID}&api_secret=${API_SECRET}`, {

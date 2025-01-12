@@ -7,4 +7,5 @@ export enum DocumentEvent {
    * 从content到inject的事件
    */
   Content2Inject = "content2inject",
+  EngineVersion = "engineVersion",
 }

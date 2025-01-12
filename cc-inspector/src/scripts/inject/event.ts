@@ -18,4 +18,9 @@ export class InjectEvent {
     const event = new CustomEvent(DocumentEvent.Inject2Content, { detail });
     document.dispatchEvent(event);
   }
+  sendEngineVersion(version: string) {
+    const detail = version;
+    const event = new CustomEvent(DocumentEvent.EngineVersion, { detail });
+    document.dispatchEvent(event);
+  }
 }

@@ -163,6 +163,7 @@ export class TestServer {
         const e = new PluginEvent(Page.Background, Page.Devtools, Msg.ResponseSupport, {
           support: this.support,
           msg: "",
+          version: "0.0.0",
         } as ResponseSupportData);
         this.send(e);
         break;

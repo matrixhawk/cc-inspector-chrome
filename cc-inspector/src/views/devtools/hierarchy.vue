@@ -1,6 +1,9 @@
 <template>
   <div class="left">
     <CCDock name="Hierarchy">
+      <template v-slot:title>
+        <div class="engine-version" v-if="engineVersion">Cocos Creator V{{ engineVersion }}</div>
+      </template>
       <CCInput style="flex: none" placeholder="enter keywords to filter" :data="filterText" v-if="false">
         <slot>
           <i class="matchCase iconfont icon_font_size" @click.stop="onChangeCase" title="match case" :style="{ color: matchCase ? 'red' : '' }"></i>
@@ -16,7 +19,7 @@ import { IUiMenuItem } from "@xuyanfeng/cc-ui/types/cc-menu/const";
 import Mousetrap, { MousetrapInstance } from "mousetrap";
 import { storeToRefs } from "pinia";
 import { defineComponent, nextTick, onMounted, onUnmounted, ref, toRaw, watch } from "vue";
-import { Msg, PluginEvent, RequestTreeInfoData, RequestUseFrameData, ResponseSetPropertyData } from "../../core/types";
+import { Msg, PluginEvent, RequestTreeInfoData, RequestUseFrameData, ResponseSetPropertyData, ResponseSupportData } from "../../core/types";
 import { ga } from "../../ga";
 import { GA_EventName } from "../../ga/type";
 import { bridge } from "./bridge";
@@ -99,6 +102,16 @@ export default defineComponent({
     const elTree = ref<typeof CCTree>(null);
     const treeData = ref<TreeData[]>([]);
     let selectedUUID: string | null = null;
+    const engineVersion = ref("");
+    bridge.on(Msg.ResponseSupport, (event: PluginEvent) => {
+      let data: ResponseSupportData = event.data;
+      const isCocosGame: boolean = data.support;
+      if (isCocosGame) {
+        engineVersion.value = data.version;
+      } else {
+        engineVersion.value = "";
+      }
+    });
     bridge.on(Msg.ResponseTreeInfo, (event: PluginEvent) => {
       let data: Array<TreeData> = event.data;
       if (!Array.isArray(data)) {
@@ -144,6 +157,7 @@ export default defineComponent({
       Bus.emit(BusMsg.SelectNode, uuid);
     }
     return {
+      engineVersion,
       expandedKeys,
       elTree,
       filterText,
@@ -234,7 +248,13 @@ export default defineComponent({
   flex-direction: column;
   min-width: 200px;
   width: 300px;
-
+  .engine-version {
+    flex: 1;
+    text-align: right;
+    padding-right: 5px;
+    font-size: 10px;
+    user-select: none;
+  }
   .matchCase {
     width: 30px;
     height: 26px;

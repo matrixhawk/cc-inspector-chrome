@@ -70,16 +70,47 @@ export class Inspector extends InjectEvent {
   }
   init() {
     console.log(...this.terminal.init());
+    this.watchIsCocosGame();
   }
-
+  private watchIsCocosGame() {
+    const timer = setInterval(() => {
+      const b = this._isCocosGame();
+      if (b) {
+        clearInterval(timer);
+        const version = this.getEngineVersion();
+        if (b && version) {
+          this.uploadEngineVersion(version);
+        }
+      }
+    }, 300);
+  }
+  private getEngineVersion() {
+    if (this._isCocosGame()) {
+      return cc.ENGINE_VERSION || "";
+    } else {
+      return "";
+    }
+  }
   notifySupportGame(b: boolean) {
-    this.sendMsgToContent(Msg.ResponseSupport, { support: b, msg: "" } as ResponseSupportData);
+    const version = this.getEngineVersion();
+    this.sendMsgToContent(Msg.ResponseSupport, { support: b, msg: "", version } as ResponseSupportData);
   }
-
+  /**
+   * 防止后台收到大量的Engine版本数据，每次调试只上传一次
+   */
+  private hasUploadEngineVersion = false;
+  private uploadEngineVersion(version: string) {
+    if (this.hasUploadEngineVersion) {
+      return;
+    }
+    if (version) {
+      this.hasUploadEngineVersion = true;
+      this.sendEngineVersion(version);
+    }
+  }
   updateTreeInfo() {
     let isCocosCreatorGame = this._isCocosGame();
     if (isCocosCreatorGame) {
-      //@ts-ignore
       let scene = cc.director.getScene();
       if (scene) {
         let treeData = new TreeData();
@@ -617,8 +648,8 @@ export class Inspector extends InjectEvent {
       const data: NodeInfoData = new NodeInfoData(uuid, groupData);
       this.sendMsgToContent(Msg.ResponseNodeInfo, data as ResponseNodeInfoData);
     } else {
-      // 未获取到节点数据
-      console.log("未获取到节点数据");
+      const data: NodeInfoData = new NodeInfoData(uuid, []);
+      this.sendMsgToContent(Msg.ResponseNodeInfo, data as ResponseNodeInfoData);
     }
   }
 

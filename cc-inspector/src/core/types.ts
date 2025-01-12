@@ -1,5 +1,5 @@
 import { Chunk } from "../scripts/terminal";
-import { FrameDetails, Info, NodeInfoData, ObjectData, ObjectItemRequestData, TreeData } from "../views/devtools/data";
+import { FrameDetails, Info, NodeInfoData, TreeData } from "../views/devtools/data";
 
 export enum Page {
   None = "None",
@@ -38,6 +38,10 @@ export interface ResponseSupportData {
    * 消息
    */
   msg: string;
+  /**
+   * engine版本
+   */
+  version: string;
 }
 
 export type ResponseUpdateFramesData = FrameDetails[];

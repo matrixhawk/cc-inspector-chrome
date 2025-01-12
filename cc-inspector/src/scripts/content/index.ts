@@ -1,7 +1,9 @@
 // content.js 和原始界面共享DOM，具有操作dom的能力
 // 但是不共享js,要想访问页面js,只能通过注入的方式
 import { ChromeConst } from "cc-plugin/src/chrome/const";
-import { debugLog, Msg, Page, PluginEvent, ResponseSupportData } from "../../core/types";
+import { debugLog, Page, PluginEvent } from "../../core/types";
+import { ga } from "../../ga";
+import { GA_EventName } from "../../ga/type";
 import { DocumentEvent } from "../const";
 import { Terminal } from "../terminal";
 
@@ -25,6 +27,12 @@ export function injectScript(url: string) {
   }
 }
 
+document.addEventListener(DocumentEvent.EngineVersion, async (event: CustomEvent) => {
+  const version: string = event.detail;
+  if (version) {
+    ga.fireEventWithParam(GA_EventName.EngineVersion, version);
+  }
+});
 // #region 和Inject通讯
 document.addEventListener(DocumentEvent.Inject2Content, (event: CustomEvent) => {
   let data: PluginEvent = PluginEvent.create(event.detail);
@@ -60,20 +68,4 @@ connect.onMessage.addListener((data: PluginEvent, sender: chrome.runtime.Port) =
     throw new Error(`invalid data: ${data}`);
   }
 });
-
-function checkGame() {
-  let gameCanvas = document.querySelector("#GameCanvas");
-  const sendData = new PluginEvent(Page.Content, Page.Devtools, Msg.ResponseSupport, {
-    support: !!gameCanvas,
-    msg: "",
-  } as ResponseSupportData);
-  if (connect) {
-    connect.postMessage(sendData);
-  } else {
-    debugLog && console.log(...terminal.log(`connect is null`));
-    throw new Error("connect is null");
-  }
-}
-
 injectScript(ChromeConst.script.inject);
-// checkGame();
