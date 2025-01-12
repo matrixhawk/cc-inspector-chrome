@@ -11,18 +11,6 @@ declare const cc: any;
 export class Inspector extends InjectEvent {
   inspectorGameMemoryStorage: Record<string, any> = {};
 
-  private watchIsCocosGame() {
-    const timer = setInterval(() => {
-      if (this._isCocosGame()) {
-        clearInterval(timer);
-        // @ts-ignore
-        cc.director.on(cc.Director.EVENT_AFTER_SCENE_LAUNCH, () => {
-          const isCocosGame = this._isCocosGame();
-          this.notifySupportGame(isCocosGame);
-        });
-      }
-    }, 300);
-  }
   onMessage(pluginEvent: PluginEvent): void {
     switch (pluginEvent.msg) {
       case Msg.RequestSupport: {
@@ -82,7 +70,6 @@ export class Inspector extends InjectEvent {
   }
   init() {
     console.log(...this.terminal.init());
-    this.watchIsCocosGame();
   }
 
   notifySupportGame(b: boolean) {
@@ -99,8 +86,10 @@ export class Inspector extends InjectEvent {
         this.getNodeChildren(scene, treeData);
         this.sendMsgToContent(Msg.ResponseTreeInfo, treeData as ResponseTreeInfoData);
       } else {
-        console.warn("can't execute api : cc.director.getScene");
-        this.notifySupportGame(false);
+        let treeData = new TreeData();
+        treeData.id = "";
+        treeData.text = "empty scene";
+        this.sendMsgToContent(Msg.ResponseTreeInfo, treeData as ResponseTreeInfoData);
       }
     } else {
       this.notifySupportGame(false);
