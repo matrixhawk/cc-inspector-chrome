@@ -109,7 +109,7 @@ export class PortMgr {
   }
   useFrame(id: number, tabID: number) {
     this.tabUseFrameID[tabID] = id;
-    const event = new PluginEvent(Page.Background, Page.Devtools, Msg.ResponseUpdateFrames, { id } as ResponseUseFrameData);
+    const event = new PluginEvent(Page.Background, Page.Devtools, Msg.ResponseUseFrame, { id } as ResponseUseFrameData);
     this.sendDevtoolMsg(event, tabID);
   }
 }
