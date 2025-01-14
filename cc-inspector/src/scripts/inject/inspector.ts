@@ -26,6 +26,23 @@ export class Inspector extends InjectEvent {
         this.updateTreeInfo();
         break;
       }
+      case Msg.VisibleFPS: {
+        const b = pluginEvent.data as boolean;
+        if (b) {
+          if (cc.profiler?.showStats) {
+            cc.profiler.showStats();
+          } else if (cc.debug?.setDisplayStats) {
+            cc.debug.setDisplayStats(true);
+          }
+        } else {
+          if (cc.profiler?.hideStats) {
+            cc.profiler.hideStats();
+          } else if (cc.debug?.setDisplayStats) {
+            cc.debug.setDisplayStats(false);
+          }
+        }
+        break;
+      }
       case Msg.RequestGameInfo: {
         const ret = new ResponseGameInfoData();
         const atlasManager = cc?.dynamicAtlasManager || cc.internal?.dynamicAtlasManager || null;

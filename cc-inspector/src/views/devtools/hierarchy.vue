@@ -39,12 +39,12 @@ export default defineComponent({
     };
     const funcEnableSchedule = (b: boolean) => {
       if (b) {
-        timer.create();
+        timer_hierarchy.create();
       } else {
-        timer.clean();
+        timer_hierarchy.clean();
       }
     };
-    const timer: Timer = new Timer(() => {
+    const timer_hierarchy: Timer = new Timer(() => {
       updateTree();
     });
     let ins: MousetrapInstance | null = null;
@@ -68,7 +68,7 @@ export default defineComponent({
       Bus.on(BusMsg.ChangeContent, changeContent);
       Bus.on(BusMsg.ShowPlace, funcShowPlace);
       Bus.on(BusMsg.EnableSchedule, funcEnableSchedule);
-      timer.create();
+      timer_hierarchy.create();
     });
     onUnmounted(() => {
       if (ins) {
@@ -77,7 +77,7 @@ export default defineComponent({
       Bus.off(BusMsg.ChangeContent, changeContent);
       Bus.off(BusMsg.ShowPlace, funcShowPlace);
       Bus.off(BusMsg.EnableSchedule, funcEnableSchedule);
-      timer.clean();
+      timer_hierarchy.clean();
     });
     function _expand(uuid: string) {
       if (elTree.value) {
@@ -213,6 +213,31 @@ export default defineComponent({
           callback: () => {
             ga.fireEventWithParam(GA_EventName.MouseMenu, "update hierarchy");
             updateTree();
+          },
+        });
+        menus.push({
+          name: "fresh auto",
+          callback: () => {
+            timer_hierarchy.create();
+          },
+        });
+        menus.push({
+          name: "fresh manual",
+          callback: () => {
+            timer_hierarchy.clean();
+          },
+        });
+        menus.push({
+          name: "fps show",
+          callback: () => {
+            bridge.send(Msg.VisibleFPS, true);
+          },
+        });
+
+        menus.push({
+          name: "fps hide",
+          callback: () => {
+            bridge.send(Msg.VisibleFPS, false);
           },
         });
         menus.push({
