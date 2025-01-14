@@ -43,7 +43,24 @@ export interface ResponseSupportData {
    */
   version: string;
 }
-
+export class DynamicAtlas {
+  /**
+   * 是否启用动态图集
+   */
+  enable: boolean = false;
+  atlasCount: number = 0;
+  maxAtlasCount: number = 0;
+  maxFrameSize: number = 0;
+  textureSize: number = 0;
+  textureBleeding: boolean = true;
+  /**
+   * 是否支持在游戏中查看
+   */
+  supportView: boolean = false;
+}
+export class ResponseGameInfoData {
+  public dynamicAtals = new DynamicAtlas();
+}
 export type ResponseUpdateFramesData = FrameDetails[];
 
 export interface RequestUseFrameData {
@@ -99,6 +116,12 @@ export enum Msg {
   RequestDestroy = "request-destroy",
 
   ResponseError = "response-error",
+
+  RequestGameInfo = "request-game-info",
+  ResponseGameInfo = "response-game-info",
+
+  RequestDynamicAtlasView = "request-dynamic-atlas-view",
+  ResponseDynamicAtlasView = "response-dynamic-atlas-view",
 }
 
 export class PluginEvent {

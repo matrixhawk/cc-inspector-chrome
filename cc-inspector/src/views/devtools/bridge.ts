@@ -43,6 +43,9 @@ class Bridge implements TestClient {
   on(msg: Msg, callback: (data: PluginEvent) => void) {
     this.emitter.on(msg, callback);
   }
+  off(msg: Msg, callback: (data: PluginEvent) => void) {
+    this.emitter.off(msg, callback);
+  }
   recv(event: PluginEvent): void {
     this.emit(event);
   }

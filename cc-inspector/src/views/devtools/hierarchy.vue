@@ -25,6 +25,7 @@ import { GA_EventName } from "../../ga/type";
 import { bridge } from "./bridge";
 import { Bus, BusMsg } from "./bus";
 import { EngineData, TreeData } from "./data";
+import GameInfo from "./game-info.vue";
 import { appStore } from "./store";
 import { Timer } from "./timer";
 const { CCTree, CCFootBar, CCDock, CCDialog, CCInput, CCButton, CCInputNumber, CCSelect, CCButtonGroup, CCCheckBox, CCColor, CCDivider } = ccui.components;
@@ -212,6 +213,16 @@ export default defineComponent({
           callback: () => {
             ga.fireEventWithParam(GA_EventName.MouseMenu, "update hierarchy");
             updateTree();
+          },
+        });
+        menus.push({
+          name: "game info",
+          callback() {
+            ga.fireEventWithParam(GA_EventName.MouseMenu, "game info");
+            ccui.dialog.showDialog({
+              comp: GameInfo,
+              title: "Game Info",
+            });
           },
         });
         if (selectedUUID) {

@@ -1,6 +1,6 @@
 // eval 注入脚本的代码,变量尽量使用var,后来发现在import之后,let会自动变为var
 import { uniq } from "lodash";
-import { Msg, PluginEvent, RequestLogData, RequestNodeInfoData, RequestSetPropertyData, ResponseNodeInfoData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
+import { Msg, PluginEvent, RequestLogData, RequestNodeInfoData, RequestSetPropertyData, ResponseGameInfoData, ResponseNodeInfoData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
 import { ArrayData, BoolData, ColorData, DataType, EngineData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectCircleData, ObjectData, Property, StringData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../../views/devtools/data";
 import { InjectEvent } from "./event";
 import { getValue, trySetValueWithConfig } from "./setValue";
@@ -11,6 +11,10 @@ declare const cc: any;
 export class Inspector extends InjectEvent {
   inspectorGameMemoryStorage: Record<string, any> = {};
 
+  private getAtlasViewFunction() {
+    // 之前只有v2版本支持
+    return cc?.dynamicAtlasManager?.showDebug;
+  }
   onMessage(pluginEvent: PluginEvent): void {
     switch (pluginEvent.msg) {
       case Msg.RequestSupport: {
@@ -20,6 +24,30 @@ export class Inspector extends InjectEvent {
       }
       case Msg.RequstTreeInfo: {
         this.updateTreeInfo();
+        break;
+      }
+      case Msg.RequestGameInfo: {
+        const ret = new ResponseGameInfoData();
+        const atlasManager = cc?.dynamicAtlasManager || cc.internal?.dynamicAtlasManager || null;
+        if (atlasManager) {
+          ret.dynamicAtals.enable = atlasManager.enabled;
+          ret.dynamicAtals.atlasCount = atlasManager.atlasCount;
+          ret.dynamicAtals.maxAtlasCount = atlasManager.maxAtlasCount;
+          ret.dynamicAtals.maxFrameSize = atlasManager.maxFrameSize;
+          ret.dynamicAtals.textureSize = atlasManager.textureSize;
+          ret.dynamicAtals.textureBleeding = atlasManager.textureBleeding;
+          ret.dynamicAtals.supportView = !!this.getAtlasViewFunction();
+          this.sendMsgToContent(Msg.ResponseGameInfo, ret);
+        }
+        break;
+      }
+      case Msg.RequestDynamicAtlasView: {
+        const b = pluginEvent.data as boolean;
+        const cb = this.getAtlasViewFunction();
+        if (cb) {
+          cb(b);
+          this.sendMsgToContent(Msg.ResponseDynamicAtlasView, b);
+        }
         break;
       }
       case Msg.RequestNodeInfo: {
@@ -90,6 +118,12 @@ export class Inspector extends InjectEvent {
     } else {
       return "";
     }
+  }
+  public isCreatorV2() {
+    return this.getEngineVersion().startsWith("2.");
+  }
+  public isCreatorV3() {
+    return this.getEngineVersion().startsWith("3.");
   }
   notifySupportGame(b: boolean) {
     const version = this.getEngineVersion();
