@@ -14,11 +14,13 @@ class Bridge implements TestClient {
    */
   private connect: chrome.runtime.Port | null = null;
   private terminal = new Terminal(Page.Devtools);
-  constructor() {
-    this.init();
-  }
 
+  private _inited = false;
   private init() {
+    if (this._inited) {
+      return;
+    }
+    this._inited = true;
     if (CCP.Adaptation.Env.isChromeRuntime) {
       this.connect = chrome.runtime.connect({ name: Page.Devtools });
       this.connect.onDisconnect.addListener(() => {
@@ -53,12 +55,14 @@ class Bridge implements TestClient {
     this.emitter.emit(data.msg, data);
   }
   send(msg: Msg, data?: any) {
+    this.init();
     if (CCP.Adaptation.Env.isChromeDevtools) {
       if (this.connect) {
         let sendData = new PluginEvent(Page.Devtools, Page.Background, msg, data);
         this.connect.postMessage(sendData);
       } else {
         console.warn(...this.terminal.log("重新和background建立链接"));
+        this._inited = false;
         this.init();
         this.send(msg, data);
       }
