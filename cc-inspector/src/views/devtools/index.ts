@@ -7,10 +7,14 @@ import { createApp } from "vue";
 import pluginConfig from "../../../cc-plugin.config";
 import "../global.less";
 import App from "./index.vue";
-import { init } from "./register-panel";
 export default CCP.init(pluginConfig, {
   ready: function (rootElement: any, args: any) {
-    init();
+    if (args && args.body) {
+      ccui.uiElement.setBody(args.body);
+    }
+    if (args && args.doc) {
+      ccui.uiElement.setDoc(args.doc);
+    }
     const app = createApp(App);
     app.use(ccui);
     app.use(createPinia());

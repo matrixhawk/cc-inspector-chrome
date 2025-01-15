@@ -2,6 +2,7 @@ import profile from "cc-plugin/src/ccp/profile";
 import { defineStore } from "pinia";
 import { ref, toRaw } from "vue";
 import pluginConfig from "../../../cc-plugin.config";
+import { PanelMsg } from "./const";
 export const enum RefreshType {
   Auto = "auto",
   Manual = "manual",
@@ -24,10 +25,19 @@ export class ConfigData {
 export const appStore = defineStore("app", () => {
   const config = ref<ConfigData>(new ConfigData());
   const frameID = ref<number>(0);
+  const pageShow = ref<boolean>(false);
   return {
     frameID,
+    pageShow,
     config,
     init() {
+      if (chrome.devtools) {
+        window.addEventListener(PanelMsg.Show, () => {
+          pageShow.value = true;
+        });
+      } else {
+        pageShow.value = true;
+      }
       profile.init(new ConfigData(), pluginConfig);
       const data = profile.load(`${pluginConfig.manifest.name}.json`) as ConfigData;
       config.value.refreshType = data.refreshType || RefreshType.Manual;

@@ -63,6 +63,7 @@ export default defineComponent({
     const timer = new Timer(() => {
       checkSupport();
     });
+    timer.name = "devtools";
     onMounted(() => {
       ccui.footbar.showTipsArray({
         tips: [
@@ -92,7 +93,7 @@ export default defineComponent({
         },
       });
       Bus.on(BusMsg.EnableSchedule, funcEnableSchedule);
-      timer.create();
+      timer.create(true);
     });
     onUnmounted(() => {
       Bus.off(BusMsg.EnableSchedule, funcEnableSchedule);

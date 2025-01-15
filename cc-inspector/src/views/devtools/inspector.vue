@@ -12,13 +12,13 @@ import ccui from "@xuyanfeng/cc-ui";
 import { IUiMenuItem } from "@xuyanfeng/cc-ui/types/cc-menu/const";
 import { defineComponent, onMounted, onUnmounted, ref } from "vue";
 import { Msg, PluginEvent, RequestNodeInfoData, ResponseSupportData } from "../../core/types";
+import { ga } from "../../ga";
+import { GA_EventName } from "../../ga/type";
 import { bridge } from "./bridge";
 import { Bus, BusMsg } from "./bus";
 import { NodeInfoData } from "./data";
 import { Timer } from "./timer";
 import Properties from "./ui/propertys.vue";
-import { ga } from "../../ga";
-import { GA_EventName } from "../../ga/type";
 const { CCDock } = ccui.components;
 export default defineComponent({
   components: { Properties, CCDock },
@@ -32,6 +32,7 @@ export default defineComponent({
       }
     }
     const timer = new Timer(updateNodeInfo);
+    timer.name = "inspector";
     const treeItemData = ref<NodeInfoData | null>(null);
     const funcEnableSchedule = (b: boolean) => {
       if (b) {
@@ -54,7 +55,7 @@ export default defineComponent({
       Bus.on(BusMsg.ChangeContent, changeContent);
       Bus.on(BusMsg.SelectNode, funSelectNode);
       Bus.on(BusMsg.EnableSchedule, funcEnableSchedule);
-      timer.create();
+      timer.create(true);
     });
     onUnmounted(() => {
       Bus.off(BusMsg.ChangeContent, changeContent);

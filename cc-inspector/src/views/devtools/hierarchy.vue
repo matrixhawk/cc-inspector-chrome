@@ -39,14 +39,15 @@ export default defineComponent({
     };
     const funcEnableSchedule = (b: boolean) => {
       if (b) {
-        timer_hierarchy.create();
+        timer.create();
       } else {
-        timer_hierarchy.clean();
+        timer.clean();
       }
     };
-    const timer_hierarchy: Timer = new Timer(() => {
+    const timer: Timer = new Timer(() => {
       updateTree();
     });
+    timer.name = "hierarchy";
     let ins: MousetrapInstance | null = null;
     function onQuickVisible() {
       ga.fireEvent(GA_EventName.SpaceVisible);
@@ -68,7 +69,7 @@ export default defineComponent({
       Bus.on(BusMsg.ChangeContent, changeContent);
       Bus.on(BusMsg.ShowPlace, funcShowPlace);
       Bus.on(BusMsg.EnableSchedule, funcEnableSchedule);
-      timer_hierarchy.create();
+      timer.create(true);
     });
     onUnmounted(() => {
       if (ins) {
@@ -77,7 +78,7 @@ export default defineComponent({
       Bus.off(BusMsg.ChangeContent, changeContent);
       Bus.off(BusMsg.ShowPlace, funcShowPlace);
       Bus.off(BusMsg.EnableSchedule, funcEnableSchedule);
-      timer_hierarchy.clean();
+      timer.clean();
     });
     function _expand(uuid: string) {
       if (elTree.value) {
@@ -218,13 +219,13 @@ export default defineComponent({
         menus.push({
           name: "fresh auto",
           callback: () => {
-            timer_hierarchy.create();
+            timer.create();
           },
         });
         menus.push({
           name: "fresh manual",
           callback: () => {
-            timer_hierarchy.clean();
+            timer.clean();
           },
         });
         menus.push({
