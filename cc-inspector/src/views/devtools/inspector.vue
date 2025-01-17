@@ -13,6 +13,7 @@
 <script lang="ts">
 import ccui from "@xuyanfeng/cc-ui";
 import { IUiMenuItem } from "@xuyanfeng/cc-ui/types/cc-menu/const";
+import { storeToRefs } from "pinia";
 import { defineComponent, onMounted, onUnmounted, ref } from "vue";
 import { Msg, PluginEvent, RequestNodeInfoData, ResponseSupportData } from "../../core/types";
 import { ga } from "../../ga";
@@ -20,6 +21,7 @@ import { GA_EventName } from "../../ga/type";
 import { bridge } from "./bridge";
 import { Bus, BusMsg } from "./bus";
 import { NodeInfoData } from "./data";
+import { appStore } from "./store";
 import { Timer } from "./timer";
 import Properties from "./ui/propertys.vue";
 const { CCDock } = ccui.components;
@@ -34,13 +36,18 @@ export default defineComponent({
         treeItemData.value = null;
       }
     }
+    const { config } = storeToRefs(appStore());
     const timer = new Timer();
     timer.onWork = () => {
       freshAuto.value = true;
+      config.value.refreshInspector = true;
+      appStore().save();
       updateNodeInfo();
     };
     timer.onClean = () => {
       freshAuto.value = false;
+      config.value.refreshInspector = false;
+      appStore().save();
     };
     timer.name = "inspector";
     const treeItemData = ref<NodeInfoData | null>(null);
@@ -65,7 +72,11 @@ export default defineComponent({
       Bus.on(BusMsg.ChangeContent, changeContent);
       Bus.on(BusMsg.SelectNode, funSelectNode);
       Bus.on(BusMsg.EnableSchedule, funcEnableSchedule);
-      timer.create(true);
+      if (config.value.refreshInspector) {
+        timer.create(true);
+      } else {
+        updateNodeInfo();
+      }
     });
     onUnmounted(() => {
       Bus.off(BusMsg.ChangeContent, changeContent);
@@ -93,7 +104,7 @@ export default defineComponent({
         ccui.footbar.showError(error, { title: "parse property error" });
       }
     });
-    const freshAuto = ref(false);
+    const freshAuto = ref(config.value.refreshInspector);
     return {
       freshAuto,
       treeItemData,

@@ -48,10 +48,14 @@ export default defineComponent({
     const timer: Timer = new Timer();
     timer.onWork = () => {
       freshAuto.value = true;
+      config.value.refreshHirarchy = true;
+      appStore().save();
       updateTree();
     };
     timer.onClean = () => {
       freshAuto.value = false;
+      config.value.refreshHirarchy = false;
+      appStore().save();
     };
     timer.name = "hierarchy";
     let ins: MousetrapInstance | null = null;
@@ -75,7 +79,11 @@ export default defineComponent({
       Bus.on(BusMsg.ChangeContent, changeContent);
       Bus.on(BusMsg.ShowPlace, funcShowPlace);
       Bus.on(BusMsg.EnableSchedule, funcEnableSchedule);
-      timer.create(true);
+      if (config.value.refreshHirarchy) {
+        timer.create(true);
+      } else {
+        updateTree();
+      }
     });
     onUnmounted(() => {
       if (ins) {
@@ -164,7 +172,7 @@ export default defineComponent({
       selectedUUID = uuid;
       Bus.emit(BusMsg.SelectNode, uuid);
     }
-    const freshAuto = ref(false);
+    const freshAuto = ref(config.value.refreshHirarchy);
     return {
       onClickRefresh() {
         freshAuto.value = true;

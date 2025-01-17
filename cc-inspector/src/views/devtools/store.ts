@@ -20,6 +20,14 @@ export class ConfigData {
    * 展开测试的section
    */
   expandTest: boolean = false;
+  /**
+   * 是否自动刷新inspector
+   */
+  refreshInspector: boolean = true;
+  /**
+   * 是否自动刷新hierarchy
+   */
+  refreshHirarchy: boolean = true;
 }
 
 export const appStore = defineStore("app", () => {
@@ -43,6 +51,8 @@ export const appStore = defineStore("app", () => {
       config.value.refreshType = data.refreshType || RefreshType.Manual;
       config.value.refreshTime = data.refreshTime || 500;
       config.value.expandTest = !!data.expandTest;
+      config.value.refreshHirarchy = !!data.refreshHirarchy;
+      config.value.refreshInspector = !!data.refreshInspector;
     },
     save() {
       const cfg = toRaw(config.value);
