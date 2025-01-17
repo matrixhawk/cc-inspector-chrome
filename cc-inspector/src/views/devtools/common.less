@@ -1,0 +1,22 @@
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+
+.refresh {
+  margin: 0 3px;
+  cursor: pointer;
+  &:hover {
+    color: rgb(250, 207, 161);
+  }
+  &:active {
+    color: #ffaa00;
+  }
+}
+.refresh-rotate {
+  animation: rotate 1s linear infinite reverse;
+}

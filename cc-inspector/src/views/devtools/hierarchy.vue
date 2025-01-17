@@ -2,6 +2,7 @@
   <div class="left">
     <CCDock name="Hierarchy">
       <template v-slot:title>
+        <i class="iconfont icon_refresh refresh" :class="{ 'refresh-rotate': freshAuto }" @click="onClickRefresh"></i>
         <div class="engine-version" v-if="engineVersion">Cocos Creator V{{ engineVersion }}</div>
       </template>
       <CCInput style="flex: none" placeholder="enter keywords to filter" :data="filterText" v-if="false">
@@ -44,9 +45,14 @@ export default defineComponent({
         timer.clean();
       }
     };
-    const timer: Timer = new Timer(() => {
+    const timer: Timer = new Timer();
+    timer.onWork = () => {
+      freshAuto.value = true;
       updateTree();
-    });
+    };
+    timer.onClean = () => {
+      freshAuto.value = false;
+    };
     timer.name = "hierarchy";
     let ins: MousetrapInstance | null = null;
     function onQuickVisible() {
@@ -158,7 +164,16 @@ export default defineComponent({
       selectedUUID = uuid;
       Bus.emit(BusMsg.SelectNode, uuid);
     }
+    const freshAuto = ref(false);
     return {
+      onClickRefresh() {
+        freshAuto.value = true;
+        updateTree();
+        setTimeout(() => {
+          freshAuto.value = false;
+        }, 1000);
+      },
+      freshAuto,
       engineVersion,
       expandedKeys,
       elTree,
@@ -280,6 +295,7 @@ export default defineComponent({
 });
 </script>
 <style lang="less" scoped>
+@import "./common.less";
 .left {
   display: flex;
   flex-direction: column;

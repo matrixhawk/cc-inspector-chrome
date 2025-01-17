@@ -60,9 +60,10 @@ export default defineComponent({
     const isShowDebug = ref<boolean>(false);
     const iframes = ref<Array<FrameInfo>>([]);
     const { config, frameID } = storeToRefs(appStore());
-    const timer = new Timer(() => {
+    const timer = new Timer();
+    timer.onWork = () => {
       checkSupport();
-    });
+    };
     timer.name = "devtools";
     onMounted(() => {
       ccui.footbar.showTipsArray({

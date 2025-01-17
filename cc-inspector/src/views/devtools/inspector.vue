@@ -1,6 +1,9 @@
 <template>
   <div class="right">
     <CCDock name="Inspector">
+      <template v-slot:title>
+        <i class="iconfont icon_refresh refresh" :class="{ 'refresh-rotate': freshAuto }" @click="onClickRefresh"></i>
+      </template>
       <div class="inspector" @contextmenu.prevent.stop="onMenu">
         <Properties v-if="treeItemData" :data="treeItemData"></Properties>
       </div>
@@ -31,7 +34,14 @@ export default defineComponent({
         treeItemData.value = null;
       }
     }
-    const timer = new Timer(updateNodeInfo);
+    const timer = new Timer();
+    timer.onWork = () => {
+      freshAuto.value = true;
+      updateNodeInfo();
+    };
+    timer.onClean = () => {
+      freshAuto.value = false;
+    };
     timer.name = "inspector";
     const treeItemData = ref<NodeInfoData | null>(null);
     const funcEnableSchedule = (b: boolean) => {
@@ -83,9 +93,17 @@ export default defineComponent({
         ccui.footbar.showError(error, { title: "parse property error" });
       }
     });
-
+    const freshAuto = ref(false);
     return {
+      freshAuto,
       treeItemData,
+      onClickRefresh() {
+        freshAuto.value = true;
+        updateNodeInfo();
+        setTimeout(() => {
+          freshAuto.value = false;
+        }, 1000);
+      },
       onMenu(evnet: MouseEvent) {
         const menus: IUiMenuItem[] = [];
         menus.push({
@@ -93,6 +111,18 @@ export default defineComponent({
           callback: () => {
             updateNodeInfo();
             ga.fireEventWithParam(GA_EventName.MouseMenu, "update node info");
+          },
+        });
+        menus.push({
+          name: "fresh auto",
+          callback: () => {
+            timer.create(true);
+          },
+        });
+        menus.push({
+          name: "fresh manual",
+          callback: () => {
+            timer.clean();
           },
         });
         menus.push({
@@ -109,11 +139,13 @@ export default defineComponent({
 });
 </script>
 <style lang="less" scoped>
+@import "./common.less";
 .right {
   flex: 1;
   display: flex;
   overflow-x: hidden;
   overflow-y: overlay;
+
   .inspector {
     display: flex;
     flex: 1;

@@ -1,17 +1,21 @@
 export class Timer {
   private timer: number | null = null;
-  private callback: Function | null = null;
-  private duration: number = 0;
+  /**
+   * 执行定时器的回调
+   */
+  public onWork: Function | null = null;
+  /**
+   * 清理定时器的回调
+   */
+  public onClean: Function | null = null;
+  public duration: number = 300;
   public name: string = "";
-  constructor(cb: Function = null, duration: number = 300) {
-    this.callback = cb;
-    this.duration = duration;
-  }
+
   create(rightNow: boolean = false) {
     this.clean();
-    this.timer = setInterval(this.callback, this.duration);
+    this.timer = setInterval(this.onWork, this.duration);
     if (rightNow) {
-      this.callback && this.callback();
+      this.onWork && this.onWork();
     }
   }
   clean() {
@@ -20,5 +24,6 @@ export class Timer {
     }
     clearInterval(this.timer);
     this.timer = null;
+    this.onClean && this.onClean();
   }
 }
