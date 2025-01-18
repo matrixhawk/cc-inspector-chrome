@@ -1,12 +1,18 @@
 <template>
-  <div v-if="data" class="banner" :class="ani" @click="onClick" :title="data.tip">
-    <div class="text">{{ data.name }}</div>
+  <div v-if="data" class="banner" :class="ani" @click="onClick" :title="data.tip" :style="getStyle()">
+    <div class="text">
+      <span>
+        {{ data.name }}
+      </span>
+    </div>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted, PropType, ref } from "vue";
+import { defineComponent, onMounted, onUnmounted, PropType, ref, toRaw } from "vue";
+import { GA_EventName } from "../../ga/type";
 import { emitter, Msg } from "./const";
 import { AdItem } from "./loader";
+import { ga } from "./util";
 export default defineComponent({
   name: "banner",
   props: {
@@ -29,9 +35,19 @@ export default defineComponent({
     const ani = ref("");
     return {
       ani,
+      getStyle() {
+        const img = props.data.img;
+        if (img) {
+          return `background-image: url(${img})`;
+        } else {
+          return "";
+        }
+      },
       onClick() {
-        if (props.data.store) {
-          window.open(props.data.store);
+        const url = toRaw(props.data.store);
+        if (url) {
+          window.open(url);
+          ga(GA_EventName.ClickPluginLink, url);
         }
       },
     };
@@ -63,7 +79,8 @@ export default defineComponent({
   animation: flip-in 0.4s cubic-bezier(0.455, 0.03, 0.515, 0.955) both;
 }
 .banner {
-  border: 2px solid #ffffff;
+  border: 2px solid #d2d2d2;
+  border-bottom: 0;
   background-color: #ffffff;
   overflow: hidden;
   min-width: 300px;
@@ -72,11 +89,11 @@ export default defineComponent({
   max-height: 50px;
   cursor: pointer;
   display: flex;
-  border: 2px solid #d2d2d2;
   text-align: center;
   align-items: flex-end;
   &:hover {
-    border: 2px solid #d1d1d1;
+    border: 2px solid #949494;
+    border-bottom: 0;
     background-color: #d1d1d1;
   }
   .text {
@@ -86,7 +103,17 @@ export default defineComponent({
     font-size: 13px;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: wrap;
+    white-space: nowrap;
+    span {
+      color: #000000c4;
+      background-color: #afafaf6b;
+      padding: 1px 4px;
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 }
 </style>

@@ -1,3 +1,5 @@
+import { GA_EventName } from "../ga/type";
+
 export enum DocumentEvent {
   /**
    * 从inject到content的事件
@@ -8,4 +10,9 @@ export enum DocumentEvent {
    */
   Content2Inject = "content2inject",
   EngineVersion = "engineVersion",
+  GoogleAnalytics = "googleAnalytics",
+}
+export interface GoogleAnalyticsData {
+  event: GA_EventName;
+  params: string;
 }

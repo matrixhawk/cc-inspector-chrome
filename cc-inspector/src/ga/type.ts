@@ -78,6 +78,14 @@ export enum GA_EventName {
   Hierarchy = "hierarchy",
   Inspector = "Inspector",
   EngineVersion = "engine_version",
+  /**
+   * 用户点击store广告链接
+   */
+  ClickPluginLink = "click_plugin_link",
+  /**
+   * 用户主动关闭store广告
+   */
+  CloseAd = "close_ad",
 }
 export enum GA_Button {
   Github = "github",

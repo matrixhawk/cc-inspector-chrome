@@ -25,6 +25,8 @@ import { defineComponent, onMounted, ref, toRaw } from "vue";
 import Banner from "./banner.vue";
 import { emitter, Msg } from "./const";
 import { AdItem, getAdData } from "./loader";
+import { ga } from "./util";
+import { GA_EventName } from "../../ga/type";
 export default defineComponent({
   name: "ad",
   components: { Banner },
@@ -80,6 +82,7 @@ export default defineComponent({
       ads,
       onClose() {
         isShow.value = false;
+        ga(GA_EventName.CloseAd);
       },
       onMouseEnter() {
         stopAutoScroll = true;

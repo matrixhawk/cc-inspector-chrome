@@ -4,7 +4,7 @@ import { ChromeConst } from "cc-plugin/src/chrome/const";
 import { debugLog, Page, PluginEvent } from "../../core/types";
 import { ga } from "../../ga";
 import { GA_EventName } from "../../ga/type";
-import { DocumentEvent } from "../const";
+import { DocumentEvent, GoogleAnalyticsData } from "../const";
 import { Terminal } from "../terminal";
 
 const terminal = new Terminal(Page.Content);
@@ -31,6 +31,16 @@ document.addEventListener(DocumentEvent.EngineVersion, async (event: CustomEvent
   const version: string = event.detail;
   if (version) {
     ga.fireEventWithParam(GA_EventName.EngineVersion, version);
+  }
+});
+document.addEventListener(DocumentEvent.GoogleAnalytics, (event: CustomEvent) => {
+  const data: GoogleAnalyticsData = event.detail;
+  if (data && data.event) {
+    if (data.params) {
+      ga.fireEventWithParam(data.event, data.params);
+    } else {
+      ga.fireEvent(data.event);
+    }
   }
 });
 // #region 和Inject通讯

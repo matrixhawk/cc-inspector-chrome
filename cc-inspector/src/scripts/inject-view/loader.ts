@@ -36,7 +36,8 @@ export class AdItem {
     this.tip = data.tip || "";
     this.duration = data.duration || 0;
     this.valid = !!data.valid;
-    this.img = data.img || "";
+    const img = data.img || "";
+    this.img = githubMirrorMgr.getFileUrl(img);
     return this;
   }
 }

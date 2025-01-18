@@ -59,7 +59,10 @@ export class GithubMirror {
     this.time = cfg.getTime(name);
     this.calcUrl = cb;
   }
-  private getUrl(file: string) {
+  public getUrl(file: string) {
+    if (!file) {
+      return "";
+    }
     if (this.calcUrl) {
       return this.calcUrl(this.owner, this.repo, this.branch, file);
     } else {
@@ -141,6 +144,14 @@ export class GithubMirrorMgr {
       }
     }
     return null;
+  }
+  getFileUrl(file: string): string {
+    if (!file) {
+      return "";
+    }
+    this.mirrors.sort((a, b) => b.time - a.time);
+    const url = this.mirrors[0].getUrl(file);
+    return url;
   }
 }
 export const githubMirrorMgr = new GithubMirrorMgr();
