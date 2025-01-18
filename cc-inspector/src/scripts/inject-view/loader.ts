@@ -56,6 +56,15 @@ export class AdData {
    * 底部广告多少秒滚动一次
    */
   scrollDuration: number = 3;
+  /**
+   * 将位置随机打乱，保证用户每次看到的插件数量不一样，提高转换率
+   */
+  randomIndex: boolean = false;
+  /**
+   * 展示的广告数量，-1为所有
+   */
+  showCount: number = -1;
+
   data: Array<AdItem> = [];
   parse(data: AdData) {
     this.desc = data.desc;
@@ -63,8 +72,17 @@ export class AdData {
     this.valid = !!data.valid;
     this.showDuration = data.showDuration || 10;
     this.scrollDuration = data.scrollDuration || 3;
+    this.randomIndex = !!data.randomIndex;
+    this.showCount = data.showCount || -1;
+
     if (data.data) {
+      if (this.randomIndex) {
+        data.data.sort(() => Math.random() - 0.5);
+      }
       data.data.forEach((el) => {
+        if (this.showCount !== -1 && this.data.length >= this.showCount) {
+          return;
+        }
         const item = new AdItem().parse(el);
         if (!item.duration) {
           console.warn(`add failed, ad.duration is ${item.duration}, ${JSON.stringify(item)}`);
