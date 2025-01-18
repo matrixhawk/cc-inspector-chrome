@@ -276,7 +276,8 @@ export default defineComponent({
         });
         if (selectedUUID) {
           menus.push({
-            name: "visible (sapce)",
+            name: "visible",
+            shortKey: "space",
             enabled: true,
             callback: () => {
               ga.fireEventWithParam(GA_EventName.MouseMenu, "visible");
