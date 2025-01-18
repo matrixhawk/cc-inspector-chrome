@@ -51,7 +51,7 @@ export default defineComponent({
       console.log("get ads ", toRaw(ads.value));
 
       setInterval(() => {
-        return;
+        // return;
         if (stopAutoScroll) {
           return;
         }
@@ -59,7 +59,7 @@ export default defineComponent({
           const el = elAd.value as HTMLElement;
 
           let left = el.scrollLeft + adWidth;
-          if (el.scrollLeft + el.clientWidth > el.scrollWidth) {
+          if (el.scrollLeft + el.clientWidth >= el.scrollWidth) {
             left = 0;
           }
           el.scrollTo({ left, behavior: "smooth" });
