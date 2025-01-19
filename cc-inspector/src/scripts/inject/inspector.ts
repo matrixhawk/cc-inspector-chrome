@@ -3,6 +3,7 @@ import { uniq } from "lodash";
 import { Msg, PluginEvent, RequestLogData, RequestNodeInfoData, RequestSetPropertyData, ResponseGameInfoData, ResponseNodeInfoData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
 import { ArrayData, BoolData, ColorData, DataType, EngineData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectCircleData, ObjectData, Property, StringData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../../views/devtools/data";
 import { InjectEvent } from "./event";
+import { injectView } from "./inject-view";
 import { getValue, trySetValueWithConfig } from "./setValue";
 import { BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOptions } from "./types";
 import { isHasProperty } from "./util";
@@ -122,6 +123,7 @@ export class Inspector extends InjectEvent {
       const b = this._isCocosGame();
       if (b) {
         clearInterval(timer);
+        injectView.init();
         const version = this.getEngineVersion();
         if (b && version) {
           this.uploadEngineVersion(version);

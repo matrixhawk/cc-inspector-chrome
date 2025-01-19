@@ -1,8 +1,8 @@
 <template>
   <div class="ad" v-show="ads.length && isShow">
     <div class="header">
-      <div class="title">Creator Plugin Recommendation</div>
-      <div style="flex: 1"></div>
+      <div class="title">Recommend</div>
+      <div class="line"></div>
       <div class="close" @click="onClose" :title="closeTitle">
         <i class="icon iconfont icon_close"></i>
       </div>
@@ -150,12 +150,13 @@ export default defineComponent({
   right: 0;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  //overflow: hidden;
 
   .header {
     display: flex;
     align-items: flex-end;
     .title {
+      box-shadow: 0px 0px 2px 0px;
       font-size: 12px;
       user-select: none;
       background-color: white;
@@ -163,7 +164,13 @@ export default defineComponent({
       border-top-right-radius: 5px;
       padding: 3px 9px;
     }
+    .line {
+      height: 1px;
+      flex: 1;
+      box-shadow: 0px 0px 2px 0px;
+    }
     .close {
+      box-shadow: 0px 0px 3px 0px;
       background-color: white;
       border-top-left-radius: 10px;
       cursor: pointer;
