@@ -1,4 +1,6 @@
+import { InjectView } from "./inject-view";
 import { Inspector } from "./inspector";
 const inspector = new Inspector();
 inspector.init();
 window["CCInspector"] = inspector;
+const ad = new InjectView();

@@ -1,7 +1,7 @@
 // content.js 和原始界面共享DOM，具有操作dom的能力
 // 但是不共享js,要想访问页面js,只能通过注入的方式
 import { ChromeConst } from "cc-plugin/src/chrome/const";
-import { debugLog, Page, PluginEvent } from "../../core/types";
+import { debugLog, Msg, Page, PluginEvent } from "../../core/types";
 import { ga } from "../../ga";
 import { GA_EventName } from "../../ga/type";
 import { DocumentEvent, GoogleAnalyticsData } from "../const";
@@ -18,6 +18,10 @@ export function injectScript(url: string) {
     script.setAttribute("type", "text/javascript");
     script.setAttribute("src", content);
     script.onload = function () {
+      // 加载注入脚本界面的css
+      let css = chrome.runtime.getURL(ChromeConst.css.inject_view);
+      const event = new CustomEvent(DocumentEvent.LoadInjectCss, { detail: [css] });
+      document.dispatchEvent(event);
       document.head.removeChild(script);
     };
     document.head.appendChild(script);

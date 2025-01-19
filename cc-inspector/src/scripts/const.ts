@@ -11,6 +11,7 @@ export enum DocumentEvent {
   Content2Inject = "content2inject",
   EngineVersion = "engineVersion",
   GoogleAnalytics = "googleAnalytics",
+  LoadInjectCss = "load-inject-css",
 }
 export interface GoogleAnalyticsData {
   event: GA_EventName;
