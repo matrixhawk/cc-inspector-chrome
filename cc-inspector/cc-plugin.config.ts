@@ -9,7 +9,7 @@ function i18n(key: string) {
 
 const manifest: CocosPluginManifest = {
   name: pkgName,
-  version: "2.1.3",
+  version: "2.1.4",
   description: "Debug games made with CocosCreator and display node trees and node properties",
   author: "xu_yanfeng",
   main: "./src/main.ts",
@@ -50,6 +50,7 @@ const manifest: CocosPluginManifest = {
     script_background: "src/scripts/background/index.ts",
     script_content: "src/scripts/content/index.ts",
     script_inject: "src/scripts/inject/index.ts",
+    script_inject_view: "src/scripts/inject-view/web-test.ts",
   },
 };
 const options: CocosPluginOptions = {
