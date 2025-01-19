@@ -313,7 +313,10 @@ export class Inspector extends InjectEvent {
 
     allKeys = allKeys.filter((key) => {
       try {
-        return typeof node[key] !== "function";
+        this.warnSilent(true);
+        const type = typeof node[key];
+        this.warnSilent(false);
+        return type !== "function";
       } catch (e) {
         // console.warn(`属性${key}出现异常：\n`, e);
         return false;
@@ -405,9 +408,19 @@ export class Inspector extends InjectEvent {
     }
     return null;
   }
-
+  private warnSilent(v: boolean) {
+    if (typeof cc !== undefined && typeof cc.warn === "function") {
+      if (v) {
+        cc.warn = () => {};
+      } else {
+        cc.warn = console.warn.bind(console);
+      }
+    }
+  }
   _genInfoData(node: any, key: string | number, path: Array<string>): Info | null {
+    this.warnSilent(true);
     const propertyValue = node[key];
+    this.warnSilent(false);
     const make = (info: Info | null) => {
       info.readonly = this._isReadonly(node, key);
       info.path = path;
