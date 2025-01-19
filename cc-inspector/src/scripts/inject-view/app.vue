@@ -4,18 +4,18 @@
       <div class="title">Recommend</div>
       <div class="line"></div>
       <div class="close" @click="onClose" :title="closeTitle">
-        <i class="icon iconfont icon_close"></i>
+        <div class="icon">x</div>
       </div>
     </div>
     <div class="body" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave">
       <div class="left slide" @click="onClickBtnLeft">
-        <i class="iconfont icon_arrow_left arrow"></i>
+        <div class="arrow">&lt;</div>
       </div>
       <div class="list" ref="elAd" @wheel="onWheel">
         <Banner v-for="(item, index) in ads" :data="item" :key="index"></Banner>
       </div>
       <div class="right slide" @click="onClickBtnRight">
-        <i class="iconfont icon_arrow_right arrow"></i>
+        <div class="arrow">&gt;</div>
       </div>
     </div>
   </div>
@@ -141,7 +141,7 @@ export default defineComponent({
 
 <style scoped lang="less">
 @color-bg: #8d8d8da6;
-@color-hover: #4d4d4da6;
+@color-hover: #f9c04e;
 @color-active: #ffaa00;
 .ad {
   position: absolute;
@@ -181,7 +181,8 @@ export default defineComponent({
       justify-content: center;
       align-items: center;
       .icon {
-        font-size: 8px;
+        user-select: none;
+        font-size: 14px;
         &:hover {
           color: black;
         }
@@ -229,10 +230,14 @@ export default defineComponent({
       flex-direction: row;
       align-items: center;
       position: absolute;
+      justify-content: center;
 
       .arrow {
+        user-select: none;
         font-size: 22px;
-        color: rgb(61, 61, 61);
+        font-weight: bold;
+
+        color: rgb(133, 133, 133);
       }
     }
   }

@@ -87,10 +87,12 @@ export default defineComponent({
   max-width: 300px;
   min-height: 50px;
   max-height: 50px;
+  margin: 0;
   cursor: pointer;
   display: flex;
   text-align: center;
   align-items: flex-end;
+
   &:hover {
     border: 2px solid #949494;
     border-bottom: 0;
