@@ -1,5 +1,5 @@
+import CCPlugin from "../../../cc-plugin.config";
 import { githubMirrorMgr } from "./github";
-
 export class AdItem {
   /**
    * 广告的名字
@@ -43,7 +43,6 @@ export class AdItem {
 }
 export class AdData {
   desc: string = "";
-  version: string = "";
   /**
    * 是否启用广告
    */
@@ -68,7 +67,6 @@ export class AdData {
   data: Array<AdItem> = [];
   parse(data: AdData) {
     this.desc = data.desc;
-    this.version = data.version;
     this.valid = !!data.valid;
     this.showDuration = data.showDuration || 10;
     this.scrollDuration = data.scrollDuration || 3;
@@ -99,7 +97,7 @@ export class AdData {
 }
 
 export async function getAdData(): Promise<AdData | null> {
-  const data = await githubMirrorMgr.getData("ad.json");
+  const data = await githubMirrorMgr.getData(`ad-${CCPlugin.manifest.version}.json`);
   if (data) {
     const ad = new AdData();
     ad.parse(data as AdData);

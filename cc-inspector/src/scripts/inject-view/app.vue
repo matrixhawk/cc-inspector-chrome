@@ -1,13 +1,13 @@
 <template>
-  <div class="ad" v-show="ads.length && isShow" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave">
+  <div class="ad" v-show="ads.length && isShow">
     <div class="header">
-      <div class="title">Creator插件推荐</div>
+      <div class="title">Creator Plugin Recommendation</div>
       <div style="flex: 1"></div>
-      <div class="close" @click="onClose">
+      <div class="close" @click="onClose" :title="closeTitle">
         <i class="icon iconfont icon_close"></i>
       </div>
     </div>
-    <div class="body">
+    <div class="body" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave">
       <div class="left slide" @click="onClickBtnLeft">
         <i class="iconfont icon_arrow_left arrow"></i>
       </div>
@@ -21,18 +21,21 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, ref, toRaw } from "vue";
+import { defineComponent, onMounted, onUnmounted, ref, toRaw } from "vue";
+import { GA_EventName } from "../../ga/type";
 import Banner from "./banner.vue";
 import { emitter, Msg } from "./const";
 import { AdItem, getAdData } from "./loader";
 import { ga } from "./util";
-import { GA_EventName } from "../../ga/type";
 export default defineComponent({
   name: "ad",
   components: { Banner },
   setup() {
     let ads = ref<AdItem[]>([]);
     let stopAutoScroll = false;
+    const key = "close-time";
+    let timer = null;
+    const closeTitle = ref("");
     onMounted(async () => {
       const data = await getAdData();
       if (!data) {
@@ -49,8 +52,13 @@ export default defineComponent({
       }
       ads.value = data.data;
       console.log("get ads ", toRaw(ads.value));
+      closeTitle.value = `display again in ${data.showDuration} minute`;
 
-      setInterval(() => {
+      visibleAd(data.showDuration);
+      adScroll(data.scrollDuration);
+    });
+    function adScroll(scrollDuration: number) {
+      timer = setInterval(() => {
         // return;
         if (stopAutoScroll) {
           return;
@@ -64,9 +72,19 @@ export default defineComponent({
           }
           el.scrollTo({ left, behavior: "smooth" });
         }
-      }, data.scrollDuration * 1000);
+      }, scrollDuration * 1000);
+    }
+    function visibleAd(showDuration: number) {
+      const time = Number(localStorage.getItem(key) || "0");
+      if (time) {
+        // 单位分钟
+        const diff = (Date.now() - time) / 1000 / 60;
+        isShow.value = diff >= showDuration;
+      }
+    }
+    onUnmounted(() => {
+      clearInterval(timer);
     });
-
     function testBanner() {
       const data = new AdItem();
       data.name = "ad test 11111111111 11111111111 44444444444444  5555555555555 111111111111111111 2222222222222222 33333333333333 444444444444444";
@@ -77,11 +95,13 @@ export default defineComponent({
     const adWidth = 300;
     const isShow = ref(true);
     return {
+      closeTitle,
       isShow,
       elAd,
       ads,
       onClose() {
         isShow.value = false;
+        localStorage.setItem(key, Date.now().toString());
         ga(GA_EventName.CloseAd);
       },
       onMouseEnter() {
