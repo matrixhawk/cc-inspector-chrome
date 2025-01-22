@@ -1,21 +1,31 @@
 <template>
-  <div class="ad" v-show="ads.length && isShow">
-    <div class="header">
-      <div class="title">Recommend</div>
-      <div class="line"></div>
-      <div class="close" @click="onClose" :title="closeTitle">
-        <div class="icon">x</div>
-      </div>
+  <div class="ad" ref="rootEl" v-show="!picking">
+    <div class="title" @mousedown="onMouseDown">
+      <i class="iconfont icon_cocos cocos"></i>
+      <div>Assistant</div>
     </div>
-    <div class="body" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave">
-      <div class="left slide" @click="onClickBtnLeft">
-        <div class="arrow">&lt;</div>
+    <div class="pick" @click="onPick">
+      <i class="iconfont icon_target target"></i>
+      <div>inspect</div>
+    </div>
+    <div v-show="ads.length && isShow">
+      <div class="header">
+        <div class="title">Recommend</div>
+        <div class="line"></div>
+        <div class="close" @click="onClose" :title="closeTitle">
+          <div class="icon">x</div>
+        </div>
       </div>
-      <div class="list" ref="elAd" @wheel="onWheel">
-        <Banner v-for="(item, index) in ads" :data="item" :key="index"></Banner>
-      </div>
-      <div class="right slide" @click="onClickBtnRight">
-        <div class="arrow">&gt;</div>
+      <div class="body" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave">
+        <div class="left slide" @click="onClickBtnLeft">
+          <div class="arrow">&lt;</div>
+        </div>
+        <div class="list" ref="elAd" @wheel="onWheel">
+          <Banner v-for="(item, index) in ads" :data="item" :key="index"></Banner>
+        </div>
+        <div class="right slide" @click="onClickBtnRight">
+          <div class="arrow">&gt;</div>
+        </div>
       </div>
     </div>
   </div>
@@ -37,6 +47,7 @@ export default defineComponent({
     let timer = null;
     const closeTitle = ref("");
     onMounted(async () => {
+      return;
       const data = await getAdData();
       if (!data) {
         console.log(`get ad failed`);
@@ -97,7 +108,11 @@ export default defineComponent({
     const elAd = ref<HTMLElement>(null);
     const adWidth = 300;
     const isShow = ref(true);
+    const picking = ref(false);
+    const rootEl = ref<HTMLDivElement>(null);
     return {
+      rootEl,
+      picking,
       closeTitle,
       isShow,
       elAd,
@@ -137,6 +152,38 @@ export default defineComponent({
           el.scrollTo({ left: el.scrollLeft + adWidth, behavior: "smooth" });
         }
       },
+      onMouseDown(event: MouseEvent) {
+        const root = toRaw(rootEl.value) as HTMLDivElement;
+        if (!root) {
+          return;
+        }
+        const startY = event.pageY;
+        const startTop = root.offsetTop;
+        function onMouseMove(e: MouseEvent) {
+          const dy = e.pageY - startY;
+          let top = startTop + dy;
+          if (top < 0) {
+            top = 0;
+          }
+          root.style.top = `${top}px`;
+        }
+
+        function onMouseUp(e: MouseEvent) {
+          document.removeEventListener("mousemove", onMouseMove, true);
+          document.removeEventListener("mouseup", onMouseUp, true);
+        }
+        document.addEventListener("mousemove", onMouseMove, true);
+        document.addEventListener("mouseup", onMouseUp, true);
+      },
+      onPick() {
+        picking.value = true;
+        const cursor = document.body.style.cursor;
+        document.body.style.cursor = "zoom-in";
+        document.addEventListener("mousedown", () => {
+          document.body.style.cursor = cursor;
+          picking.value = false;
+        });
+      },
     };
   },
 });
@@ -147,13 +194,49 @@ export default defineComponent({
 @color-hover: #f9c04e;
 @color-active: #ffaa00;
 .ad {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  position: fixed;
+  z-index: 99999;
+  top: 0px;
+  right: 0px;
   display: flex;
   flex-direction: column;
-  //overflow: hidden;
+  background-color: white;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  // overflow: hidden;
+  .title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    cursor: move;
+    font-size: 14px;
+    user-select: none;
+    background-color: rgb(0, 0, 0);
+    border: 1px solid black;
+    color: white;
+    padding: 0 4px;
+    border-top-left-radius: 5px;
+    // border-bottom-left-radius: 5px;
+    .cocos {
+      color: rgb(85, 192, 224);
+    }
+  }
+  .pick {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    color: black;
+    user-select: none;
+    &:hover {
+      color: rgb(101, 163, 249);
+    }
+    &:active {
+      color: rgb(255, 187, 0);
+    }
+    .target {
+      font-size: 19px;
+    }
+  }
 
   .header {
     display: flex;

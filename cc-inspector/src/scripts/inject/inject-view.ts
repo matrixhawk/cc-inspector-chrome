@@ -7,7 +7,6 @@ import App from "../inject-view/app.vue";
 export class InjectView {
   private _inited = false;
   private css: string[] = [];
-  private shadowRoot: ShadowRoot | null = null;
   private hasLoadCss = false;
   constructor() {
     document.addEventListener(DocumentEvent.LoadInjectCss, (event: CustomEvent) => {
@@ -24,9 +23,6 @@ export class InjectView {
     this.createUI();
   }
   private loadCss() {
-    if (!this.shadowRoot) {
-      return;
-    }
     if (this.hasLoadCss) {
       return;
     }
@@ -38,30 +34,20 @@ export class InjectView {
       const link = document.createElement("link");
       link.href = css;
       link.rel = "stylesheet";
-      this.shadowRoot.appendChild(link);
+      document.head.appendChild(link);
     });
   }
   private createUI() {
     const el = document.createElement("div");
-    el.style.position = "fixed";
-    el.style.zIndex = "99999";
-    el.style.bottom = "0";
-    el.style.right = "0";
-    el.style.left = "0";
+    el.setAttribute("app", "");
     document.body.appendChild(el);
-    const shadowRoot = el.attachShadow({ mode: "open" });
-    shadowRoot.ATTRIBUTE_NODE;
-    this.shadowRoot = shadowRoot;
-
     // load css
     this.loadCss();
     // vue
-    const root = document.createElement("div");
-    shadowRoot.appendChild(root);
     const app = createApp(App);
     // ccui.uiElement.setDoc(document);
     app.use(ccui);
-    app.mount(root);
+    app.mount(el);
   }
 }
 export const injectView = new InjectView();
