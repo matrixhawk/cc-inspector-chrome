@@ -3,6 +3,7 @@ import { uniq } from "lodash";
 import { Msg, PluginEvent, RequestLogData, RequestNodeInfoData, RequestSetPropertyData, ResponseGameInfoData, ResponseNodeInfoData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
 import { ArrayData, BoolData, ColorData, DataType, EngineData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectCircleData, ObjectData, Property, StringData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../../views/devtools/data";
 import { InjectEvent } from "./event";
+import { Hint } from "./hint";
 import { injectView } from "./inject-view";
 import { getValue, trySetValueWithConfig } from "./setValue";
 import { BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOptions } from "./types";
@@ -11,6 +12,7 @@ declare const cc: any;
 
 export class Inspector extends InjectEvent {
   inspectorGameMemoryStorage: Record<string, any> = {};
+  private hint: Hint = new Hint();
 
   private getAtlasViewFunction() {
     // 之前只有v2版本支持
@@ -104,6 +106,34 @@ export class Inspector extends InjectEvent {
         }
         break;
       }
+      case Msg.HoverNode: {
+        const uuid: string = pluginEvent.data;
+        if (uuid) {
+          const node = this.inspectorGameMemoryStorage[uuid];
+          if (node.isValid) {
+            this.hint.setHover(node);
+          } else {
+            this.hint.cleanHover();
+          }
+        } else {
+          this.hint.cleanHover();
+        }
+        break;
+      }
+      case Msg.SelectNode: {
+        const uuid: string = pluginEvent.data;
+        if (uuid) {
+          const node = this.inspectorGameMemoryStorage[uuid];
+          if (node.isValid) {
+            this.hint.setSelected(node);
+          } else {
+            this.hint.cleanSelected();
+          }
+        } else {
+          this.hint.cleanSelected();
+        }
+        break;
+      }
       case Msg.RequestDestroy: {
         const uuid: string = pluginEvent.data;
         const node = this.inspectorGameMemoryStorage[uuid];
@@ -124,14 +154,18 @@ export class Inspector extends InjectEvent {
       if (b) {
         clearInterval(timer);
         injectView.init();
+        cc.director.on(cc.Director.EVENT_AFTER_DRAW, () => {
+          this.hint.update();
+        });
         const version = this.getEngineVersion();
+        this.hint.engineVersion = version;
         if (b && version) {
           this.uploadEngineVersion(version);
         }
       }
     }, 300);
   }
-  private getEngineVersion() {
+  private getEngineVersion(): string {
     if (this._isCocosGame()) {
       return cc.ENGINE_VERSION || "";
     } else {
@@ -178,44 +212,6 @@ export class Inspector extends InjectEvent {
     } else {
       this.notifySupportGame(false);
     }
-  }
-
-  // @ts-ignore
-  draw: cc.Graphics = null;
-
-  _drawRect(node: any) {
-    let draw = this.draw;
-
-    if (!draw) {
-      // @ts-ignore
-      let node = new cc.Node("draw-node");
-      // @ts-ignore
-      cc.director.getScene().addChild(node);
-      // @ts-ignore
-      draw = this.draw = node.addComponent(cc.Graphics);
-    }
-    draw.clear();
-    draw.lineWidth = 10;
-    // @ts-ignore
-    draw.strokeColor = new cc.Color().fromHEX("#ff0000");
-    const { anchorX, anchorY, width, height, x, y } = node;
-    let halfWidth = width / 2;
-    let halfHeight = height / 2;
-    let leftBottom = node.convertToWorldSpaceAR(cc.v2(-halfWidth, -halfHeight));
-    let leftTop = node.convertToWorldSpaceAR(cc.v2(-halfWidth, halfHeight));
-    let rightBottom = node.convertToWorldSpaceAR(cc.v2(halfWidth, -halfHeight));
-    let rightTop = node.convertToWorldSpaceAR(cc.v2(halfWidth, halfHeight));
-
-    function line(began: any, end: any) {
-      draw.moveTo(began.x, began.y);
-      draw.lineTo(end.x, end.y);
-    }
-
-    line(leftBottom, rightBottom);
-    line(rightBottom, rightTop);
-    line(rightTop, leftTop);
-    line(leftTop, leftBottom);
-    this.draw.stroke();
   }
 
   // 收集节点信息

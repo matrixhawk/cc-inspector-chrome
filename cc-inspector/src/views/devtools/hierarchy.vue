@@ -10,7 +10,7 @@
           <i class="matchCase iconfont icon_font_size" @click.stop="onChangeCase" title="match case" :style="{ color: matchCase ? 'red' : '' }"></i>
         </slot>
       </CCInput>
-      <CCTree @contextmenu.prevent.stop="onMenu" style="flex: 1" ref="elTree" :expand-keys="expandedKeys" :default-expand-all="false" :value="treeData" @node-expand="onNodeExpand" @node-collapse="onNodeCollapse" @node-click="handleNodeClick" @node-unclick="handleNodeUnclick"></CCTree>
+      <CCTree @contextmenu.prevent.stop="onMenu" style="flex: 1" ref="elTree" :expand-keys="expandedKeys" :default-expand-all="false" :value="treeData" @node-expand="onNodeExpand" @node-collapse="onNodeCollapse" @node-click="handleNodeClick" @node-unclick="handleNodeUnclick" @node-enter="handleNodeEnter" @node-leave="handleNodeLeave"></CCTree>
     </CCDock>
   </div>
 </template>
@@ -171,6 +171,7 @@ export default defineComponent({
     function updateSelect(uuid: string | null) {
       selectedUUID = uuid;
       Bus.emit(BusMsg.SelectNode, uuid);
+      bridge.send(Msg.SelectNode, uuid);
     }
     const freshAuto = ref(config.value.refreshHirarchy);
     return {
@@ -191,6 +192,16 @@ export default defineComponent({
       frameID,
       handleNodeUnclick() {
         updateSelect(null);
+      },
+      handleNodeEnter(data: TreeData | null) {
+        if (data) {
+          bridge.send(Msg.HoverNode, data.id);
+        }
+      },
+      handleNodeLeave(data: TreeData | null) {
+        if (data) {
+          bridge.send(Msg.HoverNode, null);
+        }
       },
       handleNodeClick(data: TreeData | null) {
         if (data) {

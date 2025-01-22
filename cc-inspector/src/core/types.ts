@@ -103,6 +103,14 @@ export enum Msg {
    */
   GetTabID = "GetTabID",
   /**
+   * 鼠标滑过节点
+   */
+  HoverNode = "hover-node",
+  /**
+   * 选中节点
+   */
+  SelectNode = "select-node",
+  /**
    * 更新页面的frame
    */
   ResponseUpdateFrames = "response-update-frames",
