@@ -80,6 +80,9 @@ export default defineComponent({
         // 单位分钟
         const diff = (Date.now() - time) / 1000 / 60;
         isShow.value = diff >= showDuration;
+        if (isShow.value && ads.value.length) {
+          ga(GA_EventName.ShowAd);
+        }
       }
     }
     onUnmounted(() => {

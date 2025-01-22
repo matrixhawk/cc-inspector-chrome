@@ -1,5 +1,6 @@
 import { debugLog, Msg, Page, PluginEvent } from "../../core/types";
-import { DocumentEvent } from "../const";
+import { GA_EventName } from "../../ga/type";
+import { DocumentEvent, GoogleAnalyticsData } from "../const";
 import { Terminal } from "../terminal";
 
 export class InjectEvent {
@@ -21,6 +22,11 @@ export class InjectEvent {
   sendEngineVersion(version: string) {
     const detail = version;
     const event = new CustomEvent(DocumentEvent.EngineVersion, { detail });
+    document.dispatchEvent(event);
+  }
+  sendAppVersion(version: string) {
+    const detail = { event: GA_EventName.AppVersion, params: version } as GoogleAnalyticsData;
+    const event = new CustomEvent(DocumentEvent.GoogleAnalytics, { detail });
     document.dispatchEvent(event);
   }
 }

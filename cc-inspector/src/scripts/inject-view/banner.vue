@@ -1,7 +1,7 @@
 <template>
   <div v-if="data" class="banner" :class="ani" @click="onClick" :title="data.tip" :style="getStyle()">
     <div class="text">
-      <span>
+      <span v-if="data.name">
         {{ data.name }}
       </span>
     </div>
