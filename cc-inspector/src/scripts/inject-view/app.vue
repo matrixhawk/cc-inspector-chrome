@@ -1,156 +1,107 @@
 <template>
-  <div class="ad" ref="rootEl" v-show="!picking">
-    <div class="title" @mousedown="onMouseDown">
-      <i class="iconfont icon_cocos cocos"></i>
-      <div>Assistant</div>
-    </div>
-    <div class="pick" @click="onPick">
-      <i class="iconfont icon_target target"></i>
-      <div>inspect</div>
-    </div>
-    <div v-show="ads.length && isShow">
-      <div class="header">
-        <div class="title">Recommend</div>
-        <div class="line"></div>
-        <div class="close" @click="onClose" :title="closeTitle">
-          <div class="icon">x</div>
+  <div class="ad" ref="rootEl" v-show="!picking" @mouseleave="onMouseLeaveRoot">
+    <div class="title">
+      <div class="btns" v-show="showBtns">
+        <div v-for="(item, index) in listArray" :key="index" class="list" @click="item.cb" :title="item.txt">
+          <i class="iconfont icon" :class="item.icon"></i>
         </div>
       </div>
-      <div class="body" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave">
-        <div class="left slide" @click="onClickBtnLeft">
-          <div class="arrow">&lt;</div>
-        </div>
-        <div class="list" ref="elAd" @wheel="onWheel">
-          <Banner v-for="(item, index) in ads" :data="item" :key="index"></Banner>
-        </div>
-        <div class="right slide" @click="onClickBtnRight">
-          <div class="arrow">&gt;</div>
-        </div>
-      </div>
+      <i class="iconfont icon_cocos cocos" @mousedown="onMouseDown" @mouseenter="onMouseEnterCocosLogo"></i>
     </div>
+    <!-- <Memory></Memory> -->
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted, ref, toRaw } from "vue";
-import { GA_EventName } from "../../ga/type";
+import { defineComponent, onMounted, ref, toRaw } from "vue";
 import Banner from "./banner.vue";
-import { emitter, Msg } from "./const";
-import { AdItem, getAdData } from "./loader";
-import { ga } from "./util";
+import Memory from "./memory.vue";
+
+interface ListItem {
+  icon: string;
+  txt: string;
+  cb: (event: MouseEvent) => void;
+}
 export default defineComponent({
   name: "ad",
-  components: { Banner },
+  components: { Banner, Memory },
   setup() {
-    let ads = ref<AdItem[]>([]);
-    let stopAutoScroll = false;
-    const key = "close-time";
-    let timer = null;
-    const closeTitle = ref("");
-    onMounted(async () => {
-      return;
-      const data = await getAdData();
-      if (!data) {
-        console.log(`get ad failed`);
-        return;
-      }
-      if (!data.valid) {
-        console.log(`set ad forbidden`);
-        return;
-      }
-      if (!data.data.length) {
-        console.log(`not find any ad`);
-        return;
-      }
-      ads.value = data.data;
-      console.log("get ads ", toRaw(ads.value));
-      closeTitle.value = `display again in ${data.showDuration} minute`;
+    const keyAssistant = "assistant";
 
-      visibleAd(data.showDuration);
-      adScroll(data.scrollDuration);
-    });
-    function adScroll(scrollDuration: number) {
-      timer = setInterval(() => {
-        // return;
-        if (stopAutoScroll) {
+    const listArray = ref<ListItem[]>([
+      {
+        icon: "icon_shop_cart",
+        txt: "Recommend Plugins",
+        cb: () => {},
+      },
+      {
+        icon: "icon_target",
+        txt: "Inspect Game",
+        cb: () => {
+          showBtns.value = false;
+          picking.value = true;
+          const cursor = document.body.style.cursor;
+          document.body.style.cursor = "zoom-in";
+          document.addEventListener("mousedown", () => {
+            document.body.style.cursor = cursor;
+            picking.value = false;
+          });
+        },
+      },
+    ]);
+
+    function recoverAssistantTop() {
+      const top = Number(localStorage.getItem(keyAssistant) || "0");
+      updateAssistantTop(top);
+    }
+
+    function updateAssistantTop(top: number) {
+      const root = toRaw(rootEl.value) as HTMLDivElement;
+      if (!root) {
+        return;
+      }
+      if (top < 0) {
+        top = 0;
+      }
+      const maxTop = document.body.clientHeight - root.clientHeight;
+      if (top > maxTop) {
+        top = maxTop;
+      }
+      root.style.top = `${top}px`;
+      localStorage.setItem(keyAssistant, top.toString());
+    }
+    onMounted(async () => {
+      recoverAssistantTop();
+      window.addEventListener("resize", () => {
+        const root = toRaw(rootEl.value) as HTMLDivElement;
+        if (!root) {
           return;
         }
-        if (elAd.value) {
-          const el = elAd.value as HTMLElement;
-
-          let left = el.scrollLeft + adWidth;
-          if (el.scrollLeft + el.clientWidth >= el.scrollWidth) {
-            left = 0;
-          }
-          el.scrollTo({ left, behavior: "smooth" });
-        }
-      }, scrollDuration * 1000);
-    }
-    function visibleAd(showDuration: number) {
-      const time = Number(localStorage.getItem(key) || "0");
-      if (time) {
-        // 单位分钟
-        const diff = (Date.now() - time) / 1000 / 60;
-        isShow.value = diff >= showDuration;
-        if (isShow.value && ads.value.length) {
-          ga(GA_EventName.ShowAd);
-        }
-      }
-    }
-    onUnmounted(() => {
-      clearInterval(timer);
+        updateAssistantTop(root.offsetTop);
+      });
+      return;
     });
-    function testBanner() {
-      const data = new AdItem();
-      data.name = "ad test 11111111111 11111111111 44444444444444  5555555555555 111111111111111111 2222222222222222 33333333333333 444444444444444";
-      data.store = "http://www.baidu.com";
-      emitter.emit(Msg.ChangeAd, data);
-    }
-    const elAd = ref<HTMLElement>(null);
-    const adWidth = 300;
-    const isShow = ref(true);
+
     const picking = ref(false);
     const rootEl = ref<HTMLDivElement>(null);
+    const showBtns = ref(true);
+    let autoHideTimer = null;
+    let isDraging = false;
     return {
+      showBtns,
+      listArray,
       rootEl,
       picking,
-      closeTitle,
-      isShow,
-      elAd,
-      ads,
-      onClose() {
-        isShow.value = false;
-        localStorage.setItem(key, Date.now().toString());
-        ga(GA_EventName.CloseAd);
+      onMouseEnterCocosLogo() {
+        clearTimeout(autoHideTimer);
+        showBtns.value = true;
       },
-      onMouseEnter() {
-        stopAutoScroll = true;
-      },
-      onMouseLeave() {
-        stopAutoScroll = false;
-      },
-      onWheel(event: WheelEvent) {
-        if (!elAd.value) {
+      onMouseLeaveRoot(event: MouseEvent) {
+        if (isDraging) {
           return;
         }
-        event.preventDefault();
-        const div = elAd.value as HTMLElement;
-        if (event.deltaY > 0) {
-          div.scrollTo({ left: div.scrollLeft + adWidth, behavior: "smooth" });
-        } else {
-          div.scrollTo({ left: div.scrollLeft - adWidth, behavior: "smooth" });
-        }
-      },
-      async onClickBtnLeft() {
-        if (elAd.value) {
-          const el = elAd.value as HTMLElement;
-          el.scrollTo({ left: el.scrollLeft - adWidth, behavior: "smooth" });
-        }
-      },
-      async onClickBtnRight() {
-        if (elAd.value) {
-          const el = elAd.value as HTMLElement;
-          el.scrollTo({ left: el.scrollLeft + adWidth, behavior: "smooth" });
-        }
+        autoHideTimer = setTimeout(() => {
+          showBtns.value = false;
+        }, 500);
       },
       onMouseDown(event: MouseEvent) {
         const root = toRaw(rootEl.value) as HTMLDivElement;
@@ -160,29 +111,19 @@ export default defineComponent({
         const startY = event.pageY;
         const startTop = root.offsetTop;
         function onMouseMove(e: MouseEvent) {
+          isDraging = true;
           const dy = e.pageY - startY;
-          let top = startTop + dy;
-          if (top < 0) {
-            top = 0;
-          }
-          root.style.top = `${top}px`;
+          const top = startTop + dy;
+          updateAssistantTop(top);
         }
 
         function onMouseUp(e: MouseEvent) {
+          isDraging = false;
           document.removeEventListener("mousemove", onMouseMove, true);
           document.removeEventListener("mouseup", onMouseUp, true);
         }
         document.addEventListener("mousemove", onMouseMove, true);
         document.addEventListener("mouseup", onMouseUp, true);
-      },
-      onPick() {
-        picking.value = true;
-        const cursor = document.body.style.cursor;
-        document.body.style.cursor = "zoom-in";
-        document.addEventListener("mousedown", () => {
-          document.body.style.cursor = cursor;
-          picking.value = false;
-        });
       },
     };
   },
@@ -208,123 +149,40 @@ export default defineComponent({
     display: flex;
     flex-direction: row;
     align-items: center;
-    cursor: move;
     font-size: 14px;
     user-select: none;
     background-color: rgb(0, 0, 0);
     border: 1px solid black;
     color: white;
-    padding: 0 4px;
+    padding: 2px 4px;
     border-top-left-radius: 5px;
-    // border-bottom-left-radius: 5px;
-    .cocos {
-      color: rgb(85, 192, 224);
-    }
-  }
-  .pick {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    color: black;
-    user-select: none;
-    &:hover {
-      color: rgb(101, 163, 249);
-    }
-    &:active {
-      color: rgb(255, 187, 0);
-    }
-    .target {
-      font-size: 19px;
-    }
-  }
+    border-bottom-left-radius: 5px;
 
-  .header {
-    display: flex;
-    align-items: flex-end;
-    .title {
-      box-shadow: 0px 0px 2px 0px;
-      font-size: 12px;
-      user-select: none;
-      background-color: white;
-      // border-top-left-radius: 5px;
-      border-top-right-radius: 5px;
-      padding: 3px 9px;
-    }
-    .line {
-      height: 1px;
-      flex: 1;
-      box-shadow: 0px 0px 2px 0px;
-    }
-    .close {
-      box-shadow: 0px 0px 3px 0px;
-      background-color: white;
-      border-top-left-radius: 10px;
-      cursor: pointer;
-      color: rgb(138, 138, 138);
-      width: 20px;
-      height: 20px;
+    .btns {
+      color: white;
       display: flex;
-      justify-content: center;
-      align-items: center;
-      .icon {
+      flex-direction: row;
+      .list {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        color: white;
         user-select: none;
-        font-size: 14px;
         &:hover {
-          color: black;
+          color: rgb(101, 163, 249);
         }
         &:active {
-          color: #ffaa00;
+          color: rgb(255, 187, 0);
+        }
+        .icon {
+          font-size: 20px;
         }
       }
     }
-  }
-  .body {
-    display: flex;
-    position: relative;
-    .list {
-      flex: 1;
-      display: flex;
-      flex-direction: row;
-      overflow: hidden;
-    }
-    .left {
-      left: 0;
-      background-image: linear-gradient(to left, rgba(0, 0, 0, 0), @color-bg);
-      &:hover {
-        background-image: linear-gradient(to left, rgba(0, 0, 0, 0), @color-hover);
-      }
-      &:active {
-        background-image: linear-gradient(to left, rgba(0, 0, 0, 0), @color-active);
-      }
-    }
-    .right {
-      right: 0px;
-      background-image: linear-gradient(to right, rgba(0, 0, 0, 0), @color-bg);
-      &:hover {
-        background-image: linear-gradient(to right, rgba(0, 0, 0, 0), @color-hover);
-      }
-      &:active {
-        background-image: linear-gradient(to right, rgba(0, 0, 0, 0), @color-active);
-      }
-    }
-
-    .slide {
-      display: flex;
-      height: 100%;
-      width: 20px;
-      cursor: pointer;
-      flex-direction: row;
-      align-items: center;
-      position: absolute;
-      justify-content: center;
-
-      .arrow {
-        user-select: none;
-        font-size: 22px;
-        font-weight: bold;
-
-        color: rgb(133, 133, 133);
-      }
+    .cocos {
+      cursor: move;
+      font-size: 20px;
+      color: rgb(85, 192, 224);
     }
   }
 }
