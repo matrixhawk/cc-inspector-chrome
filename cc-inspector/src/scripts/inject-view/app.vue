@@ -9,13 +9,18 @@
       <i class="iconfont icon_cocos cocos" @mousedown="onMouseDown" @mouseenter="onMouseEnterCocosLogo"></i>
     </div>
     <!-- <Memory></Memory> -->
+    <CCDialog></CCDialog>
   </div>
 </template>
 <script lang="ts">
+import ccui from "@xuyanfeng/cc-ui";
 import { defineComponent, onMounted, ref, toRaw } from "vue";
+import { GA_EventName } from "../../ga/type";
+import Ad from "./ad.vue";
 import Banner from "./banner.vue";
 import Memory from "./memory.vue";
-
+import { ga } from "./util";
+const { CCDialog } = ccui.components;
 interface ListItem {
   icon: string;
   txt: string;
@@ -23,20 +28,30 @@ interface ListItem {
 }
 export default defineComponent({
   name: "ad",
-  components: { Banner, Memory },
+  components: { CCDialog, Banner, Memory },
   setup() {
     const keyAssistant = "assistant";
 
     const listArray = ref<ListItem[]>([
       {
-        icon: "icon_shop_cart",
-        txt: "Recommend Plugins",
-        cb: () => {},
+        icon: "icon_shop_cart ani_shop_cart",
+        txt: "Recommended Plugins",
+        cb: () => {
+          ccui.dialog.showDialog({
+            title: "Recommended Plugins",
+            comp: Ad,
+            width: 310,
+            closeCB: () => {
+              ga(GA_EventName.CloseAd);
+            },
+          });
+        },
       },
       {
         icon: "icon_target",
         txt: "Inspect Game",
         cb: () => {
+          ga(GA_EventName.DoInspector);
           showBtns.value = false;
           picking.value = true;
           const cursor = document.body.style.cursor;
@@ -131,9 +146,17 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
-@color-bg: #8d8d8da6;
-@color-hover: #f9c04e;
-@color-active: #ffaa00;
+@keyframes color-change {
+  0% {
+    color: #f00;
+  }
+  50% {
+    color: #0f0;
+  }
+  100% {
+    color: #f00;
+  }
+}
 .ad {
   position: fixed;
   z-index: 99999;
@@ -176,6 +199,9 @@ export default defineComponent({
         }
         .icon {
           font-size: 20px;
+        }
+        .ani_shop_cart {
+          animation: color-change 2s infinite;
         }
       }
     }

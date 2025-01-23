@@ -80,8 +80,9 @@ export default defineComponent({
 }
 .banner {
   border: 2px solid #d2d2d2;
-  border-bottom: 0;
   background-color: #ffffff;
+  background-position: center center;
+  background-size: cover;
   overflow: hidden;
   min-width: 300px;
   max-width: 300px;
@@ -95,7 +96,7 @@ export default defineComponent({
 
   &:hover {
     border: 2px solid #949494;
-    border-bottom: 0;
+
     background-color: #d1d1d1;
   }
   .text {

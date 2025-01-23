@@ -91,6 +91,10 @@ export enum GA_EventName {
    * 展示广告
    */
   ShowAd = "show_ad",
+  /**
+   * 用户主动使用inspector检查游戏节点
+   */
+  DoInspector = "do_inspector",
 }
 export enum GA_Button {
   Github = "github",
