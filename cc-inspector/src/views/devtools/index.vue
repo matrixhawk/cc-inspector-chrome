@@ -6,12 +6,6 @@
       <CCSelect v-model:value="frameID" @change="onChangeFrame" :data="getFramesData()"> </CCSelect>
     </div>
     <div v-if="isShowDebug" class="find">
-      <div v-if="false">
-        <CCButton type="success" @click="onMemoryTest">内存测试</CCButton>
-        <span>JS堆栈限制: {{ memory.performance.jsHeapSizeLimit }}</span>
-        <span>JS堆栈大小: {{ memory.performance.totalJSHeapSize }}</span>
-        <span>JS堆栈使用: {{ memory.performance.usedJSHeapSize }}</span>
-      </div>
       <Hierarchy></Hierarchy>
       <CCDivider></CCDivider>
       <Inspector></Inspector>
@@ -141,9 +135,6 @@ export default defineComponent({
       let eventData: NodeInfoData = event.data;
       isShowDebug.value = true;
     });
-    bridge.on(Msg.MemoryInfo, (eventData: any) => {
-      memory.value = eventData;
-    });
     bridge.on(Msg.ResponseError, (event: PluginEvent) => {
       const err: string = event.data;
       ccui.footbar.showError(err);
@@ -158,17 +149,6 @@ export default defineComponent({
       });
     });
 
-    const memory = ref<{
-      performance: {
-        jsHeapSizeLimit?: number;
-        totalJSHeapSize?: number;
-        usedJSHeapSize?: number;
-      };
-      console: Object;
-    }>({
-      performance: {},
-      console: {},
-    });
     // el-tree的渲染key
     const defaultProps = ref<{ children: string; label: string }>({
       children: "children",
@@ -184,7 +164,6 @@ export default defineComponent({
     const version = ref(PluginConfig.manifest.version);
     return {
       version,
-      memory,
       defaultProps,
       frameID,
       iframes,
@@ -200,10 +179,6 @@ export default defineComponent({
           });
         });
         return options;
-      },
-
-      onMemoryTest() {
-        bridge.send(Msg.MemoryInfo);
       },
 
       onChangeFrame,

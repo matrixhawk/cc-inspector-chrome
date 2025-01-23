@@ -1,6 +1,7 @@
 <template>
   <div class="left">
     <CCDock name="Hierarchy">
+      <template v-slot:tab-name-before> </template>
       <template v-slot:title>
         <i class="iconfont icon_refresh refresh" :class="{ 'refresh-rotate': freshAuto }" @click="onClickRefresh"></i>
         <div class="engine-version" v-if="engineVersion">Cocos Creator V{{ engineVersion }}</div>
@@ -327,6 +328,9 @@ export default defineComponent({
     padding-right: 5px;
     font-size: 10px;
     user-select: none;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
   }
   .matchCase {
     width: 30px;

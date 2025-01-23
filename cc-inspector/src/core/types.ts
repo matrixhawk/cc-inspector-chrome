@@ -92,7 +92,6 @@ export enum Msg {
   ResponseSupport = "response-support",
 
   ResponseMemoryInfo = "response-memory-info",
-  MemoryInfo = "memory-info",
   VisibleFPS = "visible-fps",
   /**
    * 当前页面信息

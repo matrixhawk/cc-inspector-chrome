@@ -763,24 +763,4 @@ export class Inspector extends InjectEvent {
     }
     return false;
   }
-
-  onMemoryInfo() {
-    const memory = console["memory"];
-    this.sendMsgToContent(Msg.MemoryInfo, {
-      performance: {
-        // @ts-ignore
-        jsHeapSizeLimit: window.performance.memory.jsHeapSizeLimit,
-        // @ts-ignore
-        totalJSHeapSize: window.performance.memory.totalJSHeapSize,
-        // @ts-ignore
-        usedJSHeapSize: window.performance.memory.usedJSHeapSize,
-      },
-
-      console: {
-        jsHeapSizeLimit: memory.jsHeapSizeLimit,
-        totalJSHeapSize: memory.totalJSHeapSize,
-        usedJSHeapSize: memory.usedJSHeapSize,
-      },
-    });
-  }
 }
