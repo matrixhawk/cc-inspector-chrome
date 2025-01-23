@@ -1,3 +1,8 @@
+import ccui from "@xuyanfeng/cc-ui";
+import { IUiMenuItem } from "@xuyanfeng/cc-ui/types/cc-menu/const";
+import { DocumentEvent } from "../const";
+import { Inspector } from "./inspector";
+import { Msg } from "../../core/types";
 declare const cc: any;
 class Point {
   x: number;
@@ -31,6 +36,104 @@ interface DrawOptions {
 export class Hint {
   private draw = null;
   public engineVersion: string = "";
+  private inspector: Inspector = null;
+  constructor(inspector: Inspector) {
+    this.inspector = inspector;
+    document.addEventListener(DocumentEvent.GameInspectorBegan, (event: CustomEvent) => {
+      const el = this.getTargetElement();
+      if (!el) {
+        return;
+      }
+
+      const cursor = el.style.cursor;
+      el.style.cursor = "zoom-in";
+      const test = (event: MouseEvent) => {
+        event.stopPropagation();
+        event.preventDefault();
+        el.removeEventListener("mousedown", test, true);
+        el.style.cursor = cursor;
+        const e = new CustomEvent(DocumentEvent.GameInspectorEnd);
+        document.dispatchEvent(e);
+        this.updateHint(event, el);
+      };
+      el.addEventListener("mousedown", test, true);
+    });
+  }
+  private nodeVisible(node) {
+    let parent = node;
+    while (parent) {
+      if (parent) {
+      }
+    }
+  }
+  private updateHint(event: MouseEvent, canvas: HTMLCanvasElement) {
+    this.cleanHover();
+    this.cleanSelected();
+    const rect = canvas.getBoundingClientRect();
+    let x = event.clientX - rect.x;
+    let y = rect.y + rect.height - event.clientY;
+    x *= window.devicePixelRatio;
+    y *= window.devicePixelRatio;
+
+    this.inspector.updateTreeInfo(false);
+    const nodes = [];
+    this.inspector.forEachNode((item) => {
+      const b = item._uiProps?.uiTransformComp?.hitTest({ x, y }, 0);
+      if (b && item.active && item.activeInHierarchy) {
+        nodes.push(item);
+      }
+    });
+
+    if (nodes.length === 1) {
+      const item = nodes[0];
+      this.setSelected(item);
+      this.sendInspectNodeMsg(item);
+    } else {
+      nodes.reverse();
+      const menu = nodes.map((item) => {
+        const path = this.getPath(item);
+        return {
+          name: path,
+          callback: () => {
+            this.cleanHover();
+            this.setSelected(item);
+            this.sendInspectNodeMsg(item);
+          },
+          enter: () => {
+            this.setHover(item);
+          },
+          leave: () => {
+            this.cleanHover();
+          },
+        } as IUiMenuItem;
+      });
+      ccui.menu.showMenuByMouseEvent(event, menu, 0.8);
+    }
+  }
+  private sendInspectNodeMsg(node: any) {
+    if (node.uuid) {
+      this.inspector.sendMsgToContent(Msg.InspectNode, node.uuid);
+    }
+  }
+  private getPath(node: any) {
+    let path = [];
+    let parent = node;
+    while (parent) {
+      path.push(parent.name);
+      parent = parent.parent;
+    }
+    path = path.reverse();
+    return path.join("/");
+  }
+  private getTargetElement(): HTMLCanvasElement | null {
+    // @ts-ignore
+    if (typeof cc !== "undefined" && cc.game && cc.game.canvas) {
+      // @ts-ignore
+      return cc.game.canvas;
+    } else {
+      null;
+    }
+  }
   private get isEngineV2() {
     return this.engineVersion.startsWith("2.");
   }
@@ -122,10 +225,14 @@ export class Hint {
     });
   }
   public setHover(node: any) {
-    this.hoverNodes = [node];
+    if (node.isValid) {
+      this.hoverNodes = [node];
+    }
   }
   public setSelected(node: any) {
-    this.selectedNodes = [node];
+    if (node.isValid) {
+      this.selectedNodes = [node];
+    }
   }
   private getRectPoints(node: any): RectPoints | null {
     if (this.isEngineV2) {

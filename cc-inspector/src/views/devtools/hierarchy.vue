@@ -30,6 +30,7 @@ import { EngineData, TreeData } from "./data";
 import GameInfo from "./game-info.vue";
 import { appStore } from "./store";
 import { Timer } from "./timer";
+import { HandExpandOptions } from "@xuyanfeng/cc-ui/types/cc-tree/const";
 const { CCTree, CCFootBar, CCDock, CCDialog, CCInput, CCButton, CCInputNumber, CCSelect, CCButtonGroup, CCCheckBox, CCColor, CCDivider } = ccui.components;
 export default defineComponent({
   name: "hierarchy",
@@ -71,6 +72,18 @@ export default defineComponent({
       treeData.value = [];
       selectedUUID = null;
     }
+    function onInspectNode(data: PluginEvent) {
+      const uuid = data.data as string;
+      if (!uuid) {
+        return;
+      }
+      updateSelect(uuid);
+      nextTick(() => {
+        if (elTree.value) {
+          elTree.value.handExpand(uuid, { highlight: true, select: true, scroll: true } as HandExpandOptions);
+        }
+      });
+    }
     onMounted(() => {
       if (elTree.value) {
         const el = toRaw(elTree.value);
@@ -80,6 +93,7 @@ export default defineComponent({
       Bus.on(BusMsg.ChangeContent, changeContent);
       Bus.on(BusMsg.ShowPlace, funcShowPlace);
       Bus.on(BusMsg.EnableSchedule, funcEnableSchedule);
+      bridge.on(Msg.InspectNode, onInspectNode);
       if (config.value.refreshHirarchy) {
         timer.create(true);
       } else {
@@ -93,6 +107,7 @@ export default defineComponent({
       Bus.off(BusMsg.ChangeContent, changeContent);
       Bus.off(BusMsg.ShowPlace, funcShowPlace);
       Bus.off(BusMsg.EnableSchedule, funcEnableSchedule);
+      bridge.off(Msg.InspectNode, onInspectNode);
       timer.clean();
     });
     function _expand(uuid: string) {

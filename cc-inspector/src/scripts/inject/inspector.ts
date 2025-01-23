@@ -12,7 +12,7 @@ declare const cc: any;
 
 export class Inspector extends InjectEvent {
   inspectorGameMemoryStorage: Record<string, any> = {};
-  private hint: Hint = new Hint();
+  private hint: Hint = new Hint(this);
 
   private getAtlasViewFunction() {
     // 之前只有v2版本支持
@@ -148,6 +148,7 @@ export class Inspector extends InjectEvent {
     console.log(...this.terminal.init());
     this.watchIsCocosGame();
   }
+
   private watchIsCocosGame() {
     const timer = setInterval(() => {
       const b = this._isCocosGame();
@@ -195,22 +196,30 @@ export class Inspector extends InjectEvent {
       this.sendEngineVersion(version);
     }
   }
-  updateTreeInfo() {
+  forEachNode(cb: (node: any) => void) {
+    for (let key in this.inspectorGameMemoryStorage) {
+      const item = this.inspectorGameMemoryStorage[key];
+      if (item && item.isValid && item instanceof cc.Node) {
+        cb(item);
+      }
+    }
+  }
+  updateTreeInfo(notify: boolean = true) {
     let isCocosCreatorGame = this._isCocosGame();
     if (isCocosCreatorGame) {
       let scene = cc.director.getScene();
       if (scene) {
         let treeData = new TreeData();
         this.getNodeChildren(scene, treeData);
-        this.sendMsgToContent(Msg.ResponseTreeInfo, treeData as ResponseTreeInfoData);
+        notify && this.sendMsgToContent(Msg.ResponseTreeInfo, treeData as ResponseTreeInfoData);
       } else {
         let treeData = new TreeData();
         treeData.id = "";
         treeData.text = "empty scene";
-        this.sendMsgToContent(Msg.ResponseTreeInfo, treeData as ResponseTreeInfoData);
+        notify && this.sendMsgToContent(Msg.ResponseTreeInfo, treeData as ResponseTreeInfoData);
       }
     } else {
-      this.notifySupportGame(false);
+      notify && this.notifySupportGame(false);
     }
   }
 

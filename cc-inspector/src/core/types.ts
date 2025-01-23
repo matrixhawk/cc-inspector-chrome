@@ -102,6 +102,10 @@ export enum Msg {
    */
   GetTabID = "GetTabID",
   /**
+   * 用户主动选中的节点
+   */
+  InspectNode = "inspect-node",
+  /**
    * 鼠标滑过节点
    */
   HoverNode = "hover-node",

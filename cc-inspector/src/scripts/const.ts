@@ -12,6 +12,8 @@ export enum DocumentEvent {
   EngineVersion = "engineVersion",
   GoogleAnalytics = "googleAnalytics",
   LoadInjectCss = "load-inject-css",
+  GameInspectorBegan = "GameInspectorBegan",
+  GameInspectorEnd = "GameInspectorEnd",
 }
 export interface GoogleAnalyticsData {
   event: GA_EventName;

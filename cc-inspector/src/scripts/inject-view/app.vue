@@ -1,26 +1,28 @@
 <template>
-  <div class="ad" ref="rootEl" v-show="!picking" @mouseleave="onMouseLeaveRoot">
+  <div class="ad" ref="rootEl" v-show="!picking" @mouseleave="onMouseLeaveRoot" @mousedown="onMouseDown" @mouseenter="onMouseEnterCocosLogo">
     <div class="title">
       <div class="btns" v-show="showBtns">
         <div v-for="(item, index) in listArray" :key="index" class="list" @click="item.cb" :title="item.txt">
           <i class="iconfont icon" :class="item.icon"></i>
         </div>
       </div>
-      <i class="iconfont icon_cocos cocos" @mousedown="onMouseDown" @mouseenter="onMouseEnterCocosLogo"></i>
+      <i class="iconfont icon_cocos cocos"></i>
     </div>
     <!-- <Memory></Memory> -->
     <CCDialog></CCDialog>
+    <CCMenu></CCMenu>
   </div>
 </template>
 <script lang="ts">
 import ccui from "@xuyanfeng/cc-ui";
 import { defineComponent, onMounted, ref, toRaw } from "vue";
 import { GA_EventName } from "../../ga/type";
+import { DocumentEvent } from "../const";
 import Ad from "./ad.vue";
 import Banner from "./banner.vue";
 import Memory from "./memory.vue";
 import { ga } from "./util";
-const { CCDialog } = ccui.components;
+const { CCDialog, CCMenu } = ccui.components;
 interface ListItem {
   icon: string;
   txt: string;
@@ -28,7 +30,7 @@ interface ListItem {
 }
 export default defineComponent({
   name: "ad",
-  components: { CCDialog, Banner, Memory },
+  components: { CCDialog, Banner, Memory, CCMenu },
   setup() {
     const keyAssistant = "assistant";
 
@@ -41,6 +43,7 @@ export default defineComponent({
             title: "Recommended Plugins",
             comp: Ad,
             width: 310,
+            height: 500,
             closeCB: () => {
               ga(GA_EventName.CloseAd);
             },
@@ -54,16 +57,28 @@ export default defineComponent({
           ga(GA_EventName.DoInspector);
           showBtns.value = false;
           picking.value = true;
-          const cursor = document.body.style.cursor;
-          document.body.style.cursor = "zoom-in";
-          document.addEventListener("mousedown", () => {
-            document.body.style.cursor = cursor;
-            picking.value = false;
-          });
+          if (false) {
+            testInspector();
+          } else {
+            const event = new CustomEvent(DocumentEvent.GameInspectorBegan);
+            document.dispatchEvent(event);
+          }
         },
       },
     ]);
-
+    document.addEventListener(DocumentEvent.GameInspectorEnd, () => {
+      picking.value = false;
+    });
+    function testInspector() {
+      const cursor = document.body.style.cursor;
+      document.body.style.cursor = "zoom-in";
+      function test(event: MouseEvent) {
+        document.removeEventListener("mousedown", test, true);
+        document.body.style.cursor = cursor;
+        picking.value = false;
+      }
+      document.addEventListener("mousedown", test, true);
+    }
     function recoverAssistantTop() {
       const top = Number(localStorage.getItem(keyAssistant) || "0");
       updateAssistantTop(top);
