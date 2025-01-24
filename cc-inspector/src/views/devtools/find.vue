@@ -4,7 +4,7 @@
       <span>no games created by cocos creator found!</span>
       <span>{{ msg }}</span>
     </div>
-    <i class="fresh iconfont icon_refresh" @click="onBtnClickUpdatePage"></i>
+    <Refresh @click="onBtnClickUpdatePage"></Refresh>
   </div>
 </template>
 <script lang="ts">
@@ -13,9 +13,11 @@ import { Msg, PluginEvent, ResponseSupportData } from "../../core/types";
 import { ga } from "../../ga";
 import { GA_Button } from "../../ga/type";
 import { bridge } from "./bridge";
+import Refresh from "./refresh.vue";
 import { checkSupport } from "./util";
 export default defineComponent({
   name: "find",
+  components: { Refresh },
   setup(props) {
     bridge.on(Msg.ResponseSupport, (event: PluginEvent) => {
       let data: ResponseSupportData = event.data;
@@ -51,20 +53,6 @@ export default defineComponent({
     color: white;
     font-size: 20px;
     user-select: none;
-  }
-
-  .fresh {
-    cursor: pointer;
-    color: white;
-    font-size: 20px;
-
-    &:hover {
-      color: #cef57b;
-    }
-
-    &:active {
-      color: #ffaa00;
-    }
   }
 }
 </style>

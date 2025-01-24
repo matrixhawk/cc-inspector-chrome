@@ -3,7 +3,7 @@
     <CCDock name="Hierarchy">
       <template v-slot:tab-name-before> </template>
       <template v-slot:title>
-        <i class="iconfont icon_refresh refresh" :class="{ 'refresh-rotate': freshAuto }" @click="onClickRefresh"></i>
+        <Refresh @click="onClickRefresh" :type="rotateType"></Refresh>
         <div class="engine-version" v-if="engineVersion">Cocos Creator V{{ engineVersion }}</div>
       </template>
       <CCInput style="flex: none" placeholder="enter keywords to filter" :data="filterText" v-if="false">
@@ -18,6 +18,7 @@
 <script lang="ts">
 import ccui from "@xuyanfeng/cc-ui";
 import { IUiMenuItem } from "@xuyanfeng/cc-ui/types/cc-menu/const";
+import { HandExpandOptions } from "@xuyanfeng/cc-ui/types/cc-tree/const";
 import Mousetrap, { MousetrapInstance } from "mousetrap";
 import { storeToRefs } from "pinia";
 import { defineComponent, nextTick, onMounted, onUnmounted, ref, toRaw, watch } from "vue";
@@ -26,15 +27,16 @@ import { ga } from "../../ga";
 import { GA_EventName } from "../../ga/type";
 import { bridge } from "./bridge";
 import { Bus, BusMsg } from "./bus";
+import { RotateType } from "./const";
 import { EngineData, TreeData } from "./data";
 import GameInfo from "./game-info.vue";
+import Refresh from "./refresh.vue";
 import { appStore } from "./store";
 import { Timer } from "./timer";
-import { HandExpandOptions } from "@xuyanfeng/cc-ui/types/cc-tree/const";
 const { CCTree, CCFootBar, CCDock, CCDialog, CCInput, CCButton, CCInputNumber, CCSelect, CCButtonGroup, CCCheckBox, CCColor, CCDivider } = ccui.components;
 export default defineComponent({
   name: "hierarchy",
-  components: { CCButtonGroup, CCInput, CCTree, CCDock },
+  components: { Refresh, CCButtonGroup, CCInput, CCTree, CCDock },
   setup() {
     const funcShowPlace = (data: EngineData) => {
       console.log(data);
@@ -49,13 +51,13 @@ export default defineComponent({
     };
     const timer: Timer = new Timer();
     timer.onWork = () => {
-      freshAuto.value = true;
+      rotateType.value = RotateType.Loop;
       config.value.refreshHirarchy = true;
       appStore().save();
       updateTree();
     };
     timer.onClean = () => {
-      freshAuto.value = false;
+      rotateType.value = RotateType.None;
       config.value.refreshHirarchy = false;
       appStore().save();
     };
@@ -189,16 +191,15 @@ export default defineComponent({
       Bus.emit(BusMsg.SelectNode, uuid);
       bridge.send(Msg.SelectNode, uuid);
     }
-    const freshAuto = ref(config.value.refreshHirarchy);
+    const rotateType = ref<RotateType>(RotateType.None);
+    if (config.value.refreshHirarchy) {
+      rotateType.value = RotateType.Loop;
+    }
     return {
       onClickRefresh() {
-        freshAuto.value = true;
         updateTree();
-        setTimeout(() => {
-          freshAuto.value = false;
-        }, 1000);
       },
-      freshAuto,
+      rotateType,
       engineVersion,
       expandedKeys,
       elTree,
@@ -331,7 +332,6 @@ export default defineComponent({
 });
 </script>
 <style lang="less" scoped>
-@import "./common.less";
 .left {
   display: flex;
   flex-direction: column;

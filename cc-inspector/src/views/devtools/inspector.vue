@@ -2,7 +2,7 @@
   <div class="right">
     <CCDock name="Inspector">
       <template v-slot:title>
-        <i class="iconfont icon_refresh refresh" :class="{ 'refresh-rotate': freshAuto }" @click="onClickRefresh"></i>
+        <Refresh :type="rotateType" @click="onClickRefresh"></Refresh>
       </template>
       <div class="inspector" @contextmenu.prevent.stop="onMenu">
         <Properties v-if="treeItemData" :data="treeItemData"></Properties>
@@ -20,13 +20,15 @@ import { ga } from "../../ga";
 import { GA_EventName } from "../../ga/type";
 import { bridge } from "./bridge";
 import { Bus, BusMsg } from "./bus";
+import { RotateType } from "./const";
 import { NodeInfoData } from "./data";
+import Refresh from "./refresh.vue";
 import { appStore } from "./store";
 import { Timer } from "./timer";
 import Properties from "./ui/propertys.vue";
 const { CCDock } = ccui.components;
 export default defineComponent({
-  components: { Properties, CCDock },
+  components: { Properties, CCDock, Refresh },
   setup() {
     function updateNodeInfo() {
       if (selectedUUID) {
@@ -39,13 +41,13 @@ export default defineComponent({
     const { config } = storeToRefs(appStore());
     const timer = new Timer();
     timer.onWork = () => {
-      freshAuto.value = true;
+      rotateType.value = RotateType.Loop;
       config.value.refreshInspector = true;
       appStore().save();
       updateNodeInfo();
     };
     timer.onClean = () => {
-      freshAuto.value = false;
+      rotateType.value = RotateType.None;
       config.value.refreshInspector = false;
       appStore().save();
     };
@@ -104,16 +106,15 @@ export default defineComponent({
         ccui.footbar.showError(error, { title: "parse property error" });
       }
     });
-    const freshAuto = ref(config.value.refreshInspector);
+    const rotateType = ref<RotateType>(RotateType.None);
+    if (config.value.refreshInspector) {
+      rotateType.value = RotateType.Loop;
+    }
     return {
-      freshAuto,
+      rotateType,
       treeItemData,
       onClickRefresh() {
-        freshAuto.value = true;
         updateNodeInfo();
-        setTimeout(() => {
-          freshAuto.value = false;
-        }, 1000);
       },
       onMenu(evnet: MouseEvent) {
         const menus: IUiMenuItem[] = [];
@@ -150,7 +151,6 @@ export default defineComponent({
 });
 </script>
 <style lang="less" scoped>
-@import "./common.less";
 .right {
   flex: 1;
   display: flex;
