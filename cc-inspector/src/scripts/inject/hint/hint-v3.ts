@@ -7,6 +7,18 @@ export class HintV3 extends HintAdapter {
     const len = node.parent.children.length;
     node.setSiblingIndex(len);
   }
+  hitTest(node: any, x: number, y: number): boolean {
+    let b = node._uiProps?.uiTransformComp?.hitTest({ x, y }, 0);
+    return b;
+  }
+  convertMousePos(event: MouseEvent, canvas: HTMLCanvasElement): { x: number; y: number } {
+    const rect = canvas.getBoundingClientRect();
+    let x = event.clientX - rect.x;
+    let y = rect.y + rect.height - event.clientY;
+    x *= window.devicePixelRatio;
+    y *= window.devicePixelRatio;
+    return { x, y };
+  }
   protected addDraw(scene: any, canvas: any, node: any): void {
     if (canvas) {
       // 3.x 需要放到canvas下边

@@ -13,6 +13,8 @@ export class HintV2 extends HintAdapter {
     top: 0,
     width: 0,
     height: 0,
+    adjustedTop: 0,
+    adjustedLeft: 0,
   };
   private _updateCanvasBoundingRect() {
     // @ts-ignore
@@ -49,10 +51,58 @@ export class HintV2 extends HintAdapter {
 
     return { x: event.clientX, y: event.clientY };
   }
-  private hit(event: MouseEvent) {
+  convertMousePos(event: MouseEvent, canvas: HTMLCanvasElement): { x: number; y: number } {
     let location = this.getPointByEvent(event);
-    // @ts-ignore
-    cc.view._convertMouseToLocationInView(location, this.canvasBoundingRect);
+    // let p = cc.view._convertMouseToLocationInView(location, this.canvasBoundingRect);
+    let p = cc.view.convertToLocationInView(location.x, location.y, this.canvasBoundingRect);
+    let scaleX = cc.view._scaleX;
+    let scaleY = cc.view._scaleY;
+    let viewport = cc.view._viewportRect;
+    let x = (p.x - viewport.x) / scaleX;
+    let y = (p.y - viewport.y) / scaleY;
+
+    // let position = cc.v2(event.offsetX, event.offsetY);
+    // let size = cc.view.getDesignResolutionSize();
+    // let rect = { left: 0, top: 0, width: size.width, height: size.height };
+    // cc.view._convertMouseToLocationInView(position, rect);
+    // let wordPos = cc.v2();
+    // cc.Camera.main.getScreenToWorldPoint(position, wordPos);
+
+    return { x, y };
+  }
+  hitTest(node: any, x: number, y: number): boolean {
+    // let rect = item.getBoundingBox();
+    // let p = item.parent.convertToNodeSpaceAR(wordPos);
+    // if (rect.contains(p)) {
+    //   return item;
+    // }
+    const mask = this._searchComponentsInParent(node, cc.Mask);
+    const b = node._hitTest(cc.v2(x, y), { mask });
+    return b;
+  }
+  private _searchComponentsInParent(node: any, comp: any) {
+    if (comp) {
+      let index = 0;
+      let list = null;
+      for (var curr = node; curr && cc.Node.isNode(curr); curr = curr._parent, ++index) {
+        if (curr.getComponent(comp)) {
+          let next = {
+            index: index,
+            node: curr,
+          };
+
+          if (list) {
+            list.push(next);
+          } else {
+            list = [next];
+          }
+        }
+      }
+
+      return list;
+    }
+
+    return null;
   }
   resetIndex(): void {
     const node = this.draw.node;
@@ -82,18 +132,5 @@ export class HintV2 extends HintAdapter {
       points.add(new Point(pos.x, pos.y));
     });
     return points;
-  }
-  private getBox(node: any) {
-    if (node.getBoundingBoxToWorld) {
-      return node.getBoundingBoxToWorld();
-    }
-
-    if (cc.UITransformComponent) {
-      const tr = node.getComponent(cc.UITransformComponent);
-      if (tr && tr.getBoundingBoxToWorld) {
-        return tr.getBoundingBoxToWorld();
-      }
-    }
-    return null;
   }
 }

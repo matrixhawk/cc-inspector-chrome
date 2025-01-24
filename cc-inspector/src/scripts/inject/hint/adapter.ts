@@ -45,6 +45,12 @@ export class HintAdapter {
       this.draw.clear();
     }
   }
+  convertMousePos(event: MouseEvent, canvas: HTMLCanvasElement): { x: number; y: number } {
+    throw new Error("not implemented");
+  }
+  hitTest(node: any, x: number, y: number): boolean {
+    throw new Error("not implemented");
+  }
   initDrawNode() {
     if (this.draw && !this.draw.isValid) {
       this.draw = null;

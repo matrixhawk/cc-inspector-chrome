@@ -1,8 +1,8 @@
 import ccui from "@xuyanfeng/cc-ui";
 import { IUiMenuItem } from "@xuyanfeng/cc-ui/types/cc-menu/const";
+import { Msg } from "../../../core/types";
 import { DocumentEvent } from "../../const";
 import { Inspector } from "../inspector";
-import { Msg } from "../../../core/types";
 import { DrawOptions, HintAdapter, RectPoints } from "./adapter";
 import { HintV2 } from "./hint-v2";
 import { HintV3 } from "./hint-v3";
@@ -49,22 +49,13 @@ export class Hint {
   private updateHint(event: MouseEvent, canvas: HTMLCanvasElement) {
     this.cleanHover();
     this.cleanSelected();
-    const rect = canvas.getBoundingClientRect();
-    let x = event.clientX - rect.x;
-    let y = rect.y + rect.height - event.clientY;
-    x *= window.devicePixelRatio;
-    y *= window.devicePixelRatio;
-
     this.inspector.updateTreeInfo(false);
+    const { x, y } = this.hintAdapter.convertMousePos(event, canvas);
     const nodes = [];
-    this.inspector.forEachNode((item) => {
-      let b = false;
-      if (this.inspector.isCreatorV3) {
-        b = item._uiProps?.uiTransformComp?.hitTest({ x, y }, 0);
-      } else {
-      }
-      if (b && item.active && item.activeInHierarchy) {
-        nodes.push(item);
+    this.inspector.forEachNode((node) => {
+      const b = this.hintAdapter.hitTest(node, x, y);
+      if (b && node.active && node.activeInHierarchy) {
+        nodes.push(node);
       }
     });
 
