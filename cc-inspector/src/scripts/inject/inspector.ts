@@ -110,7 +110,7 @@ export class Inspector extends InjectEvent {
         const uuid: string = pluginEvent.data;
         if (uuid) {
           const node = this.inspectorGameMemoryStorage[uuid];
-          if (node.isValid) {
+          if (node && node.isValid) {
             this.hint.setHover(node);
           } else {
             this.hint.cleanHover();
@@ -124,7 +124,7 @@ export class Inspector extends InjectEvent {
         const uuid: string = pluginEvent.data;
         if (uuid) {
           const node = this.inspectorGameMemoryStorage[uuid];
-          if (node.isValid) {
+          if (node && node.isValid) {
             this.hint.setSelected(node);
           } else {
             this.hint.cleanSelected();
@@ -159,7 +159,7 @@ export class Inspector extends InjectEvent {
           this.hint.update();
         });
         const version = this.getEngineVersion();
-        this.hint.engineVersion = version;
+        this.hint.setEngineVersion(version);
         if (b && version) {
           this.uploadEngineVersion(version);
         }
