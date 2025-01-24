@@ -270,7 +270,7 @@ export default defineComponent({
         menus.push({
           name: "fresh auto",
           callback: () => {
-            timer.create();
+            timer.create(true);
           },
         });
         menus.push({
@@ -300,6 +300,21 @@ export default defineComponent({
               comp: GameInfo,
               title: "Game Info",
             });
+          },
+        });
+        menus.push({
+          name: "copy name",
+          enabled: false,
+          callback() {
+            navigator.clipboard
+              .writeText("123")
+              .then(() => {
+                ccui.footbar.showTips("copy success");
+              })
+              .catch((e) => {
+                console.log(e);
+                ccui.footbar.showError("copy failed");
+              });
           },
         });
         if (selectedUUID) {
