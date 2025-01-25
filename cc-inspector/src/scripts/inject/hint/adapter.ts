@@ -65,7 +65,7 @@ export class HintAdapter {
     let node = new cc.Node("draw-node");
     const canvas = cc.find("Canvas");
     this.addDraw(scene, canvas, node);
-    this.draw = node.addComponent(cc.Graphics);
+    this.draw = node.addComponent(cc.Graphics || cc.GraphicsComponent);
   }
   public isDrawValid() {
     return this.draw && this.draw.isValid;

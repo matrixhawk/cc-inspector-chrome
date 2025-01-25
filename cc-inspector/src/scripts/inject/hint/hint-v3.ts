@@ -8,8 +8,23 @@ export class HintV3 extends HintAdapter {
     node.setSiblingIndex(len);
   }
   hitTest(node: any, x: number, y: number): boolean {
-    let b = node._uiProps?.uiTransformComp?.hitTest({ x, y }, 0);
-    return b;
+    let hitTest = null;
+    // hitTest = node._uiProps?.uiTransformComp?.hitTest;
+    const tr = node.getComponent(cc.UITransformComponent || cc.UITransform);
+    if (tr) {
+      if (tr.hitTest) {
+        hitTest = tr.hitTest.bind(tr);
+      } else if (tr.isHit) {
+        // TODO: 3.3.1使用的是这个接口，hitTest有问题，有人反馈再说修复，老版本暂不花费太多精力
+        hitTest = tr.isHit.bind(tr);
+      }
+    }
+    if (hitTest) {
+      let b = hitTest({ x, y }, 0);
+      return b;
+    } else {
+      return false;
+    }
   }
   convertMousePos(event: MouseEvent, canvas: HTMLCanvasElement): { x: number; y: number } {
     const rect = canvas.getBoundingClientRect();

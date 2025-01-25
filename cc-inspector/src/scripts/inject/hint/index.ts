@@ -89,7 +89,7 @@ export class Hint {
     this.cleanSelected();
     const nodes = this.getMouseNodes(event, canvas);
     const pickTop = toRaw(appStore().config.pickTop);
-    if (nodes.length === 1 || pickTop) {
+    if (nodes.length === 1 || (pickTop && nodes.length)) {
       const item = nodes[0];
       this.cleanHover();
       this.setSelected(item);
