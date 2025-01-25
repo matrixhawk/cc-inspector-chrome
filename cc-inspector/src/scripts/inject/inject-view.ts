@@ -1,8 +1,8 @@
 import ccui from "@xuyanfeng/cc-ui";
 import "@xuyanfeng/cc-ui/dist/ccui.css";
 import "@xuyanfeng/cc-ui/iconfont/iconfont.css";
-import { createApp } from "vue";
 import { createPinia } from "pinia";
+import { createApp } from "vue";
 import { DocumentEvent } from "../const";
 import App from "../inject-view/app.vue";
 export class InjectView {
@@ -41,6 +41,7 @@ export class InjectView {
   private createUI() {
     const el = document.createElement("div");
     el.setAttribute("app", "");
+    el.style.zIndex = "9000";
     document.body.appendChild(el);
     // load css
     this.loadCss();
