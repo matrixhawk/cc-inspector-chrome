@@ -79,6 +79,10 @@ export enum GA_EventName {
   Inspector = "Inspector",
   EngineVersion = "engine_version",
   AppVersion = "app_version",
+  GamePlayer = "game_player",
+  GamePause = "game_pause",
+  GameStep = "game_step",
+  GameInspectorFilter = "game_inspector_filter",
   /**
    * 用户点击store广告链接
    */
@@ -94,7 +98,7 @@ export enum GA_EventName {
   /**
    * 用户主动使用inspector检查游戏节点
    */
-  DoInspector = "do_inspector",
+  GameInspector = "game_inspector",
 }
 export enum GA_Button {
   Github = "github",

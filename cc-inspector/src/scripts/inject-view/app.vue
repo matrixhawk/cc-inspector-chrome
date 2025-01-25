@@ -6,7 +6,7 @@
           <i class="iconfont icon" :class="item.icon" @contextmenu.prevent.stop="item.contextmenu"></i>
         </div>
       </div>
-      <i class="iconfont icon_cocos cocos" @mousedown="onMouseDown"></i>
+      <i class="iconfont icon_cocos cocos" @mousedown="onMouseDown" @click="onCocosLogoClick"></i>
     </div>
     <!-- <Memory></Memory> -->
     <CCDialog></CCDialog>
@@ -65,20 +65,22 @@ export default defineComponent({
       },
       {
         icon: "icon_do_play",
-        click: (event: MouseEvent, item: ListItem) => {},
-        visible: true,
-        txt: "game play",
-        contextmenu: () => {
+        click: (event: MouseEvent, item: ListItem) => {
+          ga(GA_EventName.GamePlayer);
           if (typeof cc !== "undefined") {
             cc.game.resume();
           }
         },
+        visible: true,
+        txt: "game play",
+        contextmenu: () => {},
       },
       {
         icon: "icon_do_pause",
         visible: true,
         txt: "game pause",
         click: () => {
+          ga(GA_EventName.GamePause);
           if (typeof cc !== "undefined") {
             cc.game.pause();
           }
@@ -90,6 +92,7 @@ export default defineComponent({
         visible: true,
         txt: "game step",
         click: () => {
+          ga(GA_EventName.GameStep);
           if (typeof cc !== "undefined") {
             cc.game.step();
           }
@@ -101,10 +104,12 @@ export default defineComponent({
         txt: "Inspect Game",
         visible: true,
         click: () => {
-          ga(GA_EventName.DoInspector);
-          showBtns.value = false;
+          ga(GA_EventName.GameInspector);
+          if (config.value.autoHide) {
+            showBtns.value = false;
+          }
           picking.value = true;
-          if (false) {
+          if (typeof cc === "undefined") {
             testInspector();
           } else {
             const event = new CustomEvent(DocumentEvent.GameInspectorBegan);
@@ -134,9 +139,18 @@ export default defineComponent({
           });
           ccui.menu.showMenuByMouseEvent(event, [
             {
+              name: "Pick Top",
+              selected: config.value.pickTop,
+              callback: (menu: IUiMenuItem) => {
+                config.value.pickTop = !config.value.pickTop;
+                appStore().save();
+              },
+            },
+            {
               name: "Filter Enabled",
               selected: inspectTarget.enabled,
               callback: (menu: IUiMenuItem) => {
+                ga(GA_EventName.GameInspectorFilter);
                 inspectTarget.enabled = !inspectTarget.enabled;
               },
             },
@@ -206,6 +220,9 @@ export default defineComponent({
         clearTimeout(autoHideTimer);
         showBtns.value = true;
       },
+      onCocosLogoClick() {
+        showBtns.value = !showBtns.value;
+      },
       onContextMenuRoot(event: MouseEvent) {
         const arr: IUiMenuItem[] = [
           {
@@ -264,19 +281,36 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
+@x: 1px;
+@r: 8deg;
 @keyframes color-change {
   0% {
     color: #f00;
+    transform: rotate(0) translateX(0px);
+  }
+  20% {
+    transform: rotate(-@r) translateX(-@x);
+  }
+  40% {
+    transform: rotate(@r) translateX(@x);
   }
   50% {
     color: #0f0;
   }
+  60% {
+    transform: rotate(-@r) translateX(-@x);
+  }
+  80% {
+    transform: rotate(@r) translateX(@x);
+  }
   100% {
     color: #f00;
+    transform: rotate(0) translateX(0px);
   }
 }
 .ad {
   position: fixed;
+  box-shadow: 0px 0px 6px 1px rgb(255, 255, 255);
   //z-index: 99999;
   top: 0px;
   right: 0px;

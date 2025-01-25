@@ -58,7 +58,7 @@ document.addEventListener(DocumentEvent.Inject2Content, (event: CustomEvent) => 
       connect.postMessage(data);
     } else {
       debugLog && console.log(...terminal.log(`connect is null`));
-      throw new Error("connect is null");
+      console.log("connect is null");
     }
   } else {
     throw new Error(`invalid data: ${event.detail}`);

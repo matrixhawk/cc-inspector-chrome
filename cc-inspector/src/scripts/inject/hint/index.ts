@@ -1,7 +1,10 @@
 import ccui from "@xuyanfeng/cc-ui";
 import { IUiMenuItem } from "@xuyanfeng/cc-ui/types/cc-menu/const";
+import { throttle } from "lodash";
+import { toRaw } from "vue";
 import { Msg } from "../../../core/types";
 import { DocumentEvent } from "../../const";
+import { appStore } from "../../inject-view/store";
 import { Inspector } from "../inspector";
 import { DrawOptions, HintAdapter, RectPoints } from "./adapter";
 import { HintV2 } from "./hint-v2";
@@ -33,22 +36,42 @@ export class Hint {
 
       const cursor = el.style.cursor;
       el.style.cursor = "zoom-in";
-      const test = (event: MouseEvent) => {
+
+      const mousedown = (event: MouseEvent) => {
         event.stopPropagation();
         event.preventDefault();
-        el.removeEventListener("mousedown", test, true);
+        el.removeEventListener("mousedown", mousedown, true);
+        el.removeEventListener("mousemove", mousemove, true);
         el.style.cursor = cursor;
         const e = new CustomEvent(DocumentEvent.GameInspectorEnd);
         document.dispatchEvent(e);
-        this.updateHint(event, el);
+
+        if (event.button === 0) {
+          // 左键拾取
+          this.updateHintDown(event, el);
+        } else {
+          this.updateHitMoveThrottle.cancel();
+          // 其他按键取消
+          this.cleanHover();
+        }
       };
-      el.addEventListener("mousedown", test, true);
+      const mousemove = (event: MouseEvent) => {
+        this.updateHitMoveThrottle(event, el);
+      };
+
+      el.addEventListener("mousemove", mousemove, true);
+      el.addEventListener("mousedown", mousedown, true);
     });
   }
-
-  private updateHint(event: MouseEvent, canvas: HTMLCanvasElement) {
-    this.cleanHover();
-    this.cleanSelected();
+  private updateHitMoveThrottle = throttle(this.updateHintMove, 300);
+  private updateHintMove(event: MouseEvent, canvas: HTMLCanvasElement) {
+    const nodes = this.getMouseNodes(event, canvas);
+    if (nodes.length) {
+      const node = nodes[0];
+      this.setHover(node);
+    }
+  }
+  private getMouseNodes(event: MouseEvent, canvas: HTMLCanvasElement): Array<any> {
     this.inspector.updateTreeInfo(false);
     const { x, y } = this.hintAdapter.convertMousePos(event, canvas);
     const nodes = [];
@@ -58,13 +81,20 @@ export class Hint {
         nodes.push(node);
       }
     });
-
-    if (nodes.length === 1) {
+    nodes.reverse();
+    return nodes;
+  }
+  private updateHintDown(event: MouseEvent, canvas: HTMLCanvasElement) {
+    this.cleanHover();
+    this.cleanSelected();
+    const nodes = this.getMouseNodes(event, canvas);
+    const pickTop = toRaw(appStore().config.pickTop);
+    if (nodes.length === 1 || pickTop) {
       const item = nodes[0];
+      this.cleanHover();
       this.setSelected(item);
       this.sendInspectNodeMsg(item);
     } else {
-      nodes.reverse();
       const menu = nodes.map((item) => {
         const path = this.getPath(item);
         return {

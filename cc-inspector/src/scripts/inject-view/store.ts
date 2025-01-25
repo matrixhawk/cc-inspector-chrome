@@ -11,6 +11,10 @@ export class ConfigData {
    * 是否自动隐藏
    */
   autoHide: boolean = true;
+  /**
+   * 是否只拾取顶部元素
+   */
+  pickTop: boolean = true;
 }
 
 export const appStore = defineStore("app", () => {
@@ -22,6 +26,7 @@ export const appStore = defineStore("app", () => {
       const data = profile.load(`${pluginConfig.manifest.name}-assistant.json`) as ConfigData;
       config.value.autoHide = data.autoHide;
       config.value.pos = data.pos;
+      config.value.pickTop = data.pickTop;
     },
     save() {
       const cfg = toRaw(config.value);
