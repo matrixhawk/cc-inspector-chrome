@@ -8,6 +8,8 @@ import { injectView } from "./inject-view";
 import { getValue, trySetValueWithConfig } from "./setValue";
 import { BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOptions } from "./types";
 import { isHasProperty } from "./util";
+import { inspectTarget } from "./inspect-list";
+
 declare const cc: any;
 
 export class Inspector extends InjectEvent {
@@ -200,7 +202,13 @@ export class Inspector extends InjectEvent {
     for (let key in this.inspectorGameMemoryStorage) {
       const item = this.inspectorGameMemoryStorage[key];
       if (item && item.isValid && item instanceof cc.Node) {
-        cb(item);
+        if (inspectTarget.enabled) {
+          if (inspectTarget.checkNodeComponentsIsInList(item)) {
+            cb(item);
+          }
+        } else {
+          cb(item);
+        }
       }
     }
   }

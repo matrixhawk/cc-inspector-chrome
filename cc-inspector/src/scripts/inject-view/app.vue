@@ -1,12 +1,12 @@
 <template>
-  <div class="ad" ref="rootEl" v-show="!picking" @mouseleave="onMouseLeaveRoot" @mousedown="onMouseDown" @mouseenter="onMouseEnterCocosLogo">
+  <div class="ad" ref="rootEl" v-show="!picking" @contextmenu.prevent="onContextMenuRoot" @mouseleave="onMouseLeaveRoot" @mouseenter="onMouseEnterCocosLogo">
     <div class="title">
       <div class="btns" v-show="showBtns">
-        <div v-for="(item, index) in listArray" :key="index" class="list" @click="item.cb" :title="item.txt">
-          <i class="iconfont icon" :class="item.icon"></i>
+        <div v-for="(item, index) in listArray" :key="index" class="list" @click="item.click($event, item)" :title="item.txt" v-show="item.visible">
+          <i class="iconfont icon" :class="item.icon" @contextmenu.prevent.stop="item.contextmenu"></i>
         </div>
       </div>
-      <i class="iconfont icon_cocos cocos"></i>
+      <i class="iconfont icon_cocos cocos" @mousedown="onMouseDown"></i>
     </div>
     <!-- <Memory></Memory> -->
     <CCDialog></CCDialog>
@@ -15,30 +15,43 @@
 </template>
 <script lang="ts">
 import ccui from "@xuyanfeng/cc-ui";
+import { IUiMenuItem } from "@xuyanfeng/cc-ui/types/cc-menu/const";
+import { storeToRefs } from "pinia";
 import { defineComponent, onMounted, ref, toRaw } from "vue";
 import { GA_EventName } from "../../ga/type";
 import { DocumentEvent } from "../const";
+import { inspectTarget } from "../inject/inspect-list";
 import Ad from "./ad.vue";
 import Banner from "./banner.vue";
 import Memory from "./memory.vue";
+import { appStore } from "./store";
 import { ga } from "./util";
+declare const cc: any;
 const { CCDialog, CCMenu } = ccui.components;
 interface ListItem {
   icon: string;
   txt: string;
-  cb: (event: MouseEvent) => void;
+  visible: boolean;
+  /**
+   * 点击回调
+   */
+  click: (event: MouseEvent, item: ListItem) => void;
+  contextmenu: (event: MouseEvent) => void;
 }
 export default defineComponent({
   name: "ad",
   components: { CCDialog, Banner, Memory, CCMenu },
   setup() {
-    const keyAssistant = "assistant";
-
+    const store = appStore();
+    store.init();
+    const { config } = storeToRefs(appStore());
     const listArray = ref<ListItem[]>([
       {
         icon: "icon_shop_cart ani_shop_cart",
         txt: "Recommended Plugins",
-        cb: () => {
+        contextmenu: () => {},
+        visible: true,
+        click: () => {
           ccui.dialog.showDialog({
             title: "Recommended Plugins",
             comp: Ad,
@@ -51,9 +64,43 @@ export default defineComponent({
         },
       },
       {
+        icon: "icon_do_play",
+        click: (event: MouseEvent, item: ListItem) => {},
+        visible: true,
+        txt: "game play",
+        contextmenu: () => {
+          if (typeof cc !== "undefined") {
+            cc.game.resume();
+          }
+        },
+      },
+      {
+        icon: "icon_do_pause",
+        visible: true,
+        txt: "game pause",
+        click: () => {
+          if (typeof cc !== "undefined") {
+            cc.game.pause();
+          }
+        },
+        contextmenu: () => {},
+      },
+      {
+        icon: "icon_do_step",
+        visible: true,
+        txt: "game step",
+        click: () => {
+          if (typeof cc !== "undefined") {
+            cc.game.step();
+          }
+        },
+        contextmenu: () => {},
+      },
+      {
         icon: "icon_target",
         txt: "Inspect Game",
-        cb: () => {
+        visible: true,
+        click: () => {
           ga(GA_EventName.DoInspector);
           showBtns.value = false;
           picking.value = true;
@@ -63,6 +110,38 @@ export default defineComponent({
             const event = new CustomEvent(DocumentEvent.GameInspectorBegan);
             document.dispatchEvent(event);
           }
+        },
+        contextmenu: (event: MouseEvent) => {
+          const arr = [
+            { name: "Inspect Label", type: typeof cc !== "undefined" ? cc.Label : "cc.Label" }, //
+            { name: "Inspect Sprite", type: typeof cc !== "undefined" ? cc.Sprite : "cc.Sprite" },
+            { name: "Inspect Button", type: typeof cc !== "undefined" ? cc.Button : "cc.Button" },
+            { name: "Inspect RichText", type: typeof cc !== "undefined" ? cc.RichText : "cc.RichText" },
+          ];
+          const compMenu: IUiMenuItem[] = arr.map((item) => {
+            return {
+              name: item.name,
+              enabled: inspectTarget.enabled,
+              selected: inspectTarget.isContainInspectType(item.type),
+              callback: (menu: IUiMenuItem) => {
+                if (menu.selected) {
+                  inspectTarget.removeInspectType(item.type);
+                } else {
+                  inspectTarget.addInspectType(item.type);
+                }
+              },
+            };
+          });
+          ccui.menu.showMenuByMouseEvent(event, [
+            {
+              name: "Filter Enabled",
+              selected: inspectTarget.enabled,
+              callback: (menu: IUiMenuItem) => {
+                inspectTarget.enabled = !inspectTarget.enabled;
+              },
+            },
+            ...compMenu,
+          ]);
         },
       },
     ]);
@@ -80,7 +159,7 @@ export default defineComponent({
       document.addEventListener("mousedown", test, true);
     }
     function recoverAssistantTop() {
-      const top = Number(localStorage.getItem(keyAssistant) || "0");
+      const top = toRaw(config.value.pos);
       updateAssistantTop(top);
     }
 
@@ -97,7 +176,8 @@ export default defineComponent({
         top = maxTop;
       }
       root.style.top = `${top}px`;
-      localStorage.setItem(keyAssistant, top.toString());
+      config.value.pos = top;
+      appStore().save();
     }
     onMounted(async () => {
       recoverAssistantTop();
@@ -115,6 +195,7 @@ export default defineComponent({
     const rootEl = ref<HTMLDivElement>(null);
     const showBtns = ref(true);
     let autoHideTimer = null;
+    let autoHide = toRaw(config.value.autoHide);
     let isDraging = false;
     return {
       showBtns,
@@ -125,8 +206,30 @@ export default defineComponent({
         clearTimeout(autoHideTimer);
         showBtns.value = true;
       },
+      onContextMenuRoot(event: MouseEvent) {
+        const arr: IUiMenuItem[] = [
+          {
+            name: "auto hide",
+            selected: autoHide,
+            callback: () => {
+              autoHide = !autoHide;
+              config.value.autoHide = autoHide;
+              appStore().save();
+              ga(GA_EventName.MouseMenu, "auto hide");
+              if (!autoHide) {
+                clearTimeout(autoHideTimer);
+                showBtns.value = true;
+              }
+            },
+          },
+        ];
+        ccui.menu.showMenuByMouseEvent(event, arr);
+      },
       onMouseLeaveRoot(event: MouseEvent) {
         if (isDraging) {
+          return;
+        }
+        if (!autoHide) {
           return;
         }
         autoHideTimer = setTimeout(() => {
@@ -174,7 +277,7 @@ export default defineComponent({
 }
 .ad {
   position: fixed;
-  z-index: 99999;
+  //z-index: 99999;
   top: 0px;
   right: 0px;
   display: flex;
