@@ -156,6 +156,11 @@ export default defineComponent({
               },
             },
             {
+              name: "",
+              type: ccui.menu.MenuType.Separator,
+              callback() {},
+            },
+            {
               name: "Filter Enabled",
               selected: inspectTarget.enabled,
               callback: (menu: IUiMenuItem) => {

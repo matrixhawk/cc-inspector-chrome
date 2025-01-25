@@ -121,7 +121,8 @@ export enum Msg {
   ResponseUseFrame = "response-use-frame",
 
   RequestLogData = "request-log-data",
-
+  RequestLogCustom = "request-log-custom",
+  ReqWriteClipboard = "request-write-clipboard",
   RequestSetProperty = "request-set-property",
   ResponseSetProperty = "response-set-property",
   RequestVisible = "request-visible",

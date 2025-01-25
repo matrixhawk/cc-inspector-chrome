@@ -11,7 +11,7 @@
           <i class="matchCase iconfont icon_font_size" @click.stop="onChangeCase" title="match case" :style="{ color: matchCase ? 'red' : '' }"></i>
         </slot>
       </CCInput>
-      <CCTree @contextmenu.prevent.stop="onMenu" style="flex: 1" ref="elTree" :expand-keys="expandedKeys" :default-expand-all="false" :value="treeData" @node-expand="onNodeExpand" @node-collapse="onNodeCollapse" @node-click="handleNodeClick" @node-unclick="handleNodeUnclick" @node-enter="handleNodeEnter" @node-leave="handleNodeLeave"></CCTree>
+      <CCTree @node-menu="onMenu" @contextmenu.prevent.stop="onMenu" style="flex: 1" ref="elTree" :expand-keys="expandedKeys" :default-expand-all="false" :value="treeData" @node-expand="onNodeExpand" @node-collapse="onNodeCollapse" @node-click="handleNodeClick" @node-unclick="handleNodeUnclick" @node-enter="handleNodeEnter" @node-leave="handleNodeLeave"></CCTree>
     </CCDock>
   </div>
 </template>
@@ -257,7 +257,7 @@ export default defineComponent({
           }
         }
       },
-      onMenu(event: MouseEvent) {
+      onMenu(event: MouseEvent, data: TreeData) {
         const menus: IUiMenuItem[] = [];
         menus.push({
           name: "update hierarchy",
@@ -302,22 +302,33 @@ export default defineComponent({
             });
           },
         });
-        menus.push({
-          name: "copy name",
-          enabled: false,
-          callback() {
-            navigator.clipboard
-              .writeText("123")
-              .then(() => {
-                ccui.footbar.showTips("copy success");
-              })
-              .catch((e) => {
-                console.log(e);
-                ccui.footbar.showError("copy failed");
-              });
-          },
-        });
-        if (selectedUUID) {
+        if (data) {
+          menus.push({
+            name: "",
+            type: ccui.menu.MenuType.Separator,
+            callback() {},
+          });
+          menus.push({
+            name: "copy name",
+            enabled: true,
+            callback() {
+              console.log(data.text);
+
+              if (!data.text) {
+                return;
+              }
+              navigator.clipboard
+                .writeText(data.text)
+                .then(() => {
+                  ccui.footbar.showTips("copy success");
+                })
+                .catch((e) => {
+                  console.log(e);
+                  bridge.send(Msg.RequestLogCustom, data.text);
+                  // bridge.send(Msg.ReqWriteClipboard, data.text);
+                });
+            },
+          });
           menus.push({
             name: "visible",
             shortKey: "space",
@@ -332,7 +343,7 @@ export default defineComponent({
             enabled: true,
             callback: () => {
               ga.fireEventWithParam(GA_EventName.MouseMenu, "destroy");
-              bridge.send(Msg.RequestDestroy, selectedUUID);
+              bridge.send(Msg.RequestDestroy, data.id);
             },
           });
         }

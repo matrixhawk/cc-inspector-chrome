@@ -12,6 +12,7 @@ export enum DocumentEvent {
   EngineVersion = "engineVersion",
   GoogleAnalytics = "googleAnalytics",
   LoadInjectCss = "load-inject-css",
+  InspectorClear = "inspector_clear",
   GameInspectorBegan = "GameInspectorBegan",
   GameInspectorEnd = "GameInspectorEnd",
 }

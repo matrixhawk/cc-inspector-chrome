@@ -99,6 +99,23 @@ export class Inspector extends InjectEvent {
         logFunction(value);
         break;
       }
+      case Msg.RequestLogCustom: {
+        const logFunction = console.log;
+        logFunction(pluginEvent.data);
+      }
+      case Msg.ReqWriteClipboard: {
+        document.body.focus();
+        navigator.clipboard
+          .writeText(pluginEvent.data)
+
+          .then(() => {
+            console.log("ok");
+          })
+          .catch((e) => {
+            console.log("fail", e);
+          });
+        break;
+      }
       case Msg.RequestVisible: {
         const uuid: string = pluginEvent.data;
         const node = this.inspectorGameMemoryStorage[uuid];
