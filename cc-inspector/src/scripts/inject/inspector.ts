@@ -5,13 +5,12 @@ import { ArrayData, BoolData, ColorData, DataType, EngineData, Group, ImageData,
 import { InjectEvent } from "./event";
 import { Hint } from "./hint";
 import { injectView } from "./inject-view";
+import { inspectTarget } from "./inspect-list";
 import { getValue, trySetValueWithConfig } from "./setValue";
 import { BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOptions } from "./types";
 import { isHasProperty } from "./util";
-import { inspectTarget } from "./inspect-list";
 
 declare const cc: any;
-
 export class Inspector extends InjectEvent {
   inspectorGameMemoryStorage: Record<string, any> = {};
   private hint: Hint = new Hint(this);
@@ -280,38 +279,64 @@ export class Inspector extends InjectEvent {
     return keys;
   }
 
+  isExcludeProperty(node: any, key: string) {
+    const mapArray = [
+      {
+        type: cc.UITransformComponent || cc.UITransform,
+        keys: ["priority"],
+      },
+      {
+        type: null, // null 表示所有适配类型
+        keys: [
+          "children",
+          "quat",
+          "node",
+          "components",
+          "enabledInHierarchy",
+          "hideFlags",
+          "isValid",
+          "parent",
+          // 生命周期函数
+          "onFocusInEditor",
+          "onRestore",
+          "start",
+          "lateUpdate",
+          "update",
+          "resetInEditor",
+          "onLostFocusInEditor",
+          "onEnable",
+          "onDisable",
+          "onDestroy",
+          "onLoad",
+          "internalLateUpdate",
+          "internalOnDestroy",
+          "internalOnEnable",
+          "internalOnDisable",
+          "internalUpdate",
+          "internalPreload",
+          "internalOnLoad",
+          "internalStart",
+        ],
+      },
+    ];
+    for (let i = 0; i < mapArray.length; i++) {
+      const { type, keys } = mapArray[i];
+      if (type === null) {
+        if (keys.find((v) => v === key)) {
+          return true;
+        }
+      } else {
+        if (node instanceof type) {
+          if (keys.find((v) => v === key)) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
   _getNodeKeys(node: any) {
     // 3.x变成了getter
-    let excludeProperty = [
-      "children",
-      "quat",
-      "node",
-      "components",
-      "enabledInHierarchy",
-      "hideFlags",
-      "isValid",
-      "parent",
-      // 生命周期函数
-      "onFocusInEditor",
-      "onRestore",
-      "start",
-      "lateUpdate",
-      "update",
-      "resetInEditor",
-      "onLostFocusInEditor",
-      "onEnable",
-      "onDisable",
-      "onDestroy",
-      "onLoad",
-      "internalLateUpdate",
-      "internalOnDestroy",
-      "internalOnEnable",
-      "internalOnDisable",
-      "internalUpdate",
-      "internalPreload",
-      "internalOnLoad",
-      "internalStart",
-    ];
     const keyHidden = this.getAllPropertyDescriptors(node);
     const keyVisible1 = Object.keys(node); // Object不走原型链
     let keyVisible2: string[] = [];
@@ -321,7 +346,7 @@ export class Inspector extends InjectEvent {
     }
     let allKeys: string[] = uniq(keyHidden.concat(keyVisible1, keyVisible2)).sort();
     allKeys = allKeys.filter((key) => {
-      return !key.startsWith("_") && !excludeProperty.includes(key);
+      return !key.startsWith("_") && !this.isExcludeProperty(node, key);
     });
 
     allKeys = allKeys.filter((key) => {
