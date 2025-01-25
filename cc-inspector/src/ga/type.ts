@@ -82,6 +82,8 @@ export enum GA_EventName {
   GamePlayer = "game_player",
   GamePause = "game_pause",
   GameStep = "game_step",
+  PickTop = "pick_top",
+  InspectorClear = "inspector_clear",
   GameInspectorFilter = "game_inspector_filter",
   /**
    * 用户点击store广告链接

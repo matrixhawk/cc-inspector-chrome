@@ -139,11 +139,20 @@ export default defineComponent({
           });
           ccui.menu.showMenuByMouseEvent(event, [
             {
+              name: "Clear",
+              callback: (menu: IUiMenuItem) => {
+                const event = new CustomEvent(DocumentEvent.InspectorClear);
+                document.dispatchEvent(event);
+                ga(GA_EventName.InspectorClear);
+              },
+            },
+            {
               name: "Pick Top",
               selected: config.value.pickTop,
               callback: (menu: IUiMenuItem) => {
                 config.value.pickTop = !config.value.pickTop;
                 appStore().save();
+                ga(GA_EventName.PickTop);
               },
             },
             {

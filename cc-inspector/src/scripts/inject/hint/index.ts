@@ -28,6 +28,10 @@ export class Hint {
   private inspector: Inspector = null;
   constructor(inspector: Inspector) {
     this.inspector = inspector;
+    document.addEventListener(DocumentEvent.InspectorClear, () => {
+      this.cleanHover();
+      this.cleanSelected();
+    });
     document.addEventListener(DocumentEvent.GameInspectorBegan, (event: CustomEvent) => {
       const el = this.getTargetElement();
       if (!el) {
