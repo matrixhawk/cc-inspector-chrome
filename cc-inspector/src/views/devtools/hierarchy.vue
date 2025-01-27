@@ -189,7 +189,9 @@ export default defineComponent({
     function updateSelect(uuid: string | null) {
       selectedUUID = uuid;
       Bus.emit(BusMsg.SelectNode, uuid);
-      bridge.send(Msg.SelectNode, uuid);
+      if (config.value.clickInspect) {
+        bridge.send(Msg.SelectNode, uuid);
+      }
     }
     const rotateType = ref<RotateType>(RotateType.None);
     if (config.value.refreshHirarchy) {
@@ -211,6 +213,9 @@ export default defineComponent({
         updateSelect(null);
       },
       handleNodeEnter(data: TreeData | null) {
+        if (!config.value.hoverInspect) {
+          return;
+        }
         if (data) {
           bridge.send(Msg.HoverNode, data.id);
         }
@@ -262,56 +267,79 @@ export default defineComponent({
         menus.push({
           name: "update hierarchy",
           enabled: true,
-          callback: () => {
-            ga.fireEventWithParam(GA_EventName.MouseMenu, "update hierarchy");
+          callback: (item) => {
+            ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
             updateTree();
           },
         });
+        menus.push({ type: ccui.menu.MenuType.Separator });
         menus.push({
           name: "fresh auto",
-          callback: () => {
+          callback: (item) => {
+            ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
             timer.create(true);
           },
         });
         menus.push({
           name: "fresh manual",
-          callback: () => {
+          callback: (item) => {
+            ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
             timer.clean();
           },
         });
+        menus.push({ type: ccui.menu.MenuType.Separator });
         menus.push({
           name: "fps show",
-          callback: () => {
+          callback: (item) => {
+            ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
             bridge.send(Msg.VisibleFPS, true);
           },
         });
 
         menus.push({
           name: "fps hide",
-          callback: () => {
+          callback: (item) => {
+            ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
             bridge.send(Msg.VisibleFPS, false);
           },
         });
+        menus.push({ type: ccui.menu.MenuType.Separator });
         menus.push({
           name: "game info",
-          callback() {
-            ga.fireEventWithParam(GA_EventName.MouseMenu, "game info");
+          callback(item) {
+            ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
             ccui.dialog.showDialog({
               comp: GameInfo,
               title: "Game Info",
             });
           },
         });
+        menus.push({ type: ccui.menu.MenuType.Separator });
+        menus.push({
+          name: "hover inspect",
+          selected: config.value.hoverInspect,
+          callback: (item) => {
+            ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
+            config.value.hoverInspect = !config.value.hoverInspect;
+            appStore().save();
+          },
+        });
+        menus.push({
+          name: "click inspect",
+          selected: config.value.clickInspect,
+          callback: (item) => {
+            ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
+            config.value.clickInspect = !config.value.clickInspect;
+            appStore().save();
+          },
+        });
         if (data) {
-          menus.push({
-            name: "",
-            type: ccui.menu.MenuType.Separator,
-            callback() {},
-          });
+          menus.push({ type: ccui.menu.MenuType.Separator });
           menus.push({
             name: "copy name",
             enabled: true,
-            callback() {
+            callback(item) {
+              ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
               console.log(data.text);
 
               if (!data.text) {
@@ -333,16 +361,16 @@ export default defineComponent({
             name: "visible",
             shortKey: "space",
             enabled: true,
-            callback: () => {
-              ga.fireEventWithParam(GA_EventName.MouseMenu, "visible");
+            callback: (item) => {
+              ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
               onQuickVisible();
             },
           });
           menus.push({
             name: "destroy",
             enabled: true,
-            callback: () => {
-              ga.fireEventWithParam(GA_EventName.MouseMenu, "destroy");
+            callback: (item) => {
+              ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
               bridge.send(Msg.RequestDestroy, data.id);
             },
           });
