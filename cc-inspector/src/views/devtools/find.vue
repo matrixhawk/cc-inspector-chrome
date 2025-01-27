@@ -1,6 +1,6 @@
 <template>
   <div class="find-game">
-    <div style="display: flex; flex-direction: column">
+    <div style="display: flex; flex-direction: column; margin-bottom: 3px">
       <span>no games created by cocos creator found!</span>
       <span>{{ msg }}</span>
     </div>

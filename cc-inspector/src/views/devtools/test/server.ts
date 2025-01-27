@@ -1,6 +1,6 @@
 import { v4 } from "uuid";
 import { Msg, Page, PluginEvent, RequestNodeInfoData, ResponseNodeInfoData, ResponseSupportData, ResponseTreeInfoData } from "../../../core/types";
-import { VisibleProp } from "../comp";
+import { CompType, VisibleProp } from "../comp";
 import { ArrayData, BoolData, ColorData, EngineData, EnumData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectCircleData, ObjectData, Property, StringData, TextData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../data";
 export class TestClient {
   recv(event: PluginEvent) {}
@@ -133,9 +133,13 @@ export class TestServer {
     this.testData
       .buildChild("engine")
       .buildComponent("group4") //
-      .buildProperty("node", new EngineData().init(node.name, "cc_Node", node.id))
-      .buildProperty("sprite", new EngineData().init(node.name, "cc_Sprite", node.id))
-      .buildProperty("label", new EngineData().init(node.name, "cc_Label", node.id))
+      .buildProperty("node", new EngineData().init(node.name, CompType.Node, node.id))
+      .buildProperty("sprite", new EngineData().init(node.name, CompType.Spirte, node.id))
+      .buildProperty("label", new EngineData().init(node.name, CompType.Label, node.id))
+      .buildProperty("prefab", new EngineData().init(node.name, CompType.Prefab, node.id))
+      .buildProperty("animation", new EngineData().init(node.name, CompType.Animation, node.id))
+      .buildProperty("button", new EngineData().init(node.name, CompType.Button, node.id))
+      .buildProperty("input", new EngineData().init(node.name, CompType.EditBox, node.id))
       .buildProperty("un_known", new EngineData().init(comp.name, "un_known", comp.id, node.id));
 
     this.testData

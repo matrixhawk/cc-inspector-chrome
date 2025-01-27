@@ -145,16 +145,19 @@ export class Hint {
   }
   public cleanHover() {
     this.hoverNodes = [];
-    this.hintAdapter.clear();
+    this.hintAdapter && this.hintAdapter.clear();
   }
   public cleanSelected() {
     this.selectedNodes = [];
-    this.hintAdapter.clear();
+    this.hintAdapter && this.hintAdapter.clear();
   }
   private hoverNodes = [];
   private selectedNodes = [];
 
   public update() {
+    if (!this.hintAdapter) {
+      return;
+    }
     this.hintAdapter.initDrawNode();
     if (!this.hintAdapter.isDrawValid()) {
       return;

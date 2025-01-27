@@ -1,5 +1,6 @@
 export enum CompType {
   Node = "cc.Node",
+  Prefab = "cc.Prefab",
   Spirte = "cc.Sprite",
   Label = "cc.Label",
   Widget = "cc.Widget",

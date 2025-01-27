@@ -33,6 +33,10 @@ export default defineComponent({
         map[CompType.Spirte] = "icon_picture";
         map[CompType.Label] = "icon_text";
         map[CompType.Node] = "icon_node";
+        map[CompType.Prefab] = "icon_prefab";
+        map[CompType.Animation] = "icon_animation";
+        map[CompType.Button] = "icon_button";
+        map[CompType.EditBox] = "icon_inputbox";
         return map[props.data.engineType] || "icon_unknown";
       },
     };
