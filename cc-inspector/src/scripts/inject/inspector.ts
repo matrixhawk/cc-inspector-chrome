@@ -102,9 +102,9 @@ export class Inspector extends InjectEvent {
       case Msg.RequestLogCustom: {
         const logFunction = console.log;
         logFunction(pluginEvent.data);
+        break;
       }
       case Msg.ReqWriteClipboard: {
-        document.body.focus();
         navigator.clipboard
           .writeText(pluginEvent.data)
 
@@ -343,7 +343,7 @@ export class Inspector extends InjectEvent {
           return true;
         }
       } else {
-        if (node instanceof type) {
+        if (type && node instanceof type) {
           if (keys.find((v) => v === key)) {
             return true;
           }

@@ -222,8 +222,10 @@ export default defineComponent({
     const picking = ref(false);
     const rootEl = ref<HTMLDivElement>(null);
     const showBtns = ref(true);
+    if (config.value.autoHide) {
+      showBtns.value = false;
+    }
     let autoHideTimer = null;
-    let autoHide = toRaw(config.value.autoHide);
     let isDraging = false;
     return {
       showBtns,
@@ -241,13 +243,12 @@ export default defineComponent({
         const arr: IUiMenuItem[] = [
           {
             name: "auto hide",
-            selected: autoHide,
+            selected: config.value.autoHide,
             callback: () => {
-              autoHide = !autoHide;
-              config.value.autoHide = autoHide;
+              config.value.autoHide = !config.value.autoHide;
               appStore().save();
               ga(GA_EventName.MouseMenu, "auto hide");
-              if (!autoHide) {
+              if (!config.value.autoHide) {
                 clearTimeout(autoHideTimer);
                 showBtns.value = true;
               }
@@ -260,7 +261,7 @@ export default defineComponent({
         if (isDraging) {
           return;
         }
-        if (!autoHide) {
+        if (!config.value.autoHide) {
           return;
         }
         autoHideTimer = setTimeout(() => {
