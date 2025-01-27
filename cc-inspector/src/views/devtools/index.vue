@@ -101,16 +101,6 @@ export default defineComponent({
       chrome.scripting.executeScript({ files: ["js/execute.js"], target: { tabId: tabID } }, (results: chrome.scripting.InjectionResult[]) => {});
     }
 
-    function _inspectedCode() {
-      let injectCode = "";
-      chrome.devtools.inspectedWindow.eval(injectCode, (result, isException) => {
-        if (isException) {
-          console.error(isException);
-        } else {
-          console.log(`执行结果：${result}`);
-        }
-      });
-    }
     const funcEnableSchedule = (b: boolean) => {
       if (b) {
         timer.create();

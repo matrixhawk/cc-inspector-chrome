@@ -34,25 +34,32 @@ export const appStore = defineStore("app", () => {
   const config = ref<ConfigData>(new ConfigData());
   const frameID = ref<number>(0);
   const pageShow = ref<boolean>(false);
+
+  function readConfigFile(file: string) {
+    const data = profile.load(file) as ConfigData;
+    config.value.refreshType = data.refreshType || RefreshType.Manual;
+    config.value.refreshTime = data.refreshTime || 500;
+    config.value.expandTest = !!data.expandTest;
+    config.value.refreshHirarchy = !!data.refreshHirarchy;
+    config.value.refreshInspector = !!data.refreshInspector;
+  }
   return {
     frameID,
     pageShow,
     config,
     init() {
+      profile.init(new ConfigData(), pluginConfig);
       if (chrome.devtools) {
         window.addEventListener(PanelMsg.Show, () => {
           pageShow.value = true;
         });
+        chrome.devtools.inspectedWindow.eval("window.location.href", (url: string, ex: chrome.devtools.inspectedWindow.EvaluationExceptionInfo) => {
+          readConfigFile(url);
+        });
       } else {
         pageShow.value = true;
+        readConfigFile(`${pluginConfig.manifest.name}.json`);
       }
-      profile.init(new ConfigData(), pluginConfig);
-      const data = profile.load(`${pluginConfig.manifest.name}.json`) as ConfigData;
-      config.value.refreshType = data.refreshType || RefreshType.Manual;
-      config.value.refreshTime = data.refreshTime || 500;
-      config.value.expandTest = !!data.expandTest;
-      config.value.refreshHirarchy = !!data.refreshHirarchy;
-      config.value.refreshInspector = !!data.refreshInspector;
     },
     save() {
       const cfg = toRaw(config.value);

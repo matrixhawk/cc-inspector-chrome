@@ -22,13 +22,6 @@ export default defineComponent({
     },
   },
   setup(props, context) {
-    function _evalCode(code: string) {
-      if (chrome && chrome.devtools) {
-        chrome.devtools.inspectedWindow.eval(code);
-      } else {
-        console.log(code);
-      }
-    }
     watch(
       () => props.data,
       (newValue: NodeInfoData, oldValue: NodeInfoData) => {

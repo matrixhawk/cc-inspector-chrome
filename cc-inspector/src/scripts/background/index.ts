@@ -39,6 +39,9 @@ chrome.runtime.onMessage.addListener((request: PluginEvent, sender: any, sendRes
   }
 });
 chrome.tabs.onActivated.addListener(({ tabId, windowId }) => {});
+chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
+  //
+});
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   // 页面发生刷新，通知重新生成数据
   if (changeInfo.status === "complete") {
