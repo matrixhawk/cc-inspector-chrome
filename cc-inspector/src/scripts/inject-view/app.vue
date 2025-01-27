@@ -129,6 +129,7 @@ export default defineComponent({
               enabled: inspectTarget.enabled,
               selected: inspectTarget.isContainInspectType(item.type),
               callback: (menu: IUiMenuItem) => {
+                ga(GA_EventName.MouseMenu, menu.name);
                 if (menu.selected) {
                   inspectTarget.removeInspectType(item.type);
                 } else {
@@ -143,7 +144,7 @@ export default defineComponent({
               callback: (menu: IUiMenuItem) => {
                 const event = new CustomEvent(DocumentEvent.InspectorClear);
                 document.dispatchEvent(event);
-                ga(GA_EventName.InspectorClear);
+                ga(GA_EventName.MouseMenu, menu.name);
               },
             },
             {
@@ -152,19 +153,15 @@ export default defineComponent({
               callback: (menu: IUiMenuItem) => {
                 config.value.pickTop = !config.value.pickTop;
                 appStore().save();
-                ga(GA_EventName.PickTop);
+                ga(GA_EventName.MouseMenu, menu.name);
               },
             },
-            {
-              name: "",
-              type: ccui.menu.MenuType.Separator,
-              callback() {},
-            },
+            { type: ccui.menu.MenuType.Separator },
             {
               name: "Filter Enabled",
               selected: inspectTarget.enabled,
               callback: (menu: IUiMenuItem) => {
-                ga(GA_EventName.GameInspectorFilter);
+                ga(GA_EventName.MouseMenu, menu.name);
                 inspectTarget.enabled = !inspectTarget.enabled;
               },
             },
@@ -244,10 +241,10 @@ export default defineComponent({
           {
             name: "auto hide",
             selected: config.value.autoHide,
-            callback: () => {
+            callback: (item) => {
               config.value.autoHide = !config.value.autoHide;
               appStore().save();
-              ga(GA_EventName.MouseMenu, "auto hide");
+              ga(GA_EventName.MouseMenu, item.name);
               if (!config.value.autoHide) {
                 clearTimeout(autoHideTimer);
                 showBtns.value = true;

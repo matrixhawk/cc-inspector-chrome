@@ -120,28 +120,32 @@ export default defineComponent({
         const menus: IUiMenuItem[] = [];
         menus.push({
           name: "update node info",
-          callback: () => {
+          callback: (item) => {
             updateNodeInfo();
-            ga.fireEventWithParam(GA_EventName.MouseMenu, "update node info");
+            ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
           },
         });
+        menus.push({ type: ccui.menu.MenuType.Separator });
         menus.push({
           name: "fresh auto",
-          callback: () => {
+          callback: (item) => {
             timer.create(true);
+            ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
           },
         });
         menus.push({
           name: "fresh manual",
-          callback: () => {
+          callback: (item) => {
             timer.clean();
+            ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
           },
         });
+        menus.push({ type: ccui.menu.MenuType.Separator });
         menus.push({
           name: simpleProperties ? "show more properties" : "show simple properties",
-          callback: () => {
+          callback: (item) => {
             simpleProperties = !simpleProperties;
-            ga.fireEventWithParam(GA_EventName.MouseMenu, "simple/more properties");
+            ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
           },
         });
         ccui.menu.showMenuByMouseEvent(evnet, menus);

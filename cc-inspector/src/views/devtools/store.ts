@@ -28,6 +28,14 @@ export class ConfigData {
    * 是否自动刷新hierarchy
    */
   refreshHirarchy: boolean = true;
+  /**
+   * 当鼠标滑过节点树时，游戏是否同步Inspect
+   */
+  hoverInspect: boolean = true;
+  /**
+   * 当节点树点击时，游戏是否同步Inspect
+   */
+  clickInspect: boolean = true;
 }
 
 export const appStore = defineStore("app", () => {
@@ -42,6 +50,8 @@ export const appStore = defineStore("app", () => {
     config.value.expandTest = !!data.expandTest;
     config.value.refreshHirarchy = !!data.refreshHirarchy;
     config.value.refreshInspector = !!data.refreshInspector;
+    config.value.hoverInspect = !!data.hoverInspect;
+    config.value.clickInspect = !!data.clickInspect;
   }
   return {
     frameID,
