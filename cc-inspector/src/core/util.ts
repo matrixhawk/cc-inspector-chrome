@@ -1,3 +1,4 @@
+import { Page } from "./types";
 
 interface LogOptions {
   data: any;
@@ -7,12 +8,12 @@ interface LogOptions {
 
 export function log(options: LogOptions) {
   const data: any = options.data;
-  const time = new Date().toLocaleString()
-  let log = ""
+  const time = new Date().toLocaleString();
+  let log = "";
   if (typeof data === "string") {
     log = data;
   } else if (typeof data === "object") {
-    log = JSON.stringify(data)
+    log = JSON.stringify(data);
   }
 
   let str = "";
@@ -22,8 +23,16 @@ export function log(options: LogOptions) {
     str = `[${time}]: ${log} `;
   }
   if (options.color) {
-    console.log(`%c${str}`, `color:${options.color};`)
+    console.log(`%c${str}`, `color:${options.color};`);
   } else {
     console.log(str);
   }
+}
+
+export function assembleDevToolsName(id: number) {
+  return `${Page.Devtools}-${id}`;
+}
+export function getDevToolsInspectorId(name: string) {
+  const id = name.split("-")[1];
+  return id ? Number(id) : 0;
 }

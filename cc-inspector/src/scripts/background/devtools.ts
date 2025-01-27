@@ -1,7 +1,8 @@
-import { debugLog, Page, PluginEvent } from "../../core/types";
+import { debugLog, Msg, Page, PluginEvent, RequestUseFrameData, ResponseSupportData } from "../../core/types";
 import { Terminal } from "../terminal";
+import { TabInfo } from "./tabInfo";
 
-export abstract class PortMan {
+export class Devtools {
   /**
    * port的名字标识
    */
@@ -14,18 +15,14 @@ export abstract class PortMan {
   public url: string = "";
   protected port: chrome.runtime.Port | null = null;
   public tab: chrome.tabs.Tab | null = null;
-  public onDisconnect: (port: chrome.runtime.Port) => void | null = null;
-  public onMessage: (data: PluginEvent) => void | null = null;
+
   public terminal: Terminal = null;
-  public timestamp: number = 0;
-  constructor(tab: chrome.tabs.Tab, port: chrome.runtime.Port) {
-    this.timestamp = Date.now();
+  public tabInfo: TabInfo | null = null;
+  constructor(port: chrome.runtime.Port, tabInfo: TabInfo) {
+    this.tabInfo = tabInfo;
     this.port = port;
-    this.tab = tab;
     this.name = port.name;
-    this.tabID = tab.id;
     this.url = port.sender.url;
-    this.title = tab.title;
     this.terminal = new Terminal(`Port-${this.name}`);
     port.onMessage.addListener((data: any, port: chrome.runtime.Port) => {
       const event = PluginEvent.create(data);
@@ -43,25 +40,20 @@ export abstract class PortMan {
       }
     });
   }
-  abstract init(): void;
-
-  isContent() {
-    return this.name === Page.Content;
+  public onDisconnect(port: chrome.runtime.Port) {
+    this.tabInfo.removeDevtools(this);
   }
-  isDevtools() {
-    return this.name === Page.Devtools;
-  }
-  isUseing(id: number) {
-    if (!this.port) {
-      return false;
+  public onMessage(data: PluginEvent) {
+    if (data.msg === Msg.RequestUseFrame) {
+      // 因为devtool是定时器驱动，这里改变了content，后续就会将数据派发到对应的content中去
+      this.tabInfo.useFrame((data.data as RequestUseFrameData).id);
+    } else {
+      // 从devtools过来的消息统一派发到目标content中
+      if (data.check(Page.Devtools, Page.Background)) {
+        data.reset(Page.Background, Page.Content);
+        this.tabInfo.sendMsgToContent(data);
+      }
     }
-    if (!this.port.sender) {
-      return false;
-    }
-    if (this.port.sender.frameId === undefined) {
-      return false;
-    }
-    return this.port.sender.frameId === id;
   }
   send(data: PluginEvent) {
     if (this.port) {

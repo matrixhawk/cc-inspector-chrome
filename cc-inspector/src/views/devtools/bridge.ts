@@ -22,7 +22,9 @@ class Bridge implements TestClient {
     }
     this._inited = true;
     if (CCP.Adaptation.Env.isChromeRuntime) {
-      this.connect = chrome.runtime.connect({ name: Page.Devtools });
+      // 调试的标签ID
+      const id = chrome.devtools.inspectedWindow.tabId;
+      this.connect = chrome.runtime.connect({ name: `${Page.Devtools}-${id}` });
       this.connect.onDisconnect.addListener(() => {
         debugLog && console.log(...this.terminal.disconnect(""));
         this.connect = null;
