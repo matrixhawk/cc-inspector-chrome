@@ -38,7 +38,11 @@ export class GoogleAnalytics {
           },
         ],
       } as MeasurementBody),
-    });
+    })
+      .then(() => {})
+      .catch((e) => {
+        console.error(e);
+      });
   }
   public async fireEvent(name: string) {
     if (!this.isChromeEnv()) {
@@ -60,7 +64,11 @@ export class GoogleAnalytics {
           },
         ],
       } as MeasurementBody),
-    });
+    })
+      .then(() => {})
+      .catch((e) => {
+        console.error(e);
+      });
   }
   async clickButton(btn: GA_Button) {
     await this.fireEventWithParam(GA_EventName.ButtonClicked, btn);

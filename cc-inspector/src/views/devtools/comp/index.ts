@@ -170,7 +170,11 @@ export function getSimpleProperties(typeName: string): string[] {
     "worldScale",
     // "worldRotation",// 渲染有问题，暂时先不支持这个属性
   ];
-  config[CompType.UITransform] = ["anchor", "size"];
+  config[CompType.UITransform] = [
+    "anchorPoint", //vec2类型，step会正确处理
+    // "anchor",// FIXME: 会被Inspector属性配对，无法正确处理step
+    "size",
+  ];
   config[CompType.Widget] = [
     "left",
     "right",

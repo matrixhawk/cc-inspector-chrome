@@ -416,6 +416,9 @@ export class Inspector extends InjectEvent {
             let propPath = path.concat(propName);
             let itemData = this._genInfoData(value, propName, propPath);
             if (itemData) {
+              if (itemData instanceof NumberData && options.step !== undefined) {
+                itemData.step = options.step;
+              }
               data.add(new Property(propName, itemData));
             }
           }
@@ -472,7 +475,10 @@ export class Inspector extends InjectEvent {
       }
     }
   }
-  private getStep(node: any, key: string) {
+  private getStep(node: any, key: string | number) {
+    if (typeof key !== "string") {
+      return 1;
+    }
     const cfgArray: Array<{ type: any; keys: Array<{ key: string; step: number }> }> = [];
     if (cc.Node) {
       cfgArray.push({
@@ -482,7 +488,16 @@ export class Inspector extends InjectEvent {
           { key: "anchorY", step: 0.1 },
           { key: "scaleX", step: 0.1 },
           { key: "scaleY", step: 0.1 },
+          { key: "scale", step: 0.1 },
+          { key: "worldScale", step: 0.1 },
         ],
+      });
+    }
+    const tr = cc.UITransformComponent || cc.UITransform;
+    if (tr) {
+      cfgArray.push({
+        type: tr,
+        keys: [{ key: "anchorPoint", step: 0.1 }],
       });
     }
     for (let i = 0; i < cfgArray.length; i++) {
@@ -518,9 +533,7 @@ export class Inspector extends InjectEvent {
       }
       case "number": {
         const info = new NumberData(propertyValue);
-        if (typeof key === "string") {
-          info.step = this.getStep(node, key);
-        }
+        info.step = this.getStep(node, key);
         return make(info);
       }
       case "string": {
@@ -563,6 +576,7 @@ export class Inspector extends InjectEvent {
       path: path,
       data: new Vec3Data(),
       keys: ["x", "y", "z"],
+      step: this.getStep(node, key),
       value: propertyValue,
     });
     if (info) {
@@ -584,6 +598,7 @@ export class Inspector extends InjectEvent {
       ctor: cc.Vec2,
       path: path,
       data: new Vec2Data(),
+      step: this.getStep(node, key),
       keys: ["x", "y"],
       value: propertyValue,
     });

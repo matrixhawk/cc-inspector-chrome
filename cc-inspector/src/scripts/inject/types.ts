@@ -16,6 +16,7 @@ export interface BuildArrayOptions {
 export interface BuildVecOptions {
   path: string[];
   keys: string[];
+  step?: number;
   ctor: Function;
   value: Object;
   data: Vec3Data | Vec2Data;
