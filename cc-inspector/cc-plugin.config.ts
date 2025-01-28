@@ -9,7 +9,7 @@ function i18n(key: string) {
 
 const manifest: CocosPluginManifest = {
   name: pkgName,
-  version: "2.1.4",
+  version: "2.1.5",
   description: "Debug games made with CocosCreator and display node trees and node properties",
   author: "xu_yanfeng",
   main: "./src/main.ts",
@@ -54,8 +54,9 @@ const manifest: CocosPluginManifest = {
   },
 };
 const options: CocosPluginOptions = {
+  obscure: true,
   server: {
-    enabled: true,
+    enabled: false,
     port: 2022,
     https: true,
     writeToDisk: true,
