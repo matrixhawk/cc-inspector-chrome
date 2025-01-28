@@ -4,13 +4,18 @@ declare const cc: any;
 export class HintV3 extends HintAdapter {
   resetIndex(): void {
     const node = this.draw.node;
-    const len = node.parent.children.length;
-    node.setSiblingIndex(len);
+    if (node.parent) {
+      const len = node.parent.children.length;
+      node.setSiblingIndex(len);
+    }
+  }
+  private get transformComponent() {
+    return cc.UITransformComponent || cc.UITransform;
   }
   hitTest(node: any, x: number, y: number): boolean {
     let hitTest = null;
     // hitTest = node._uiProps?.uiTransformComp?.hitTest;
-    const tr = node.getComponent(cc.UITransformComponent || cc.UITransform);
+    const tr = node.getComponent(this.transformComponent);
     if (tr) {
       if (tr.hitTest) {
         hitTest = tr.hitTest.bind(tr);
@@ -34,26 +39,45 @@ export class HintV3 extends HintAdapter {
     y *= window.devicePixelRatio;
     return { x, y };
   }
-  protected addDraw(scene: any, canvas: any, node: any): void {
+  /**
+   *  这种方式能够获取到优先绘制的canvas，也能保证线框在顶部，但是方案不完美，会收到node.layer的影响
+   */
+  private getCanvas(scene: any) {
+    const canvasArray: Array<{ canvas: any; index: number }> = [];
+    scene.walk((item: any) => {
+      if (cc.Canvas) {
+        const comp = item.getComponent(cc.Canvas);
+        if (comp) {
+          const idx = comp.cameraComponent?.priority || 0;
+          canvasArray.push({ canvas: comp, index: idx });
+        }
+      }
+    });
+    canvasArray.sort((a, b) => a.index - b.index);
+    return canvasArray[0].canvas.node;
+  }
+  protected addDraw(scene: any, node: any): void {
+    const canvas = this.getCanvas(scene);
     if (canvas) {
-      // 3.x 需要放到canvas下边
       if (canvas.layer) {
         node.layer = canvas.layer;
       }
+      const tr = node.getComponent(this.transformComponent) || node.addComponent(this.transformComponent);
+      if (tr) {
+        tr.setContentSize(0, 0);
+      }
+      // FIXME: 多canvas的情况下，如果hover和select的节点不在一个canvas下，绘制线框有问题，暂时先不支持多canvas的情况
       canvas.addChild(node);
-    } else {
-      scene.addChild(node);
     }
   }
   getRectPoints(node: any): RectPoints | null {
     if (!node.worldPosition) {
       return null;
     }
-    const transform = cc.UITransformComponent || cc.UITransform;
-    if (!transform) {
+    if (!this.transformComponent) {
       return null;
     }
-    const tr = node.getComponent(transform);
+    const tr = node.getComponent(this.transformComponent);
     if (!tr) {
       return null;
     }
@@ -74,7 +98,7 @@ export class HintV3 extends HintAdapter {
       let worldX = (m.m00 * x + m.m04 * y + m.m12) * rhw;
       let worldY = (m.m01 * x + m.m05 * y + m.m13) * rhw;
       let worldZ = (m.m02 * x + m.m06 * y + m.m14) * rhw;
-      const pos = this.draw.getComponent(transform).convertToNodeSpaceAR(cc.v3(worldX, worldY, worldZ));
+      const pos = this.draw.getComponent(this.transformComponent).convertToNodeSpaceAR(cc.v3(worldX, worldY, worldZ));
       points.add(new Point(pos.x, pos.y));
     });
 

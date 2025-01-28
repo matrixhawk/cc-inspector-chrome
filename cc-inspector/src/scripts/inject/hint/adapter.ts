@@ -63,14 +63,13 @@ export class HintAdapter {
       return;
     }
     let node = new cc.Node("draw-node");
-    const canvas = cc.find("Canvas");
-    this.addDraw(scene, canvas, node);
+    this.addDraw(scene, node);
     this.draw = node.addComponent(cc.Graphics || cc.GraphicsComponent);
   }
   public isDrawValid() {
     return this.draw && this.draw.isValid;
   }
-  protected addDraw(scene: any, canvas: any, node: any) {
+  protected addDraw(scene: any, node: any) {
     throw new Error("not implemented");
   }
   public drawRect(points: RectPoints, opts: DrawOptions) {

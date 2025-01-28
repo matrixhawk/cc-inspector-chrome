@@ -5,7 +5,7 @@ export class HintV2 extends HintAdapter {
   constructor() {
     super();
   }
-  protected addDraw(scene: any, canvas: any, node: any): void {
+  protected addDraw(scene: any, node: any): void {
     scene.addChild(node);
   }
   private canvasBoundingRect = {
