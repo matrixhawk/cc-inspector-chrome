@@ -323,6 +323,7 @@ export class StringData extends Info {
 
 export class NumberData extends Info {
   public data: number = 0;
+  public step: number = 1;
   constructor(data: number = 0) {
     super();
     this.type = DataType.Number;
@@ -331,6 +332,7 @@ export class NumberData extends Info {
   parse(data: NumberData) {
     super.parse(data);
     this.data = data.data;
+    this.step = data.step || 1;
     return this;
   }
   public isNumber(): boolean {

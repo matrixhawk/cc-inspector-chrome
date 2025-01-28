@@ -472,6 +472,30 @@ export class Inspector extends InjectEvent {
       }
     }
   }
+  private getStep(node: any, key: string) {
+    const cfgArray: Array<{ type: any; keys: Array<{ key: string; step: number }> }> = [];
+    if (cc.Node) {
+      cfgArray.push({
+        type: cc.Node,
+        keys: [
+          { key: "anchorX", step: 0.1 },
+          { key: "anchorY", step: 0.1 },
+          { key: "scaleX", step: 0.1 },
+          { key: "scaleY", step: 0.1 },
+        ],
+      });
+    }
+    for (let i = 0; i < cfgArray.length; i++) {
+      const { type, keys } = cfgArray[i];
+      if (node instanceof type) {
+        const ret = keys.find((item) => item.key === key);
+        if (ret) {
+          return ret.step;
+        }
+      }
+    }
+    return 1;
+  }
   _genInfoData(node: any, key: string | number, path: Array<string>): Info | null {
     this.warnSilent(true);
     const propertyValue = node[key];
@@ -494,6 +518,9 @@ export class Inspector extends InjectEvent {
       }
       case "number": {
         const info = new NumberData(propertyValue);
+        if (typeof key === "string") {
+          info.step = this.getStep(node, key);
+        }
         return make(info);
       }
       case "string": {
