@@ -2,6 +2,7 @@
 import { uniq } from "lodash";
 import { Msg, PluginEvent, RequestLogData, RequestNodeInfoData, RequestSetPropertyData, ResponseGameInfoData, ResponseNodeInfoData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
 import { ArrayData, BoolData, ColorData, DataType, EngineData, EnumData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectCircleData, ObjectData, Property, StringData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../../views/devtools/data";
+import { enumConfig } from "./enumConfig";
 import { InjectEvent } from "./event";
 import { Hint } from "./hint";
 import { injectView } from "./inject-view";
@@ -516,22 +517,9 @@ export class Inspector extends InjectEvent {
     return false;
   }
   private getEnum(node: any, key: string): Array<{ name: string; value: number }> | null {
-    const cfgArray: Array<{ type: any; list: Array<{ key: string; values: () => Array<{ name: string; value: number }> }> }> = [
-      {
-        type: cc.Widget,
-        list: [
-          {
-            key: "alignMode",
-            values: () => {
-              return cc.Widget.AlignMode.__enums__;
-            },
-          },
-        ],
-      },
-    ];
-    for (let i = 0; i < cfgArray.length; i++) {
-      const { type, list } = cfgArray[i];
-      if (node instanceof type) {
+    for (let i = 0; i < enumConfig.length; i++) {
+      const { type, list } = enumConfig[i];
+      if (type && node instanceof type) {
         const ret = list.find((item) => item.key === key);
         if (ret) {
           return ret.values();
