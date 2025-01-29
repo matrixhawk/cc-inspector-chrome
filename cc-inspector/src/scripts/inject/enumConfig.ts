@@ -73,6 +73,18 @@ export function getEnumListConfig() {
             return cc.Label.Overflow.__enums__;
           },
         },
+        {
+          key: "verticalAlign",
+          values() {
+            return cc.Label.VerticalAlign.__enums__;
+          },
+        },
+        {
+          key: "horizontalAlign",
+          values() {
+            return cc.Label.HorizontalAlign.__enums__;
+          },
+        },
       ],
     },
     {
@@ -212,7 +224,7 @@ export function getEnumListConfig() {
       ],
     },
     {
-      type: cc.VidePlayer,
+      type: cc.VideoPlayer,
       list: [
         {
           key: "resourceType",

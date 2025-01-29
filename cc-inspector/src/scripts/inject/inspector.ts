@@ -256,7 +256,7 @@ export class Inspector extends InjectEvent {
     if (node instanceof cc.Scene) {
       // 场景不允许获取active，引擎会报错
     } else {
-      data.active = !!node.active;
+      data.active = !!node.active && !!node.activeInHierarchy;
     }
     this.inspectorGameMemoryStorage[node.uuid] = node;
     let nodeChildren = node.children;
