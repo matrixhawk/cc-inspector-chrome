@@ -402,22 +402,32 @@ export class Inspector extends InjectEvent {
 
   _buildVecData(options: BuildVecOptions) {
     const ctor: Function = options.ctor;
-    const keys: Array<string> = options.keys;
+    const keys = options.keys;
     const value: Object = options.value;
     const data: Vec3Data | Vec2Data = options.data;
     const path: Array<string> = options.path;
 
     if (ctor && value instanceof ctor) {
-      let hasUnOwnProperty = keys.find((key) => !value.hasOwnProperty(key));
+      let hasUnOwnProperty = keys.find((item) => !value.hasOwnProperty(item.key));
       if (!hasUnOwnProperty) {
         for (let key in keys) {
-          let propName = keys[key];
+          const propName = keys[key].key;
+          const stepFunc = keys[key].step;
+          const disabledFunc = keys[key].disabled;
+
           if (value.hasOwnProperty(propName)) {
             let propPath = path.concat(propName);
             let itemData = this._genInfoData(value, propName, propPath);
             if (itemData) {
-              if (itemData instanceof NumberData && options.step !== undefined) {
-                itemData.step = options.step;
+              if (itemData instanceof NumberData) {
+                if (stepFunc) {
+                  itemData.step = stepFunc(propName);
+                } else if (options.step) {
+                  itemData.step = options.step;
+                } else {
+                  itemData.step = 1;
+                }
+                itemData.disabled = disabledFunc ? disabledFunc(propName, itemData) : false;
               }
               data.add(new Property(propName, itemData));
             }
@@ -474,6 +484,70 @@ export class Inspector extends InjectEvent {
         cc.warn = console.warn.bind(console);
       }
     }
+  }
+  private isDisabledX(node: any, item: Info) {
+    const widget = node.getComponent(cc.Widget);
+    if (widget && widget.enabled) {
+      if (widget.isAlignLeft) {
+        item.tip = "widget.isAlignLeft";
+        return true;
+      }
+      if (widget.isAlignRight) {
+        item.tip = "widget.isAlignRight";
+        return true;
+      }
+    }
+    item.tip = "";
+    return false;
+  }
+  private isDisabledY(node: any, item: Info) {
+    const widget = node.getComponent(cc.Widget);
+    if (widget && widget.enabled) {
+      if (widget.isAlignTop) {
+        item.tip = "widget.isAlignTop";
+        return true;
+      }
+      if (widget.isAlignBottom) {
+        item.tip = "widget.isAlignBottom";
+        return true;
+      }
+    }
+    item.tip = "";
+    return false;
+  }
+  private getDisabled(node: any, key: string | number, v: string, item: Info) {
+    if (typeof key !== "string") {
+      return false;
+    }
+    const cfgArray: Array<{ type: any; keys: Array<{ key: string; disabled: () => boolean }> }> = [
+      {
+        type: cc.Node,
+        keys: [
+          {
+            key: "position.x",
+            disabled: () => {
+              return this.isDisabledX(node, item);
+            },
+          },
+          {
+            key: "position.y",
+            disabled: () => {
+              return this.isDisabledY(node, item);
+            },
+          },
+        ],
+      },
+    ];
+    for (let i = 0; i < cfgArray.length; i++) {
+      const { type, keys } = cfgArray[i];
+      if (node instanceof type) {
+        const ret = keys.find((item) => item.key === `${key.trim()}.${v.trim()}`);
+        if (ret) {
+          return ret.disabled();
+        }
+      }
+    }
+    return false;
   }
   private getStep(node: any, key: string | number) {
     if (typeof key !== "string") {
@@ -564,7 +638,7 @@ export class Inspector extends InjectEvent {
       ctor: cc.Size,
       path: path,
       data: new Vec2Data(),
-      keys: ["width", "height"],
+      keys: [{ key: "width" }, { key: "height" }],
       value: propertyValue,
     });
     if (info) {
@@ -575,7 +649,21 @@ export class Inspector extends InjectEvent {
       ctor: cc.Vec3,
       path: path,
       data: new Vec3Data(),
-      keys: ["x", "y", "z"],
+      keys: [
+        {
+          key: "x",
+          disabled: (v: string, item: Info) => {
+            return this.getDisabled(node, key, v, item);
+          },
+        },
+        {
+          key: "y",
+          disabled: (v: string, item: Info) => {
+            return this.getDisabled(node, key, v, item);
+          },
+        },
+        { key: "z" },
+      ],
       step: this.getStep(node, key),
       value: propertyValue,
     });
@@ -587,7 +675,7 @@ export class Inspector extends InjectEvent {
       ctor: cc.Quat,
       path: path,
       data: new Vec4Data(),
-      keys: ["x", "y", "z", "w"],
+      keys: [{ key: "x" }, { key: "y" }, { key: "z" }, { key: "w" }],
       value: propertyValue,
     });
     if (info) {
@@ -599,7 +687,20 @@ export class Inspector extends InjectEvent {
       path: path,
       data: new Vec2Data(),
       step: this.getStep(node, key),
-      keys: ["x", "y"],
+      keys: [
+        {
+          key: "x",
+          disabled: (v: string, item: Info) => {
+            return this.getDisabled(node, key, v, item);
+          },
+        },
+        {
+          key: "y",
+          disabled: (v: string, item: Info) => {
+            return this.getDisabled(node, key, v, item);
+          },
+        },
+      ],
       value: propertyValue,
     });
     if (info) {

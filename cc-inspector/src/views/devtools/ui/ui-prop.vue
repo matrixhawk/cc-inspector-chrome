@@ -7,7 +7,7 @@
         </div>
         <CCInput v-if="value.isString()" v-model:value="value.data" :disabled="value.readonly" @change="onChangeValue"> </CCInput>
         <CCTextarea v-if="value.isText()" v-model:value="value.data" :disabled="value.readonly" @change="onChangeValue"> </CCTextarea>
-        <CCInputNumber v-if="value.isNumber()" v-model:value="value.data" :step="getStep()" :disabled="value.readonly" @change="onChangeValue"></CCInputNumber>
+        <CCInputNumber v-if="value.isNumber()" v-model:value="value.data" :step="getStep()" :readonly="value.readonly" :disabled="getDisabled()" @change="onChangeValue" :tip="value.tip"></CCInputNumber>
         <div v-if="value.isVec2() || value.isVec3() || value.isVec4()" class="vec">
           <UiProp v-for="(vec, index) in value.data" :icon="!!index" head-width="auto" :key="index" :arrow="false" :value="vec.value" :name="vec.name"> </UiProp>
         </div>
@@ -143,6 +143,13 @@ export default defineComponent({
           return props.value.step || 1;
         } else {
           return 1;
+        }
+      },
+      getDisabled() {
+        if (props.value instanceof NumberData) {
+          return props.value.disabled;
+        } else {
+          return false;
         }
       },
     };

@@ -1,4 +1,4 @@
-import { ArrayData, ImageData, ObjectData, Vec2Data, Vec3Data } from "../../views/devtools/data";
+import { ArrayData, ImageData, Info, ObjectData, Vec2Data, Vec3Data } from "../../views/devtools/data";
 
 export interface BuildObjectOptions {
   path: string[];
@@ -15,7 +15,20 @@ export interface BuildArrayOptions {
 
 export interface BuildVecOptions {
   path: string[];
-  keys: string[];
+  keys: Array<{
+    key: string;
+    /**
+     * 分量使用的步进值，优先使用，主要是为了实现不同分量不同的步进
+     */
+    step?: (key: string) => number;
+    /**
+     * 分量是否可以调整
+     */
+    disabled?: (key: string, item: Info) => boolean;
+  }>;
+  /**
+   * 所有的vec统一使用的步进值
+   */
   step?: number;
   ctor: Function;
   value: Object;
