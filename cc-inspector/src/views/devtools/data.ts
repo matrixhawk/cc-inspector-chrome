@@ -493,13 +493,16 @@ export class ImageData extends Info {
 }
 
 export class EnumData extends Info {
+  public data: string | number = 0;
   public values: Array<{ name: string; value: any }> = [];
-  constructor() {
+  constructor(data: string | number = 0) {
     super();
     this.type = DataType.Enum;
+    this.data = data;
   }
   parse(data: EnumData) {
     super.parse(data);
+    this.data = data.data;
     for (let i = 0; i < data.values.length; i++) {
       const item = data.values[i];
       this.values.push({ name: item.name, value: item.value });
