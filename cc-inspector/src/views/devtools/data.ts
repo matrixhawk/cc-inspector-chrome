@@ -25,11 +25,13 @@ export class Info {
   public data: any;
   public readonly: boolean = false;
   public path: Array<string> = []; // 属性对应的路径
+  public tip: string = "";
   constructor(id: string = "") {
     this.id = id || v4();
   }
   parse(data: Info) {
     this.id = data.id;
+    this.tip = data.tip || "";
     this.path = data.path;
     this.readonly = data.readonly;
   }
@@ -324,6 +326,10 @@ export class StringData extends Info {
 export class NumberData extends Info {
   public data: number = 0;
   public step: number = 1;
+  /**
+   * 是否禁用，因为cc.Widget组件会影响调整x、y
+   */
+  public disabled: boolean = false;
   constructor(data: number = 0) {
     super();
     this.type = DataType.Number;
@@ -333,6 +339,7 @@ export class NumberData extends Info {
     super.parse(data);
     this.data = data.data;
     this.step = data.step || 1;
+    this.disabled = !!data.disabled;
     return this;
   }
   public isNumber(): boolean {

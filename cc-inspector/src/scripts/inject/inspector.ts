@@ -515,22 +515,19 @@ export class Inspector extends InjectEvent {
     item.tip = "";
     return false;
   }
-  private getDisabled(node: any, key: string | number, v: string, item: Info) {
-    if (typeof key !== "string") {
-      return false;
-    }
-    const cfgArray: Array<{ type: any; keys: Array<{ key: string; disabled: () => boolean }> }> = [
+  private getDisabled(node: any, key: string, item: Info) {
+    const cfgArray: Array<{ type: any; keys: Array<{ key: string[]; disabled: () => boolean }> }> = [
       {
         type: cc.Node,
         keys: [
           {
-            key: "position.x",
+            key: ["position.x", "x"],
             disabled: () => {
               return this.isDisabledX(node, item);
             },
           },
           {
-            key: "position.y",
+            key: ["position.y", "y"],
             disabled: () => {
               return this.isDisabledY(node, item);
             },
@@ -541,7 +538,7 @@ export class Inspector extends InjectEvent {
     for (let i = 0; i < cfgArray.length; i++) {
       const { type, keys } = cfgArray[i];
       if (node instanceof type) {
-        const ret = keys.find((item) => item.key === `${key.trim()}.${v.trim()}`);
+        const ret = keys.find((item) => !!item.key.find((el) => el === key));
         if (ret) {
           return ret.disabled();
         }
@@ -608,6 +605,7 @@ export class Inspector extends InjectEvent {
       case "number": {
         const info = new NumberData(propertyValue);
         info.step = this.getStep(node, key);
+        info.disabled = this.getDisabled(node, key.toString(), info);
         return make(info);
       }
       case "string": {
@@ -653,13 +651,13 @@ export class Inspector extends InjectEvent {
         {
           key: "x",
           disabled: (v: string, item: Info) => {
-            return this.getDisabled(node, key, v, item);
+            return this.getDisabled(node, `${key}.${v}`, item);
           },
         },
         {
           key: "y",
           disabled: (v: string, item: Info) => {
-            return this.getDisabled(node, key, v, item);
+            return this.getDisabled(node, `${key}.${v}`, item);
           },
         },
         { key: "z" },
@@ -691,13 +689,13 @@ export class Inspector extends InjectEvent {
         {
           key: "x",
           disabled: (v: string, item: Info) => {
-            return this.getDisabled(node, key, v, item);
+            return this.getDisabled(node, `${key}.${v}`, item);
           },
         },
         {
           key: "y",
           disabled: (v: string, item: Info) => {
-            return this.getDisabled(node, key, v, item);
+            return this.getDisabled(node, `${key}.${v}`, item);
           },
         },
       ],
