@@ -94,6 +94,7 @@ export function getSimpleProperties(typeName: string): string[] {
   config[CompType.RichText] = [
     "string",
     "horizontalAlign",
+    "verticalAlign",
     "fontSize",
     "font",
     "fontFamily",
