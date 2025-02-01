@@ -32,6 +32,8 @@ export class AdItem {
   parse(data: AdItem) {
     this.name = data.name;
     this.store = data.store || "";
+    this.parseStore();
+
     this.try = data.try || "";
     this.tip = data.tip || "";
     this.duration = data.duration || 0;
@@ -39,6 +41,13 @@ export class AdItem {
     const img = data.img || "";
     this.img = githubMirrorMgr.getFileUrl(img);
     return this;
+  }
+  parseStore() {
+    const flag = "${git}";
+    if (this.store.startsWith(flag)) {
+      const file = this.store.split(flag)[1];
+      this.store = githubMirrorMgr.getFileUrl(file);
+    }
   }
 }
 export class AdData {
