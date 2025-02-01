@@ -82,6 +82,7 @@ export enum GA_EventName {
   GamePlayer = "game_player",
   GamePause = "game_pause",
   GameStep = "game_step",
+  TreeSearch = "tree-search",
   /**
    * 用户点击store广告链接
    */

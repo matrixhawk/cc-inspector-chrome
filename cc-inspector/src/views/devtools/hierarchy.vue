@@ -11,7 +11,7 @@
           <i class="matchCase iconfont icon_font_size" @click.stop="onChangeCase" title="match case" :style="{ color: matchCase ? 'red' : '' }"></i>
         </slot>
       </CCInput>
-      <CCTree :search="true" @node-menu="onMenu" @contextmenu.prevent.stop="onMenu" style="flex: 1" ref="elTree" :expand-keys="expandedKeys" :default-expand-all="false" :value="treeData" @node-expand="onNodeExpand" @node-collapse="onNodeCollapse" @node-click="handleNodeClick" @node-unclick="handleNodeUnclick" @node-enter="handleNodeEnter" @node-leave="handleNodeLeave"></CCTree>
+      <CCTree @do-search="doSearch" :search="true" @node-menu="onMenu" @contextmenu.prevent.stop="onMenu" style="flex: 1" ref="elTree" :expand-keys="expandedKeys" :default-expand-all="false" :value="treeData" @node-expand="onNodeExpand" @node-collapse="onNodeCollapse" @node-click="handleNodeClick" @node-unclick="handleNodeUnclick" @node-enter="handleNodeEnter" @node-leave="handleNodeLeave"></CCTree>
     </CCDock>
   </div>
 </template>
@@ -197,7 +197,14 @@ export default defineComponent({
     if (config.value.refreshHirarchy) {
       rotateType.value = RotateType.Loop;
     }
+    let preSearch = "";
     return {
+      doSearch(v: string) {
+        if (v && preSearch !== v) {
+          ga.fireEventWithParam(GA_EventName.TreeSearch, v);
+          preSearch = v;
+        }
+      },
       onClickRefresh() {
         updateTree();
       },
@@ -232,6 +239,7 @@ export default defineComponent({
           updateSelect(null);
         }
       },
+
       onNodeExpand(data: TreeData) {
         if (data.id) {
           expandedKeys.value.push(data.id);

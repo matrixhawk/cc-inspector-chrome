@@ -42,13 +42,24 @@ export default defineComponent({
   name: "ad",
   components: { CCDialog, Banner, Memory, CCMenu },
   setup() {
+    function randomSupport(): { icon: string; title: string } {
+      const arr = [
+        { icon: "icon_shop_cart", title: "冲冲冲" },
+        { icon: "icon_good", title: "赞一个" },
+        { icon: "icon_coffe", title: "请我喝杯咖啡" },
+      ];
+      const idx = Math.floor(Math.random() * arr.length);
+      return arr[idx];
+    }
+
     const store = appStore();
     store.init();
+    const rnd = randomSupport();
     const { config } = storeToRefs(appStore());
     const listArray = ref<ListItem[]>([
       {
-        icon: "icon_shop_cart ani_shop_cart",
-        txt: "Recommended Plugins",
+        icon: `${rnd.icon} ani_shop_cart`,
+        txt: rnd.title,
         contextmenu: () => {},
         visible: true,
         click: () => {
