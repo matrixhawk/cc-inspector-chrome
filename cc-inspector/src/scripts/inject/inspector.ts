@@ -303,7 +303,11 @@ export class Inspector extends InjectEvent {
     return null;
   }
   private calcColor(node: any) {
-    return "";
+    if (node._prefab) {
+      return "#00ff00ff";
+    } else {
+      return "";
+    }
   }
   // 收集节点信息
   getNodeChildren(node: any, data: TreeData) {
