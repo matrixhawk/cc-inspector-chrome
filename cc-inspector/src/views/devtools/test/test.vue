@@ -102,9 +102,11 @@ export default defineComponent({
       onTestTree1() {
         const data: TreeData = {
           id: "11",
+          color: "#ffffffff",
+          icon: "icon_node",
           text: "11",
           active: true,
-          children: [{ id: "22", text: "22", active: true, children: [] }],
+          children: [{ id: "22", text: "22", active: true, color: "#ffffffff", icon: "icon_node", children: [] }],
         };
         const event = new PluginEvent(Page.Inject, Page.Devtools, Msg.ResponseTreeInfo, data);
         bridge.emit(event);
@@ -113,15 +115,19 @@ export default defineComponent({
         const data: TreeData = {
           id: "1",
           text: "1",
+          color: "#ffffffff",
+          icon: "icon_node",
           active: true,
           children: [
             {
               id: "2",
               text: "2",
+              color: "#ffffffff",
+              icon: "icon_node",
               active: true,
-              children: [{ id: "3", text: "3", active: true, children: [] }],
+              children: [{ id: "3", text: "3", active: true, color: "#ffffffff", icon: "icon_node", children: [] }],
             },
-            { id: "4", text: "4", active: true, children: [] },
+            { id: "4", text: "4", active: true, color: "#ffffffff", icon: "icon_node", children: [] },
           ],
         };
         const event = new PluginEvent(Page.Inject, Page.Devtools, Msg.ResponseTreeInfo, data);

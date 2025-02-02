@@ -521,6 +521,8 @@ export class EnumData extends Info {
 
 export class TreeData implements ITreeData {
   id: string = "";
+  icon: string = "";
+  color: string = "";
   active: boolean = true;
   text: string = "";
   children: TreeData[] = [];

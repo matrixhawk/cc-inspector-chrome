@@ -3,6 +3,8 @@ export enum CompType {
   Prefab = "cc.Prefab",
   Spirte = "cc.Sprite",
   Label = "cc.Label",
+  Layout = "cc.Layout",
+  Graphics = "cc.Graphics",
   Widget = "cc.Widget",
   Camera = "cc.Camera",
   Canvas = "cc.Canvas",
@@ -249,3 +251,24 @@ export const VisibleProp = {
   Active: "active",
   Enabled: "enabled",
 };
+
+export function getNodeIcon(comp: CompType): string {
+  const map = {};
+  map[CompType.Spirte] = "icon_picture";
+  map[CompType.Label] = "icon_text";
+  map[CompType.Node] = "icon_node";
+  map[CompType.Prefab] = "icon_prefab";
+  map[CompType.Animation] = "icon_animation";
+  map[CompType.Button] = "icon_button";
+  map[CompType.EditBox] = "icon_inputbox";
+  map[CompType.Scene] = "icon_cocos";
+  map[CompType.ScrollView] = "icon_scroll_view";
+  map[CompType.Canvas] = "icon_canvas";
+  map[CompType.Camera] = "icon_camera";
+  map[CompType.Mask] = "icon_mask";
+  map[CompType.Widget] = "icon_widget";
+  map[CompType.ProgressBar] = "icon_progress";
+  map[CompType.Layout] = "icon_layout";
+  map[CompType.Graphics] = "icon_graphics";
+  return map[comp] || "";
+}

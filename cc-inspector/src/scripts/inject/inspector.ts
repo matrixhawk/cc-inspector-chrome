@@ -1,6 +1,7 @@
 // eval 注入脚本的代码,变量尽量使用var,后来发现在import之后,let会自动变为var
 import { uniq } from "lodash";
 import { Msg, PluginEvent, RequestLogData, RequestNodeInfoData, RequestSetPropertyData, ResponseGameInfoData, ResponseNodeInfoData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
+import { CompType, getNodeIcon } from "../../views/devtools/comp";
 import { ArrayData, BoolData, ColorData, DataType, EngineData, EnumData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectCircleData, ObjectData, Property, StringData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../../views/devtools/data";
 import { getEnumListConfig } from "./enumConfig";
 import { InjectEvent } from "./event";
@@ -241,17 +242,75 @@ export class Inspector extends InjectEvent {
         let treeData = new TreeData();
         treeData.id = "";
         treeData.text = "empty scene";
+        treeData.icon = "icon_cocos";
         notify && this.sendMsgToContent(Msg.ResponseTreeInfo, treeData as ResponseTreeInfoData);
       }
     } else {
       notify && this.notifySupportGame(false);
     }
   }
+  private calcIcon(node: any): string {
+    if (node instanceof cc.Scene) {
+      return getNodeIcon(CompType.Scene);
+    }
 
+    const components = node._components;
+    if (components) {
+      const types: CompType[] = [];
+      // widget组件的优先级低于其他渲染组件
+      for (let i = 0; i < components.length; i++) {
+        const component = components[i];
+        const type = this.checkComponent(component);
+        if (type) {
+          types.push(type);
+        }
+      }
+      if (types.length) {
+        //按照字母的顺序排序，目前是符合预期
+        types.sort();
+        return getNodeIcon(types[0]);
+      }
+    }
+    return getNodeIcon(CompType.Node);
+  }
+  private checkComponent(comp: any): CompType | null {
+    const map = {};
+    map[CompType.Animation] = [cc.Animation];
+    map[CompType.Button] = [cc.Button];
+    map[CompType.Spirte] = [cc.Sprite];
+    map[CompType.Label] = [cc.Label];
+    map[CompType.Node] = [cc.Node];
+    map[CompType.Prefab] = [cc.Prefab];
+    map[CompType.EditBox] = [cc.EditBox];
+    map[CompType.Scene] = [cc.Scene];
+    map[CompType.ScrollView] = [cc.ScrollView];
+    map[CompType.Camera] = [cc.Camera];
+    map[CompType.Canvas] = [cc.Canvas];
+    map[CompType.Mask] = [cc.Mask];
+    map[CompType.ProgressBar] = [cc.ProgressBar];
+    map[CompType.Layout] = [cc.Layout];
+    map[CompType.Graphics] = [cc.Graphics];
+    map[CompType.Widget] = [cc.Widget];
+    for (let key in map) {
+      const item = map[key];
+      const ret = item.find((el: any) => {
+        return el && comp instanceof el;
+      });
+      if (ret) {
+        return key as CompType;
+      }
+    }
+    return null;
+  }
+  private calcColor(node: any) {
+    return "";
+  }
   // 收集节点信息
   getNodeChildren(node: any, data: TreeData) {
     data.id = node.uuid;
     data.text = node.name;
+    data.icon = this.calcIcon(node);
+    data.color = this.calcColor(node);
     // @ts-ignore
     if (node instanceof cc.Scene) {
       // 场景不允许获取active，引擎会报错

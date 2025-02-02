@@ -11,7 +11,7 @@ import { defineComponent, PropType, toRaw } from "vue";
 import { ga } from "../../../ga";
 import { GA_EventName } from "../../../ga/type";
 import { Bus, BusMsg } from "../bus";
-import { CompType } from "../comp";
+import { CompType, getNodeIcon } from "../comp";
 import { EngineData } from "../data";
 export default defineComponent({
   name: "property-engine",
@@ -29,15 +29,7 @@ export default defineComponent({
         Bus.emit(BusMsg.ShowPlace, toRaw(props.data));
       },
       getEngineTypeIcon() {
-        const map = {};
-        map[CompType.Spirte] = "icon_picture";
-        map[CompType.Label] = "icon_text";
-        map[CompType.Node] = "icon_node";
-        map[CompType.Prefab] = "icon_prefab";
-        map[CompType.Animation] = "icon_animation";
-        map[CompType.Button] = "icon_button";
-        map[CompType.EditBox] = "icon_inputbox";
-        return map[props.data.engineType] || "icon_unknown";
+        return getNodeIcon(props.data.engineType as CompType) || "icon_unknown";
       },
     };
   },

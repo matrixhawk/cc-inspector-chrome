@@ -6,7 +6,9 @@ export class TestClient {
   recv(event: PluginEvent) {}
 }
 class Node {
+  icon: string = "icon_node";
   active: boolean = true;
+  color: string = "";
   children: Node[] = [];
   id: string = "";
   name: string = "";
@@ -16,6 +18,18 @@ class Node {
     this.active = true;
     this.id = v4();
     this.children = [];
+  }
+  setColor(color: string) {
+    this.color = color;
+    return this;
+  }
+  setIcon(icon: string) {
+    this.icon = icon;
+    return this;
+  }
+  setActive(active: boolean) {
+    this.active = active;
+    return this;
   }
   buildComponent(name: string) {
     const info = new Group(name);
@@ -32,6 +46,8 @@ class Node {
     data.id = this.id;
     data.text = this.name;
     data.active = this.active;
+    data.icon = this.icon;
+    data.color = this.color;
     for (let i = 0; i < this.children.length; i++) {
       const child = this.children[i];
       const childData = new TreeData();
@@ -83,7 +99,10 @@ export class TestServer {
   private testData: Node = new Node("scene");
   constructor() {
     this.testData
+      .setIcon("icon_cocos")
+      .setColor("#f00")
       .buildChild("base")
+      .setIcon("icon_prefab")
       .buildComponent("group-base") //
       .buildProperty("bool", new BoolData(true))
       .buildProperty("text", new TextData("text"))
@@ -122,8 +141,7 @@ export class TestServer {
       .buildComponent("group-arr[obj]") //
       .buildProperty("arr", new ArrayData().testObject()); //
 
-    const node = this.testData.buildChild("str1");
-    node.active = false;
+    const node = this.testData.buildChild("str1").setActive(false).setColor("#00ff00ff");
     const comp = node.buildComponent("group51");
     comp.buildProperty("str1", new StringData("str1"));
     node.buildComponent("group52").buildProperty("num", new NumberData(200));
@@ -189,6 +207,7 @@ export class TestServer {
       }
       case Msg.RequstTreeInfo: {
         const ret: TreeData = new TreeData();
+        ret.icon = "icon_cocos";
         this.testData.toTreeData(ret);
         const event = new PluginEvent(Page.Inject, Page.Devtools, Msg.ResponseTreeInfo, ret as ResponseTreeInfoData);
         this.send(event);
