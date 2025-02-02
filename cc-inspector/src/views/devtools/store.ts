@@ -36,6 +36,10 @@ export class ConfigData {
    * 当节点树点击时，游戏是否同步Inspect
    */
   clickInspect: boolean = true;
+  /**
+   * 显示节点树的icon
+   */
+  showTreeIcon: boolean = true;
 }
 
 export const appStore = defineStore("app", () => {
@@ -52,6 +56,7 @@ export const appStore = defineStore("app", () => {
     config.value.refreshInspector = !!data.refreshInspector;
     config.value.hoverInspect = !!data.hoverInspect;
     config.value.clickInspect = !!data.clickInspect;
+    config.value.showTreeIcon = !!data.showTreeIcon;
   }
   return {
     frameID,

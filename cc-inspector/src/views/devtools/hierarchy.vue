@@ -11,7 +11,7 @@
           <i class="matchCase iconfont icon_font_size" @click.stop="onChangeCase" title="match case" :style="{ color: matchCase ? 'red' : '' }"></i>
         </slot>
       </CCInput>
-      <CCTree :show-icon="true" @do-search="doSearch" :search="true" @node-menu="onMenu" @contextmenu.prevent.stop="onMenu" style="flex: 1" ref="elTree" :expand-keys="expandedKeys" :default-expand-all="false" :value="treeData" @node-expand="onNodeExpand" @node-collapse="onNodeCollapse" @node-click="handleNodeClick" @node-unclick="handleNodeUnclick" @node-enter="handleNodeEnter" @node-leave="handleNodeLeave"></CCTree>
+      <CCTree :show-icon="config.showTreeIcon" @do-search="doSearch" :search="true" @node-menu="onMenu" @contextmenu.prevent.stop="onMenu" style="flex: 1" ref="elTree" :expand-keys="expandedKeys" :default-expand-all="false" :value="treeData" @node-expand="onNodeExpand" @node-collapse="onNodeCollapse" @node-click="handleNodeClick" @node-unclick="handleNodeUnclick" @node-enter="handleNodeEnter" @node-leave="handleNodeLeave"></CCTree>
     </CCDock>
   </div>
 </template>
@@ -199,6 +199,7 @@ export default defineComponent({
     }
     let preSearch = "";
     return {
+      config,
       doSearch(v: string) {
         if (v && preSearch !== v) {
           ga.fireEventWithParam(GA_EventName.TreeSearch, v);
@@ -320,6 +321,16 @@ export default defineComponent({
               comp: GameInfo,
               title: "Game Info",
             });
+          },
+        });
+        menus.push({ type: ccui.menu.MenuType.Separator });
+        menus.push({
+          name: "tree icon",
+          selected: config.value.showTreeIcon,
+          callback(item) {
+            ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
+            config.value.showTreeIcon = !config.value.showTreeIcon;
+            appStore().save();
           },
         });
         menus.push({ type: ccui.menu.MenuType.Separator });
