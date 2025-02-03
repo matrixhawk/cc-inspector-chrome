@@ -1,19 +1,23 @@
 <template>
-  <div class="panel">
+  <div class="panel ccui-scrollbar">
     <vue-particles id="tsparticles" :options="options"></vue-particles>
     <div class="head">
       <img class="icon" src="../../doc/icon128.png" />
       <span class="txt">Cocos Inspector</span>
     </div>
-    <div class="content">
+    <div class="content" :class="horizontal ? 'content-row' : 'content-col'">
       <div class="title">
         <p style="font-size: 40px; font-weight: bold; color: white">为Coocs游戏开发加速。</p>
         <div style="font-size: 18px; font-weight: normal; margin: 30px 0; line-height: 40px; color: white">在Chrome浏览器中查看节点树、节点属性。<br />支持Creator所有版本。</div>
-        <CCButton color="rgb(38,187,255)" class="download" @click="onClickBtn">
-          <div style="font-size: 20px; font-weight: normal; color: black">下载</div>
-        </CCButton>
+        <div class="link">
+          <CCButton color="rgb(38,187,255)" class="download" @click="onClickBtn">
+            <div style="font-size: 20px; font-weight: normal; color: black">下载</div>
+          </CCButton>
+          <i @click="onClickGithub" class="iconfont icon_github github"></i>
+        </div>
       </div>
-      <video class="video" controls="true" autoplay loop muted src="./res/video.mp4"></video>
+      <iframe class="video" src="//player.bilibili.com/player.html?isOutside=true&aid=113803849106700&bvid=BV1jzcHeSEh3&cid=27797426092&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+      <!-- <video class="video" controls="true" autoplay loop muted src="https://www.bilibili.com/video/BV1jzcHeSEh3/"></video> -->
     </div>
   </div>
 </template>
@@ -27,8 +31,14 @@ export default defineComponent({
   components: { CCButton },
   setup(props, { emit }) {
     onMounted(() => {
-      console.log("hi ~~~");
+      updateLayout();
     });
+    const horizontal = ref(true);
+    function updateLayout() {
+      const w = window.document.body.clientWidth;
+      horizontal.value = w > 1100;
+    }
+    window.addEventListener("resize", updateLayout);
     const msg = ref(PluginConfig.manifest.name);
     const count = ref(0);
     const options = ref({
@@ -110,11 +120,16 @@ export default defineComponent({
     });
     return {
       options,
+      horizontal,
       msg,
       count,
       onClickBtn() {
-        count.value++;
-        console.log("click btn");
+        const url = "https://chromewebstore.google.com/detail/cc-inspector/hejbkamkfnkifppoaljcidepkhgaahcj?hl=zh-CN&utm_source=ext_sidebar";
+        window.open(url);
+      },
+      onClickGithub() {
+        const url = "https://github.com/tidys/cc-inspector-chrome";
+        window.open(url);
       },
     };
   },
@@ -125,7 +140,7 @@ export default defineComponent({
 .panel {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: auto;
   width: 100%;
   height: 100%;
   padding: 30px;
@@ -148,25 +163,53 @@ export default defineComponent({
       margin-left: 10px;
     }
   }
+  .content-row {
+    flex-direction: row;
+  }
+  .content-col {
+    flex-direction: column;
+    .video {
+      margin-top: 40px !important;
+    }
+  }
   .content {
     z-index: 1;
     display: flex;
-    flex-direction: row;
+
     .title {
       margin-top: 10px;
       margin-left: 20px;
       min-width: 450px;
       box-sizing: border-box;
+      .link {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+        .github {
+          cursor: pointer;
+          padding: 0 20px;
+          font-size: 30px;
+          color: white;
 
-      .download {
-        width: 160px;
-        height: 60px;
-        font-size: 20px !important;
+          &:hover {
+            color: #188ee1;
+          }
+          &:active {
+            color: rgb(255, 153, 0);
+          }
+        }
+        .download {
+          width: 160px;
+          height: 60px;
+          font-size: 20px !important;
+        }
       }
     }
     .video {
+      flex: 1;
       object-fit: cover;
       overflow: hidden;
+      min-height: 440px;
       margin: 5px;
       box-sizing: border-box;
       color: white;
