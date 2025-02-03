@@ -8,10 +8,19 @@
     <div class="content" :class="horizontal ? 'content-row' : 'content-col'">
       <div class="title">
         <p style="font-size: 40px; font-weight: bold; color: white">为Coocs游戏开发加速。</p>
-        <div style="font-size: 18px; font-weight: normal; margin: 30px 0; line-height: 40px; color: white">在Chrome浏览器中查看节点树、节点属性。<br />支持Creator所有版本。</div>
+        <div style="font-size: 18px; font-weight: normal; margin: 30px 0; line-height: 40px; color: white">在浏览器中查看节点树、节点属性。<br />支持Creator所有版本。</div>
         <div class="link">
-          <CCButton color="rgb(38,187,255)" class="download" @click="onClickBtn">
-            <div style="font-size: 20px; font-weight: normal; color: black">下载</div>
+          <CCButton color="rgb(38,187,255)" class="download" @click="onClickChrome">
+            <div class="list">
+              <img src="./res/chrome.png" />
+              <div class="txt">下载</div>
+            </div>
+          </CCButton>
+          <CCButton style="margin-left: 20px" color="rgb(38,187,255)" class="download" @click="onClickEdge">
+            <div class="list">
+              <img src="./res/edge.png" />
+              <div class="txt">下载</div>
+            </div>
           </CCButton>
           <i @click="onClickGithub" class="iconfont icon_github github"></i>
         </div>
@@ -123,8 +132,12 @@ export default defineComponent({
       horizontal,
       msg,
       count,
-      onClickBtn() {
+      onClickChrome() {
         const url = "https://chromewebstore.google.com/detail/cc-inspector/hejbkamkfnkifppoaljcidepkhgaahcj?hl=zh-CN&utm_source=ext_sidebar";
+        window.open(url);
+      },
+      onClickEdge() {
+        const url = "https://microsoftedge.microsoft.com/addons/detail/ccinspector/jcghedjiinobccoffphdgkplcildapgb";
         window.open(url);
       },
       onClickGithub() {
@@ -202,6 +215,26 @@ export default defineComponent({
           width: 160px;
           height: 60px;
           font-size: 20px !important;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          .list {
+            display: flex;
+            flex-direction: row;
+            img {
+              width: 50px;
+              height: 50px;
+            }
+            .txt {
+              display: flex;
+              flex-direction: row;
+              align-items: center;
+              font-size: 20px;
+              line-height: 22px;
+              font-weight: normal;
+              color: black;
+            }
+          }
         }
       }
     }
