@@ -4,6 +4,8 @@
     <div class="head">
       <img class="icon" src="../../doc/icon128.png" />
       <span class="txt">Cocos Inspector</span>
+      <div style="flex: 1"></div>
+      <a href="https://hits.seeyoufarm.com"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Ftidys.github.io%2Fcc-inspector-chrome%2F&count_bg=%2379C83D&title_bg=%23555555&icon=codesandbox.svg&icon_color=%23E7E7E7&title=%E8%AE%BF%E9%97%AE%E6%AC%A1%E6%95%B0&edge_flat=false" /></a>
     </div>
     <div class="content" :class="horizontal ? 'content-row' : 'content-col'">
       <div class="title">
