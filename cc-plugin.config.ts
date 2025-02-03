@@ -15,10 +15,10 @@ const manifest: CocosPluginManifest = {
   main: "./src/main.ts",
   panels: [
     {
-      name: "main",
+      name: "inspector",
       type: Panel.Type.DockAble,
       main: "./src/panel/index.ts",
-      title: "cc-inspector",
+      title: "Cocos Inspector",
       width: 500,
       height: 400,
       minWidth: 50,
