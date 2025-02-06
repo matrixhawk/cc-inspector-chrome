@@ -171,6 +171,8 @@ export function getSimpleProperties(typeName: string): string[] {
     //----------
     "worldPosition",
     "worldScale",
+    "layer",
+    "mobility",
     // "worldRotation",// 渲染有问题，暂时先不支持这个属性
   ];
   config[CompType.UITransform] = [
@@ -222,6 +224,7 @@ export function getSimpleProperties(typeName: string): string[] {
     "zoomRatio",
     "priority",
     "alignWithScreen",
+    "visibility",
     "projection",
     "far",
     "near",

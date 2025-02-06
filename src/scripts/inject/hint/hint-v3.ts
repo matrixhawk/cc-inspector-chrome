@@ -1,12 +1,10 @@
 import { HintAdapter, Point, RectPoints } from "./adapter";
 declare const cc: any;
-
 export class HintV3 extends HintAdapter {
   resetIndex(): void {
-    const node = this.draw.node;
-    if (node.parent) {
-      const len = node.parent.children.length;
-      node.setSiblingIndex(len);
+    if (this.inspectorCanvas) {
+      const len = this.inspectorCanvas.parent.children.length;
+      this.inspectorCanvas.setSiblingIndex(len);
     }
   }
   private get transformComponent() {
@@ -40,7 +38,7 @@ export class HintV3 extends HintAdapter {
     return { x, y };
   }
   /**
-   *  这种方式能够获取到优先绘制的canvas，也能保证线框在顶部，但是方案不完美，会收到node.layer的影响
+   *  这种方式能够获取到优先绘制的canvas，也能保证线框在顶部，但是方案不完美，会受到node.layer的影响
    */
   private getCanvas(scene: any) {
     const canvasArray: Array<{ canvas: any; index: number }> = [];
@@ -53,22 +51,60 @@ export class HintV3 extends HintAdapter {
         }
       }
     });
-    canvasArray.sort((a, b) => a.index - b.index);
-    return canvasArray[0].canvas.node;
-  }
-  protected addDraw(scene: any, node: any): void {
-    const canvas = this.getCanvas(scene);
-    if (canvas) {
-      if (canvas.layer) {
-        node.layer = canvas.layer;
-      }
-      const tr = node.getComponent(this.transformComponent) || node.addComponent(this.transformComponent);
-      if (tr) {
-        tr.setContentSize(0, 0);
-      }
-      // FIXME: 多canvas的情况下，如果hover和select的节点不在一个canvas下，绘制线框有问题，暂时先不支持多canvas的情况
-      canvas.addChild(node);
+    if (canvasArray.length) {
+      canvasArray.sort((a, b) => a.index - b.index);
+      return canvasArray[0].canvas.node;
     }
+    return null;
+  }
+  private inspectorCanvas: any = null;
+  protected addDraw(scene: any, graphicsNode: any): boolean {
+    graphicsNode.layer = this.getLayerID();
+    const tr = graphicsNode.getComponent(this.transformComponent) || graphicsNode.addComponent(this.transformComponent);
+    if (tr) {
+      tr.setContentSize(0, 0);
+    }
+
+    const inspectorCanvas = this.createInspectorCanvas();
+    scene.addChild(inspectorCanvas);
+
+    const camera = this.createCamera();
+    inspectorCanvas.addChild(camera.node);
+    inspectorCanvas.addChild(graphicsNode);
+
+    const canvas = inspectorCanvas.addComponent(cc.Canvas);
+    canvas.cameraComponent = camera;
+    canvas.alignCavasWithScreen = true;
+    this.inspectorCanvas = inspectorCanvas;
+    return true;
+  }
+  private createInspectorCanvas() {
+    const node = new cc.Node("InspectorCanvas");
+    node.layer = this.getLayerID();
+    const widget = node.addComponent(cc.Widget);
+    widget.alignMode = cc.Widget.AlignMode.ALWAYS;
+    widget.isAlignBottom = true;
+    widget.isAlignTop = true;
+    widget.isAlignLeft = true;
+    widget.isAlignRight = true;
+    widget.left = widget.right = widget.top = widget.bottom = 0;
+
+    return node;
+  }
+  private createCamera() {
+    const node = new cc.Node("Camera");
+    const camera = node.addComponent(cc.Camera);
+    camera.priority = Number.MAX_VALUE;
+    camera.layer = this.getLayerID();
+    camera.visibility = this.getLayerID();
+    camera.clearFlags = cc.Camera.ClearFlag.DONT_CLEAR;
+    camera.clearColor = new cc.Color(0, 0, 0, 0);
+    camera.projection = cc.Camera.ProjectionType.ORTHO;
+    camera.far = 2000;
+    return camera;
+  }
+  private getLayerID() {
+    return cc.Layers.Enum.GIZMOS;
   }
   getRectPoints(node: any): RectPoints | null {
     if (!node.worldPosition) {

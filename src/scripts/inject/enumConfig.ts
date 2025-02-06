@@ -284,6 +284,13 @@ export function getEnumListConfig() {
             return cc.Camera.ISO.__enums__;
           },
         },
+        // TODO: 有时间再优化可以复选的枚举选项
+        // {
+        //   key: "visibility",
+        //   values() {
+        //     return cc.Layers.BitMask.__bitmask__;
+        //   },
+        // },
       ],
     },
   ];

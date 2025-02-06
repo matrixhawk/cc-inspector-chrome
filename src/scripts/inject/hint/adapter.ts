@@ -63,13 +63,16 @@ export class HintAdapter {
       return;
     }
     let node = new cc.Node("draw-node");
-    this.addDraw(scene, node);
     this.draw = node.addComponent(cc.Graphics || cc.GraphicsComponent);
+    if (!this.addDraw(scene, node)) {
+      node.destroy();
+      this.draw = null;
+    }
   }
   public isDrawValid() {
     return this.draw && this.draw.isValid;
   }
-  protected addDraw(scene: any, node: any) {
+  protected addDraw(scene: any, node: any): boolean {
     throw new Error("not implemented");
   }
   public drawRect(points: RectPoints, opts: DrawOptions) {
