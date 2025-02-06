@@ -205,7 +205,33 @@ export function getSimpleProperties(typeName: string): string[] {
     "cacheMode",
     "useSystemFont",
   ];
-  config[CompType.Camera] = ["clearColor", "clearFlags", "cullingMask", "depth", "zoomRatio", "alignWithScreen"];
+
+  config[CompType.Graphics] = [
+    "lineWidth",
+    "lineJoin", //
+    "lineCap",
+    "strokeColor",
+    "fillColor",
+    "miterLimit",
+  ];
+  config[CompType.Camera] = [
+    "clearColor", //
+    "clearFlags",
+    "cullingMask",
+    "depth",
+    "zoomRatio",
+    "priority",
+    "alignWithScreen",
+    "projection",
+    "far",
+    "near",
+    "clearDepth",
+    "clearStencil",
+    "orthoHeight",
+    "aperture",
+    "shutter",
+    "iso",
+  ];
   config[CompType.Spirte] = [
     "atlas",
     "spriteFrame",
@@ -244,6 +270,8 @@ export function getSimpleProperties(typeName: string): string[] {
     "fitWidth",
     "fitHeight", //
     "designResolution",
+    "cameraComponent",
+    "alignCanvasWithScreen",
   ];
   return config[typeName] || [];
 }

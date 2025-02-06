@@ -234,6 +234,58 @@ export function getEnumListConfig() {
         },
       ],
     },
+    {
+      type: cc.Graphics,
+      list: [
+        {
+          key: "lineJoin",
+          values() {
+            return cc.Graphics.LineJoin.__enums__;
+          },
+        },
+        {
+          key: "lineCap",
+          values() {
+            return cc.Graphics.LineCap.__enums__;
+          },
+        },
+      ],
+    },
+    {
+      type: cc.Camera,
+      list: [
+        {
+          key: "clearFlags",
+          values() {
+            return cc.Camera.ClearFlag.__enums__;
+          },
+        },
+        {
+          key: "projection",
+          values() {
+            return cc.Camera.ProjectionType.__enums__;
+          },
+        },
+        {
+          key: "aperture",
+          values() {
+            return cc.Camera.Aperture.__enums__;
+          },
+        },
+        {
+          key: "shutter",
+          values() {
+            return cc.Camera.Shutter.__enums__;
+          },
+        },
+        {
+          key: "iso",
+          values() {
+            return cc.Camera.ISO.__enums__;
+          },
+        },
+      ],
+    },
   ];
   return enumConfig;
 }
