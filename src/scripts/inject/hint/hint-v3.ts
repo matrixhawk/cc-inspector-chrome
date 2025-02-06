@@ -11,8 +11,15 @@ export class HintV3 extends HintAdapter {
     return cc.UITransformComponent || cc.UITransform;
   }
   hitTest(node: any, x: number, y: number): boolean {
+    if (node === this.inspectorCanvas) {
+      return false;
+    }
+    if (node.getComponent(cc.Canvas)) {
+      // 因为Canvas会全屏，所以暂时不拾取，会干扰体验
+      return false;
+    }
+
     let hitTest = null;
-    // hitTest = node._uiProps?.uiTransformComp?.hitTest;
     const tr = node.getComponent(this.transformComponent);
     if (tr) {
       if (tr.hitTest) {
