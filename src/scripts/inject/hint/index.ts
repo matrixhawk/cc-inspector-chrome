@@ -11,6 +11,8 @@ import { HintV2 } from "./hint-v2";
 import { HintV3 } from "./hint-v3";
 declare const cc: any;
 
+export const PickShortKey = "Escape";
+
 /**
  * 只负责管理hint的流程
  */
@@ -44,28 +46,42 @@ export class Hint {
       const mousedown = (event: MouseEvent) => {
         event.stopPropagation();
         event.preventDefault();
-        el.removeEventListener("mousedown", mousedown, true);
-        el.removeEventListener("mousemove", mousemove, true);
-        el.style.cursor = cursor;
-        const e = new CustomEvent(DocumentEvent.GameInspectorEnd);
-        document.dispatchEvent(e);
+        pickEnd();
 
         if (event.button === 0) {
           // 左键拾取
           this.updateHintDown(event, el);
         } else {
-          this.updateHitMoveThrottle.cancel();
           // 其他按键取消
-          this.cleanHover();
+          this.pickCancel();
         }
       };
+      function pickEnd() {
+        document.removeEventListener("keydown", keydown, true);
+        el.removeEventListener("mousedown", mousedown, true);
+        el.removeEventListener("mousemove", mousemove, true);
+        el.style.cursor = cursor;
+        const e = new CustomEvent(DocumentEvent.GameInspectorEnd);
+        document.dispatchEvent(e);
+      }
+
       const mousemove = (event: MouseEvent) => {
         this.updateHitMoveThrottle(event, el);
       };
-
+      const keydown = (event: KeyboardEvent) => {
+        if (event.key === PickShortKey) {
+          pickEnd();
+          this.pickCancel();
+        }
+      };
+      document.addEventListener("keydown", keydown, true);
       el.addEventListener("mousemove", mousemove, true);
       el.addEventListener("mousedown", mousedown, true);
     });
+  }
+  private pickCancel() {
+    this.updateHitMoveThrottle.cancel();
+    this.cleanHover();
   }
   private updateHitMoveThrottle = throttle(this.updateHintMove, 300);
   private updateHintMove(event: MouseEvent, canvas: HTMLCanvasElement) {

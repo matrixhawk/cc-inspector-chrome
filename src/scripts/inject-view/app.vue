@@ -20,6 +20,7 @@ import { storeToRefs } from "pinia";
 import { defineComponent, onMounted, ref, toRaw } from "vue";
 import { GA_EventName } from "../../ga/type";
 import { DocumentEvent } from "../const";
+import { PickShortKey } from "../inject/hint";
 import { inspectTarget } from "../inject/inspect-list";
 import Ad from "./ad.vue";
 import Banner from "./banner.vue";
@@ -51,20 +52,12 @@ export default defineComponent({
       const idx = Math.floor(Math.random() * arr.length);
       return arr[idx];
     }
-    document.addEventListener(
-      "keydown",
-      (e: KeyboardEvent) => {
-        if ((e.key === "Escape" || e.keyCode === 27) && picking.value === false) {
-          doInspector();
-        }
-      },
-      true
-    );
     const store = appStore();
     store.init();
     const rnd = randomSupport();
     const { config } = storeToRefs(appStore());
     function doInspector() {
+      unregisterPickShortKey();
       ga(GA_EventName.GameInspector);
       if (config.value.autoHide) {
         showBtns.value = false;
@@ -194,6 +187,7 @@ export default defineComponent({
     ]);
     document.addEventListener(DocumentEvent.GameInspectorEnd, () => {
       picking.value = false;
+      registerPickShortKey();
     });
     function testInspector() {
       const cursor = document.body.style.cursor;
@@ -240,6 +234,24 @@ export default defineComponent({
     });
 
     const picking = ref(false);
+
+    const pickShortFunc = (e: KeyboardEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.key === PickShortKey && picking.value === false) {
+        doInspector();
+      }
+    };
+    function registerPickShortKey() {
+      if (picking.value === false) {
+        document.addEventListener("keydown", pickShortFunc, true);
+      }
+    }
+    function unregisterPickShortKey() {
+      document.removeEventListener("keydown", pickShortFunc, true);
+    }
+    registerPickShortKey();
+
     const rootEl = ref<HTMLDivElement>(null);
     const showBtns = ref(true);
     if (config.value.autoHide) {
