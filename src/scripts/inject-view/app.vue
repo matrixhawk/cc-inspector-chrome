@@ -51,11 +51,32 @@ export default defineComponent({
       const idx = Math.floor(Math.random() * arr.length);
       return arr[idx];
     }
-
+    document.addEventListener(
+      "keydown",
+      (e: KeyboardEvent) => {
+        if ((e.key === "Escape" || e.keyCode === 27) && picking.value === false) {
+          doInspector();
+        }
+      },
+      true
+    );
     const store = appStore();
     store.init();
     const rnd = randomSupport();
     const { config } = storeToRefs(appStore());
+    function doInspector() {
+      ga(GA_EventName.GameInspector);
+      if (config.value.autoHide) {
+        showBtns.value = false;
+      }
+      picking.value = true;
+      if (typeof cc === "undefined") {
+        testInspector();
+      } else {
+        const event = new CustomEvent(DocumentEvent.GameInspectorBegan);
+        document.dispatchEvent(event);
+      }
+    }
     const listArray = ref<ListItem[]>([
       {
         icon: `${rnd.icon} ani_shop_cart`,
@@ -112,20 +133,10 @@ export default defineComponent({
       },
       {
         icon: "icon_target",
-        txt: "Inspect Game",
+        txt: "Inspect Game (esc)",
         visible: true,
         click: () => {
-          ga(GA_EventName.GameInspector);
-          if (config.value.autoHide) {
-            showBtns.value = false;
-          }
-          picking.value = true;
-          if (typeof cc === "undefined") {
-            testInspector();
-          } else {
-            const event = new CustomEvent(DocumentEvent.GameInspectorBegan);
-            document.dispatchEvent(event);
-          }
+          doInspector();
         },
         contextmenu: (event: MouseEvent) => {
           const arr = [
@@ -200,7 +211,8 @@ export default defineComponent({
     }
 
     function updateAssistantTop(top: number) {
-      const root = toRaw(rootEl.value) as HTMLDivElement;
+      // @ts-ignore
+      const root = toRaw(rootEl.value) as HTMLDivElement | null;
       if (!root) {
         return;
       }
@@ -277,7 +289,8 @@ export default defineComponent({
         }, 500);
       },
       onMouseDown(event: MouseEvent) {
-        const root = toRaw(rootEl.value) as HTMLDivElement;
+        // @ts-ignore
+        const root = toRaw(rootEl.value) as HTMLDivElement | null;
         if (!root) {
           return;
         }
