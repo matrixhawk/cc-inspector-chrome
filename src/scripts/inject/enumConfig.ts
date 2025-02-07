@@ -9,6 +9,17 @@ export function getEnumListConfig() {
     }>;
   }> = [
     {
+      type: cc.Node,
+      list: [
+        {
+          key: "layer",
+          values() {
+            return cc.Layers.BitMask.__bitmask__;
+          },
+        },
+      ],
+    },
+    {
       type: cc.Widget,
       list: [
         {
