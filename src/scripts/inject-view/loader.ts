@@ -12,7 +12,7 @@ export class AdItem {
   /**
    * 插件的试用地址
    */
-  try: string = "";
+  try: string | Array<{ name: string; url: string }> = "";
   /**
    * 广告的store购买链接
    */
@@ -29,6 +29,14 @@ export class AdItem {
    * 背景图
    */
   img: string = "";
+  getTryInfos(): Array<{ name: string; url: string }> {
+    if (typeof this.try === "string" && this.try) {
+      return [{ name: this.name, url: this.try }];
+    } else if (Array.isArray(this.try)) {
+      return this.try;
+    }
+    return [];
+  }
   parse(data: AdItem) {
     this.name = data.name;
     this.store = data.store || "";
@@ -93,10 +101,6 @@ export class AdData {
         const item = new AdItem().parse(el);
         if (!item.duration) {
           console.warn(`add failed, ad.duration is ${item.duration}, ${JSON.stringify(item)}`);
-          return;
-        }
-        if (!item.valid) {
-          console.warn(`add failed, ad is invalid, ${JSON.stringify(item)}`);
           return;
         }
         this.data.push(item);

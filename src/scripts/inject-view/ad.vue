@@ -34,7 +34,7 @@ export default defineComponent({
         console.log(`not find any ad`);
         return;
       }
-      ads.value = data.data;
+      ads.value = data.data.filter((item) => item.valid);
       console.log("get ads ", toRaw(ads.value));
 
       ga(GA_EventName.ShowAd);
