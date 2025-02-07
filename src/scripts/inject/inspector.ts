@@ -214,6 +214,7 @@ export class Inspector extends InjectEvent {
     if (version) {
       this.hasUploadEngineVersion = true;
       this.sendEngineVersion(version);
+      this.sendUrl(window.location.href);
     }
   }
   forEachNode(cb: (node: any) => void) {

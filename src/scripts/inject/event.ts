@@ -29,4 +29,9 @@ export class InjectEvent {
     const event = new CustomEvent(DocumentEvent.GoogleAnalytics, { detail });
     document.dispatchEvent(event);
   }
+  sendUrl(url: string) {
+    const detail = { event: GA_EventName.GameUrl, params: url } as GoogleAnalyticsData;
+    const event = new CustomEvent(DocumentEvent.GoogleAnalytics, { detail });
+    document.dispatchEvent(event);
+  }
 }
