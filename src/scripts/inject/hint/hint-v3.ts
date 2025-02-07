@@ -18,9 +18,20 @@ export class HintV3 extends HintAdapter {
       // 因为Canvas会全屏，所以暂时不拾取，会干扰体验
       return false;
     }
+    const tr = node.getComponent(this.transformComponent);
+    if (tr) {
+      const size = cc.view.getVisibleSize();
+      if (tr.width >= size.width || tr.height >= size.height) {
+        // 节点的区域非常大，并且没有渲染组件，在界面上看不到任何内容，也忽略掉
+        // 有些背景遮罩使用的是单色透明图片，这种情况暂时没有好办法过滤掉
+        const renderComp = [cc.Sprite, cc.Label].find((comp) => node.getComponent(comp));
+        if (!renderComp) {
+          return false;
+        }
+      }
+    }
 
     let hitTest = null;
-    const tr = node.getComponent(this.transformComponent);
     if (tr) {
       if (tr.hitTest) {
         hitTest = tr.hitTest.bind(tr);
