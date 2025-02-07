@@ -26,7 +26,7 @@ import Ad from "./ad.vue";
 import Banner from "./banner.vue";
 import Memory from "./memory.vue";
 import { appStore } from "./store";
-import { ga } from "./util";
+import { sendGaEvent } from "./util";
 declare const cc: any;
 const { CCDialog, CCMenu } = ccui.components;
 interface ListItem {
@@ -58,7 +58,7 @@ export default defineComponent({
     const { config } = storeToRefs(appStore());
     function doInspector() {
       unregisterPickShortKey();
-      ga(GA_EventName.GameInspector);
+      sendGaEvent(GA_EventName.GameInspector);
       if (config.value.autoHide) {
         showBtns.value = false;
       }
@@ -83,7 +83,7 @@ export default defineComponent({
             width: 310,
             height: 500,
             closeCB: () => {
-              ga(GA_EventName.CloseAd);
+              sendGaEvent(GA_EventName.CloseAd);
             },
           });
         },
@@ -91,7 +91,7 @@ export default defineComponent({
       {
         icon: "icon_do_play",
         click: (event: MouseEvent, item: ListItem) => {
-          ga(GA_EventName.GamePlayer);
+          sendGaEvent(GA_EventName.GamePlayer);
           if (typeof cc !== "undefined") {
             cc.game.resume();
           }
@@ -105,7 +105,7 @@ export default defineComponent({
         visible: true,
         txt: "game pause",
         click: () => {
-          ga(GA_EventName.GamePause);
+          sendGaEvent(GA_EventName.GamePause);
           if (typeof cc !== "undefined") {
             cc.game.pause();
           }
@@ -117,7 +117,7 @@ export default defineComponent({
         visible: true,
         txt: "game step",
         click: () => {
-          ga(GA_EventName.GameStep);
+          sendGaEvent(GA_EventName.GameStep);
           if (typeof cc !== "undefined") {
             cc.game.step();
           }
@@ -144,7 +144,7 @@ export default defineComponent({
               enabled: inspectTarget.enabled,
               selected: inspectTarget.isContainInspectType(item.type),
               callback: (menu: IUiMenuItem) => {
-                ga(GA_EventName.MouseMenu, menu.name);
+                sendGaEvent(GA_EventName.MouseMenu, menu.name);
                 if (menu.selected) {
                   inspectTarget.removeInspectType(item.type);
                 } else {
@@ -159,7 +159,7 @@ export default defineComponent({
               callback: (menu: IUiMenuItem) => {
                 const event = new CustomEvent(DocumentEvent.InspectorClear);
                 document.dispatchEvent(event);
-                ga(GA_EventName.MouseMenu, menu.name);
+                sendGaEvent(GA_EventName.MouseMenu, menu.name);
               },
             },
             {
@@ -168,7 +168,7 @@ export default defineComponent({
               callback: (menu: IUiMenuItem) => {
                 config.value.pickTop = !config.value.pickTop;
                 appStore().save();
-                ga(GA_EventName.MouseMenu, menu.name);
+                sendGaEvent(GA_EventName.MouseMenu, menu.name);
               },
             },
             { type: ccui.menu.MenuType.Separator },
@@ -176,7 +176,7 @@ export default defineComponent({
               name: "Filter Enabled",
               selected: inspectTarget.enabled,
               callback: (menu: IUiMenuItem) => {
-                ga(GA_EventName.MouseMenu, menu.name);
+                sendGaEvent(GA_EventName.MouseMenu, menu.name);
                 inspectTarget.enabled = !inspectTarget.enabled;
               },
             },
@@ -277,7 +277,7 @@ export default defineComponent({
             callback: (item) => {
               config.value.autoHide = !config.value.autoHide;
               appStore().save();
-              ga(GA_EventName.MouseMenu, item.name);
+              sendGaEvent(GA_EventName.MouseMenu, item.name);
               if (!config.value.autoHide) {
                 clearTimeout(autoHideTimer);
                 showBtns.value = true;

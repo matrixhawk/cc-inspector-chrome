@@ -14,7 +14,7 @@ import { GA_EventName } from "../../ga/type";
 import Banner from "./banner.vue";
 import { emitter, Msg } from "./const";
 import { AdItem, getAdData } from "./loader";
-import { ga } from "./util";
+import { sendGaEvent } from "./util";
 const { CCButton } = ccui.components;
 export default defineComponent({
   name: "ad",
@@ -37,7 +37,7 @@ export default defineComponent({
       ads.value = data.data.filter((item) => item.valid);
       console.log("get ads ", toRaw(ads.value));
 
-      ga(GA_EventName.ShowAd);
+      sendGaEvent(GA_EventName.ShowAd);
     });
     onUnmounted(() => {});
     function testBanner() {

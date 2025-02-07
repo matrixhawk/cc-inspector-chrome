@@ -12,7 +12,7 @@ import { defineComponent, onMounted, onUnmounted, PropType, ref, toRaw } from "v
 import { GA_EventName } from "../../ga/type";
 import { emitter, Msg } from "./const";
 import { AdItem } from "./loader";
-import { ga } from "./util";
+import { sendGaEvent } from "./util";
 export default defineComponent({
   name: "banner",
   props: {
@@ -47,7 +47,7 @@ export default defineComponent({
         const url = toRaw(props.data.store);
         if (url) {
           window.open(url);
-          ga(GA_EventName.ClickPluginLink, url);
+          sendGaEvent(GA_EventName.ClickPluginLink, url);
         }
       },
     };
