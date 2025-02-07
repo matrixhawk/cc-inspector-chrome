@@ -6,7 +6,7 @@
     <div v-if="isViewSupport()" class="root" style="flex-direction: column; align-items: center">
       <ol style="overflow: auto" class="ccui-scrollbar">
         <li><a href="https://store.cocos.com/app/detail/2002" target="_blank">CocosStore打赏该插件</a></li>
-        <li><a href="https://store.cocos.com/app/search?name=xu_yanfeng" target="_blank">支持作者其他插件</a></li>
+        <li><a :href="myPlugins" target="_blank" @click="onClickBuyPlugins">支持作者其他插件</a></li>
         <li>
           <div style="display: flex; flex-direction: column; align-items: flex-start">
             请我喝杯咖啡
@@ -29,7 +29,7 @@
         <ol>
           <li v-for="(item, index) in onlineTools" :key="index">
             <a :href="item.store" target="_blank" class="iconfont icon_shop_cart icon"></a>
-            <a :href="item.url" target="_blank" class="link"> {{ item.name }} </a>
+            <a :href="item.url" target="_blank" class="link" @click="onClickTry($event, item.url)"> {{ item.name }} </a>
           </li>
         </ol>
       </div>
@@ -48,6 +48,7 @@ import { ChromeConst } from "cc-plugin/src/chrome/const";
 import { defineComponent, onMounted, ref } from "vue";
 import { Page } from "../../core/types";
 import { ga } from "../../ga";
+import { GA_EventName } from "../../ga/type";
 import Ad from "../../scripts/inject-view/ad.vue";
 import { getAdData } from "../../scripts/inject-view/loader";
 const { CCInput, CCButton, CCButtonGroup, CCInputNumber, CCSelect, CCCheckBox, CCColor } = ccui.components;
@@ -103,36 +104,48 @@ export default defineComponent({
       {
         text: "在线工具",
         icon: "icon_fly",
-        click: () => {
+        click: (event: MouseEvent | null, item: ButtonGroupItem) => {
           viewType.value = ViewType.OnlineTools;
+          ga.fireEventWithParam(GA_EventName.Popup, item.text);
         },
       },
       {
         text: "支持我",
         icon: "icon_cocos",
-        click: () => {
+        click: (event: MouseEvent | null, item: ButtonGroupItem) => {
           viewType.value = ViewType.Support;
+          ga.fireEventWithParam(GA_EventName.Popup, item.text);
         },
       },
       {
         text: "加我为好友",
         icon: "icon_wechat",
-        click: () => {
+        click: (event: MouseEvent | null, item: ButtonGroupItem) => {
           viewType.value = ViewType.Friends;
+          ga.fireEventWithParam(GA_EventName.Popup, item.text);
         },
       },
       {
         text: "推荐",
         icon: "icon_good",
-        click: () => {
+        click: (event: MouseEvent | null, item: ButtonGroupItem) => {
           viewType.value = ViewType.Recommend;
+          ga.fireEventWithParam(GA_EventName.Popup, item.text);
         },
       },
     ]);
     const viewType = ref<ViewType>(ViewType.Friends);
     const onlineTools = ref<Tools[]>([]);
     const chooseItem = ref(items.value[0]);
+    const myPlugins = ref("https://store.cocos.com/app/search?name=xu_yanfeng");
     return {
+      myPlugins,
+      onClickBuyPlugins() {
+        ga.fireEventWithParam(GA_EventName.Popup, myPlugins.value);
+      },
+      onClickTry(event: MouseEvent, url: string) {
+        ga.fireEventWithParam(GA_EventName.Popup, url);
+      },
       onlineTools,
       isViewSupport() {
         return viewType.value === ViewType.Support;
