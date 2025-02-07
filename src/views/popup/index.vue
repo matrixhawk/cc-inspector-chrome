@@ -5,7 +5,7 @@
     </div>
     <div v-if="isViewSupport()" class="root" style="flex-direction: column; align-items: center">
       <ol style="overflow: auto" class="ccui-scrollbar">
-        <li><a href="https://store.cocos.com/app/detail/2002" target="_blank">CocosStore打赏该插件</a></li>
+        <li><a :href="cocosStore" target="_blank">CocosStore打赏该插件</a></li>
         <li><a :href="myPlugins" target="_blank" @click="onClickBuyPlugins">支持作者其他插件</a></li>
         <li>
           <div style="display: flex; flex-direction: column; align-items: flex-start">
@@ -35,6 +35,10 @@
       </div>
     </div>
     <div class="foot">
+      <div class="rate" @click="onClickRate">
+        <img v-for="i in 5" style="width: 16px; object-fit: contain" src="./res/star.png" />
+        <div style="margin-left: 3px">求五星好评</div>
+      </div>
       <div class="space"></div>
       <div v-if="version">ver:{{ version }}</div>
     </div>
@@ -46,6 +50,7 @@ import { ButtonGroupItem } from "@xuyanfeng/cc-ui/types/cc-button-group/const";
 import CCP from "cc-plugin/src/ccp/entry-render";
 import { ChromeConst } from "cc-plugin/src/chrome/const";
 import { defineComponent, onMounted, ref } from "vue";
+import PKG from "../../../cc-plugin.config";
 import { Page } from "../../core/types";
 import { ga } from "../../ga";
 import { GA_EventName } from "../../ga/type";
@@ -137,8 +142,14 @@ export default defineComponent({
     const viewType = ref<ViewType>(ViewType.Friends);
     const onlineTools = ref<Tools[]>([]);
     const chooseItem = ref(items.value[0]);
+    const cocosStore = ref(PKG.manifest.store);
     const myPlugins = ref("https://store.cocos.com/app/search?name=xu_yanfeng");
     return {
+      onClickRate() {
+        ga.fireEventWithParam(GA_EventName.Popup, "rate");
+        window.open(PKG.manifest.chrome.url);
+      },
+      cocosStore,
       myPlugins,
       onClickBuyPlugins() {
         ga.fireEventWithParam(GA_EventName.Popup, myPlugins.value);
@@ -217,7 +228,16 @@ export default defineComponent({
     flex-direction: row;
     height: 30px;
     align-items: center;
+    .rate {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      cursor: pointer;
 
+      &:hover {
+        color: #ff0000;
+      }
+    }
     .space {
       flex: 1;
     }
