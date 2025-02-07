@@ -236,8 +236,6 @@ export default defineComponent({
     const picking = ref(false);
 
     const pickShortFunc = (e: KeyboardEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
       if (e.key === PickShortKey && picking.value === false) {
         doInspector();
       }
