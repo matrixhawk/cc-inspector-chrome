@@ -1,4 +1,6 @@
 import PKG from "../../../cc-plugin.config";
+import { ga } from "../../ga";
+import { GA_EventName } from "../../ga/type";
 (async () => {
   interface ConfigItem {
     id: string;
@@ -24,6 +26,7 @@ import PKG from "../../../cc-plugin.config";
       //   type: "normal",
       // });
       chrome.tabs.create({ url: url });
+      ga.fireEventWithParam(GA_EventName.Rate, "go");
     }
   }
   const config: ConfigItem[] = [
@@ -44,6 +47,7 @@ import PKG from "../../../cc-plugin.config";
           title: "我已评价",
           click: () => {
             chrome.storage.local.set({ [HasRate]: true });
+            ga.fireEventWithParam(GA_EventName.Rate, "has rate");
           },
         },
         {

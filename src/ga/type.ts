@@ -80,6 +80,7 @@ export enum GA_EventName {
   EngineVersion = "engine_version",
   AppVersion = "app_version",
   Popup = "popup",
+  Rate = "rate",
   GameUrl = "game_url",
   GamePlayer = "game_player",
   GamePause = "game_pause",

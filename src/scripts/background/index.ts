@@ -2,6 +2,7 @@ import { debugLog, Page, PluginEvent } from "../../core/types";
 import { getDevToolsInspectorId } from "../../core/util";
 import { Terminal } from "../terminal";
 import { tabMgr } from "./tabMgr";
+import "./notify";
 const terminal = new Terminal(Page.Background);
 debugLog && console.log(...terminal.init());
 
