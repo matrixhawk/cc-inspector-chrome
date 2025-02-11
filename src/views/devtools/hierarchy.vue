@@ -22,9 +22,10 @@ import { HandExpandOptions } from "@xuyanfeng/cc-ui/types/cc-tree/const";
 import Mousetrap, { MousetrapInstance } from "mousetrap";
 import { storeToRefs } from "pinia";
 import { defineComponent, nextTick, onMounted, onUnmounted, ref, toRaw, watch } from "vue";
-import { Msg, PluginEvent, RequestTreeInfoData, RequestUseFrameData, ResponseSetPropertyData, ResponseSupportData } from "../../core/types";
+import { Msg, PluginEvent, RequestOpenNodeTouchFuntionData, RequestTreeInfoData, RequestUseFrameData, ResponseSetPropertyData, ResponseSupportData } from "../../core/types";
 import { ga } from "../../ga";
 import { GA_EventName } from "../../ga/type";
+import { ShowCode } from "../../scripts/inject/types";
 import { bridge } from "./bridge";
 import { Bus, BusMsg } from "./bus";
 import { RotateType } from "./const";
@@ -273,6 +274,57 @@ export default defineComponent({
       },
       onMenu(event: MouseEvent, data: TreeData) {
         const menus: IUiMenuItem[] = [];
+        if (data) {
+          function hintCode(type: ShowCode) {
+            bridge.send(Msg.RequestOpenNodeTouchFuntion, { uuid: data.id, code: type } as RequestOpenNodeTouchFuntionData);
+            chrome.devtools.inspectedWindow.eval(`DoInspect()`);
+          }
+          menus.push({
+            name: `code button-click [${data.codeButtonClick}]`,
+            visible: !!data.codeButtonClick,
+            callback: (item) => {
+              ga.fireEventWithParam(GA_EventName.MouseMenu, ShowCode.ButtonClick);
+              hintCode(ShowCode.ButtonClick);
+            },
+          });
+          menus.push({
+            name: `code touch-start [${data.codeTouchStart}]`,
+            visible: !!data.codeTouchStart,
+            callback: (item) => {
+              ga.fireEventWithParam(GA_EventName.MouseMenu, ShowCode.TouchStart);
+              hintCode(ShowCode.TouchStart);
+            },
+          });
+          menus.push({
+            name: `code touch-move [${data.codeTouchMove}]`,
+            visible: !!data.codeTouchMove,
+            callback: (item) => {
+              ga.fireEventWithParam(GA_EventName.MouseMenu, ShowCode.TouchMove);
+              hintCode(ShowCode.TouchMove);
+            },
+          });
+          menus.push({
+            name: `code touch-end [${data.codeTouchEnd}]`,
+            visible: !!data.codeTouchEnd,
+            callback: (item) => {
+              ga.fireEventWithParam(GA_EventName.MouseMenu, ShowCode.TouchEnd);
+              hintCode(ShowCode.TouchEnd);
+            },
+          });
+          menus.push({
+            name: `code touch-cancel [${data.codeTouchCancel}]`,
+            visible: !!data.codeTouchCancel,
+            callback: (item) => {
+              ga.fireEventWithParam(GA_EventName.MouseMenu, ShowCode.TouchCancel);
+              hintCode(ShowCode.TouchCancel);
+            },
+          });
+
+          if (data.codeButtonClick || data.codeTouchStart || data.codeTouchMove || data.codeTouchEnd || data.codeTouchCancel) {
+            menus.push({ type: ccui.menu.MenuType.Separator });
+          }
+        }
+
         menus.push({
           name: "update hierarchy",
           enabled: true,

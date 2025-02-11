@@ -1,6 +1,6 @@
 // eval 注入脚本的代码,变量尽量使用var,后来发现在import之后,let会自动变为var
 import { uniq } from "lodash";
-import { Msg, PluginEvent, RequestLogData, RequestNodeInfoData, RequestSetPropertyData, ResponseGameInfoData, ResponseNodeInfoData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
+import { Msg, PluginEvent, RequestLogData, RequestNodeInfoData, RequestOpenNodeTouchFuntionData, RequestSetPropertyData, ResponseGameInfoData, ResponseNodeInfoData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
 import { CompType, getNodeIcon } from "../../views/devtools/comp";
 import { ArrayData, BoolData, ColorData, DataType, EngineData, EnumData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectCircleData, ObjectData, Property, StringData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../../views/devtools/data";
 import { getEnumListConfig } from "./enumConfig";
@@ -9,11 +9,16 @@ import { Hint } from "./hint";
 import { injectView } from "./inject-view";
 import { inspectTarget } from "./inspect-list";
 import { getValue, trySetValueWithConfig } from "./setValue";
-import { BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOptions } from "./types";
+import { BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOptions, ShowCode } from "./types";
 import { isHasProperty } from "./util";
+import { calcCodeHint, getCallbacks } from "./code-hint";
 
 declare const cc: any;
 export class Inspector extends InjectEvent {
+  /**
+   * 要inspect的函数
+   */
+  public target: Function = null;
   inspectorGameMemoryStorage: Record<string, any> = {};
   private hint: Hint = new Hint(this);
 
@@ -99,6 +104,23 @@ export class Inspector extends InjectEvent {
         // 直接写console.log会被tree shaking
         const logFunction = console.log;
         logFunction(value);
+        break;
+      }
+      case Msg.RequestOpenNodeTouchFuntion: {
+        const data: RequestOpenNodeTouchFuntionData = pluginEvent.data;
+        const node = this.inspectorGameMemoryStorage[data.uuid];
+        if (!node || !node.isValid) {
+          return;
+        }
+        const funArray = getCallbacks(node, data.code);
+        if (funArray && funArray.length) {
+          // @ts-ignore
+          const fn = funArray[0];
+          this.target = fn;
+          if (funArray.length !== 1) {
+            debugger;
+          }
+        }
         break;
       }
       case Msg.RequestLogCustom: {
@@ -316,6 +338,7 @@ export class Inspector extends InjectEvent {
     data.text = node.name;
     data.icon = this.calcIcon(node);
     data.color = this.calcColor(node);
+    calcCodeHint(node, data);
     // @ts-ignore
     if (node instanceof cc.Scene) {
       // 场景不允许获取active，引擎会报错

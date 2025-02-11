@@ -1,3 +1,4 @@
+import { ShowCode } from "../scripts/inject/types";
 import { Chunk } from "../scripts/terminal";
 import { FrameDetails, Info, NodeInfoData, TreeData } from "../views/devtools/data";
 
@@ -72,6 +73,7 @@ export interface ResponseUseFrameData {
 export type RequestSetPropertyData = Info;
 export type ResponseSetPropertyData = Info;
 export type RequestLogData = string[];
+export type RequestOpenNodeTouchFuntionData = { uuid: string; code: ShowCode };
 export type ResponseErrorData = string;
 export enum Msg {
   None = "None",
@@ -135,6 +137,11 @@ export enum Msg {
 
   RequestDynamicAtlasView = "request-dynamic-atlas-view",
   ResponseDynamicAtlasView = "response-dynamic-atlas-view",
+
+  /**
+   * 请求在source面板打开节点的touch函数
+   */
+  RequestOpenNodeTouchFuntion = "request-open-node-touch-funtion",
 }
 
 export class PluginEvent {

@@ -523,6 +523,14 @@ export class TreeData implements ITreeData {
   id: string = "";
   icon: string = "";
   color: string = "";
+  /**
+   * 回调的数量
+   */
+  codeTouchStart: number = 0;
+  codeTouchMove: number = 0;
+  codeTouchEnd: number = 0;
+  codeTouchCancel: number = 0;
+  codeButtonClick: number = 0;
   active: boolean = true;
   text: string = "";
   children: TreeData[] = [];

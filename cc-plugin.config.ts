@@ -11,6 +11,7 @@ const manifest: CocosPluginManifest = {
   name: pkgName,
   version: "2.1.7",
   description: "Debug games made with CocosCreator and display node trees and node properties",
+  store: "https://store.cocos.com/app/detail/2002",
   author: "xu_yanfeng",
   main: "./src/main.ts",
   panels: [
@@ -42,6 +43,7 @@ const manifest: CocosPluginManifest = {
     // googleAnalytics: "G-0S2X4Z1FE7",
   },
   chrome: {
+    url: "https://chromewebstore.google.com/detail/cc-inspector/hejbkamkfnkifppoaljcidepkhgaahcj?authuser=0&hl=en",
     version: 3,
     pem: "./crx-key.pem",
     view_devtools: "src/views/devtools/index.ts",

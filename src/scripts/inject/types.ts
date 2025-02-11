@@ -41,3 +41,10 @@ export interface BuildImageOptions {
   value: Object;
   data: ImageData;
 }
+export enum ShowCode {
+  TouchStart = "touchstart",
+  TouchMove = "touchmove",
+  TouchEnd = "touchend",
+  TouchCancel = "touchcancel",
+  ButtonClick = "buttonclick",
+}
