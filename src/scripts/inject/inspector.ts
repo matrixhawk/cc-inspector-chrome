@@ -114,9 +114,9 @@ export class Inspector extends InjectEvent {
         }
         const funArray = getCallbacks(node, data.code, true);
         if (funArray && funArray.length && data.index < funArray.length) {
-          const fn = funArray[data.index];
-          this.target = fn.fn;
-          if (!fn) {
+          const item = funArray[data.index];
+          this.target = item.fn;
+          if (!item) {
             debugger;
           }
         }

@@ -277,7 +277,9 @@ export default defineComponent({
         if (data) {
           function doInspect(type: ShowCode, index: number) {
             bridge.send(Msg.RequestOpenNodeTouchFuntion, { uuid: data.id, code: type, index } as RequestOpenNodeTouchFuntionData);
-            chrome.devtools.inspectedWindow.eval(`DoInspect()`);
+            setTimeout(() => {
+              chrome.devtools.inspectedWindow.eval(`DoInspect()`);
+            }, 5);
           }
           function hintCode(type: ShowCode, cbArray: FunctionInfo[], event: MouseEvent) {
             if (cbArray.length === 1) {
