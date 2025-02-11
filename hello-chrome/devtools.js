@@ -31,6 +31,10 @@ if (send2bg) {
 console.log('href: ', window.location.href);
 console.log(chrome.devtools);
 console.log(chrome.devtools.inspectedWindow.tabId);
+chrome.devtools.panels.setOpenResourceHandler((res) => {
+  debugger;
+  console.log(res);
+})
 chrome.devtools.panels.create("Hello World", "icon.png", "devtools.html", (panel) => {
   console.log("panel created");
   panel.onShown.addListener((win, b) => {
@@ -47,8 +51,16 @@ chrome.devtools.panels.create("Hello World", "icon.png", "devtools.html", (panel
       console.log(e);
     })
   });
+  // panel.createStatusBarButton({})
+  // panel.show();
+
   panel.onHidden.addListener((a, b) => {
     console.log("panel hidden", a, b);
+    // setTimeout(() => {
+    //   debugger;
+
+    //   panel.show();
+    // }, 3 * 1000);
   });
   panel.onSearch.addListener((query) => {
     console.log("panel search", query);
