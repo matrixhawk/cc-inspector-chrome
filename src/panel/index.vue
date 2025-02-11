@@ -10,7 +10,10 @@
     <div class="content" :class="horizontal ? 'content-row' : 'content-col'">
       <div class="title">
         <p style="font-size: 40px; font-weight: bold; color: white">为Coocs游戏开发加速。</p>
-        <div style="font-size: 18px; font-weight: normal; margin: 30px 0; line-height: 40px; color: white">在浏览器中查看节点树、节点属性。<br />支持Creator所有版本。</div>
+        <div style="font-size: 18px; font-weight: normal; margin: 30px 0; line-height: 40px; color: white">
+          在浏览器中查看节点树、节点属性。<br />支持Creator所有版本。<br />
+          <a href="https://juejin.cn/post/7463836172559024179" target="_blank">详细功能介绍</a>
+        </div>
         <div class="link">
           <CCButton color="rgb(38,187,255)" class="download" @click="onClickChrome">
             <div class="list">
