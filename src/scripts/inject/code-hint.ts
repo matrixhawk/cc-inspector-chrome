@@ -27,7 +27,7 @@ function getButton(node: any, fillFn: boolean): FunctionInfo[] {
   const ret: FunctionInfo[] = [];
   for (let i = 0; i < arr.length; i++) {
     const item = arr[i];
-    const compType = cc.js.getClassById(item._componentId);
+    const compType = cc.js._getClassById(item._componentId);
     if (!compType) {
       continue;
     }
@@ -47,6 +47,9 @@ function getButton(node: any, fillFn: boolean): FunctionInfo[] {
 }
 
 export function getCallbacks(node: any, code: ShowCode, fillFn: boolean = false): FunctionInfo[] {
+  if (node instanceof cc.Scene) {
+    return [];
+  }
   if (code === ShowCode.ButtonClickEvents) {
     return getButton(node, fillFn);
   } else {
