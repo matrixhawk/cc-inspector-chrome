@@ -8,14 +8,58 @@ function getKey(code: ShowCode): string {
   map[ShowCode.TouchMove] = cc.Node.EventType.TOUCH_MOVE;
   map[ShowCode.TouchEnd] = cc.Node.EventType.TOUCH_END;
   map[ShowCode.TouchCancel] = cc.Node.EventType.TOUCH_CANCEL;
-  map[ShowCode.ButtonClick] = cc.Button.EventType.CLICK;
+  if (cc.Button?.EventType?.CLICK) {
+    map[ShowCode.ButtonClick] = cc.Button.EventType.CLICK;
+  }
   const key = map[code];
   return key || "";
 }
 
-export function getCallbacks(node: any, code: ShowCode) {
+function getButton(node: any, fillFn: boolean): FunctionInfo[] {
+  const button = node.getComponent(cc.Button);
+  if (!button) {
+    return [];
+  }
+  if (!button.clickEvents || button.clickEvents.length === 0) {
+    return [];
+  }
+  const arr: Array<{ handler: string; target: any; _componentId: string }> = button.clickEvents;
+  const ret: FunctionInfo[] = [];
+  for (let i = 0; i < arr.length; i++) {
+    const item = arr[i];
+    const compType = cc.js.getClassById(item._componentId);
+    if (!compType) {
+      continue;
+    }
+    const comp = item.target.getComponent(compType);
+    if (!comp || !cc.isValid(comp)) {
+      continue;
+    }
+    const handler = comp[item.handler];
+    if (typeof handler !== "function") {
+      continue;
+    }
+    const info = getFn(handler, fillFn);
+    info.name = item.handler;
+    ret.push(info);
+  }
+  return ret;
+}
+
+export function getCallbacks(node: any, code: ShowCode, fillFn: boolean = false): FunctionInfo[] {
+  if (code === ShowCode.ButtonClickEvents) {
+    return getButton(node, fillFn);
+  } else {
+    return getTouch(node, code, fillFn);
+  }
+}
+
+function getTouch(node: any, code: ShowCode, fillFn: boolean = false): FunctionInfo[] {
   const key = getKey(code);
   if (!key) {
+    return [];
+  }
+  if (!node._eventProcessor) {
     return [];
   }
   if (!node._eventProcessor.bubblingTarget) {
@@ -25,34 +69,36 @@ export function getCallbacks(node: any, code: ShowCode) {
   if (!tables) {
     return [];
   }
-  const funArray: Function[] = tables.callbackInfos;
-  if (!funArray || funArray.length === 0) {
+  const infos: Array<any> = tables.callbackInfos;
+  if (!infos || infos.length === 0) {
     return [];
   }
-  return funArray.map((fun) => {
+  return infos.map((fun) => {
     // @ts-ignore
-    return fun.callback;
+    return getFn(fun.callback, fillFn);
   });
+}
+
+function getFn(item: Function, fillFn: boolean): FunctionInfo {
+  let desc = item.toString();
+  const max = 50;
+  if (desc.length > max) {
+    // desc = desc.substr(0, max) + "...";
+  }
+  const ret: FunctionInfo = {
+    name: item.name || ANONYMOUS,
+    desc,
+    fn: fillFn ? item : null,
+  };
+  return ret;
 }
 export const ANONYMOUS = "anonymous";
 
-function functionInfo(node: any, type: ShowCode): FunctionInfo[] {
-  return getCallbacks(node, type).map((item) => {
-    let desc = item.toString();
-    const max = 50;
-    if (desc.length > max) {
-      // desc = desc.substr(0, max) + "...";
-    }
-    return {
-      name: item.name || ANONYMOUS,
-      desc,
-    } as FunctionInfo;
-  });
-}
 export function calcCodeHint(node: any, data: TreeData) {
-  data.codeTouchStart = functionInfo(node, ShowCode.TouchStart);
-  data.codeTouchMove = functionInfo(node, ShowCode.TouchMove);
-  data.codeTouchEnd = functionInfo(node, ShowCode.TouchEnd);
-  data.codeTouchCancel = functionInfo(node, ShowCode.TouchCancel);
-  data.codeButtonClick = functionInfo(node, ShowCode.ButtonClick);
+  data.codeTouchStart = getCallbacks(node, ShowCode.TouchStart);
+  data.codeTouchMove = getCallbacks(node, ShowCode.TouchMove);
+  data.codeTouchEnd = getCallbacks(node, ShowCode.TouchEnd);
+  data.codeTouchCancel = getCallbacks(node, ShowCode.TouchCancel);
+  data.codeButtonClick = getCallbacks(node, ShowCode.ButtonClick);
+  data.codeButtonEvents = getCallbacks(node, ShowCode.ButtonClickEvents);
 }

@@ -3,15 +3,15 @@ import { uniq } from "lodash";
 import { Msg, PluginEvent, RequestLogData, RequestNodeInfoData, RequestOpenNodeTouchFuntionData, RequestSetPropertyData, ResponseGameInfoData, ResponseNodeInfoData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
 import { CompType, getNodeIcon } from "../../views/devtools/comp";
 import { ArrayData, BoolData, ColorData, DataType, EngineData, EnumData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectCircleData, ObjectData, Property, StringData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../../views/devtools/data";
+import { calcCodeHint, getCallbacks } from "./code-hint";
 import { getEnumListConfig } from "./enumConfig";
 import { InjectEvent } from "./event";
 import { Hint } from "./hint";
 import { injectView } from "./inject-view";
 import { inspectTarget } from "./inspect-list";
 import { getValue, trySetValueWithConfig } from "./setValue";
-import { BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOptions, ShowCode } from "./types";
+import { BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOptions } from "./types";
 import { isHasProperty } from "./util";
-import { calcCodeHint, getCallbacks } from "./code-hint";
 
 declare const cc: any;
 export class Inspector extends InjectEvent {
@@ -112,11 +112,10 @@ export class Inspector extends InjectEvent {
         if (!node || !node.isValid) {
           return;
         }
-        const funArray = getCallbacks(node, data.code);
+        const funArray = getCallbacks(node, data.code, true);
         if (funArray && funArray.length && data.index < funArray.length) {
-          // @ts-ignore
           const fn = funArray[data.index];
-          this.target = fn;
+          this.target = fn.fn;
           if (!fn) {
             debugger;
           }

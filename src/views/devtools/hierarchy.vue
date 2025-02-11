@@ -299,48 +299,29 @@ export default defineComponent({
               });
             }
           }
-          menus.push({
-            name: `code button-click [${data.codeButtonClick.length}]`,
-            visible: !!data.codeButtonClick.length,
-            callback: (item, event: MouseEvent) => {
-              ga.fireEventWithParam(GA_EventName.MouseMenu, ShowCode.ButtonClick);
-              hintCode(ShowCode.ButtonClick, data.codeButtonClick, event);
-            },
-          });
-          menus.push({
-            name: `code touch-start [${data.codeTouchStart.length}]`,
-            visible: !!data.codeTouchStart.length,
-            callback: (item, event: MouseEvent) => {
-              ga.fireEventWithParam(GA_EventName.MouseMenu, ShowCode.TouchStart);
-              hintCode(ShowCode.TouchStart, data.codeTouchStart, event);
-            },
-          });
-          menus.push({
-            name: `code touch-move [${data.codeTouchMove.length}]`,
-            visible: !!data.codeTouchMove.length,
-            callback: (item, event: MouseEvent) => {
-              ga.fireEventWithParam(GA_EventName.MouseMenu, ShowCode.TouchMove);
-              hintCode(ShowCode.TouchMove, data.codeTouchMove, event);
-            },
-          });
-          menus.push({
-            name: `code touch-end [${data.codeTouchEnd.length}]`,
-            visible: !!data.codeTouchEnd.length,
-            callback: (item, event: MouseEvent) => {
-              ga.fireEventWithParam(GA_EventName.MouseMenu, ShowCode.TouchEnd);
-              hintCode(ShowCode.TouchEnd, data.codeTouchEnd, event);
-            },
-          });
-          menus.push({
-            name: `code touch-cancel [${data.codeTouchCancel.length}]`,
-            visible: !!data.codeTouchCancel.length,
-            callback: (item, event: MouseEvent) => {
-              ga.fireEventWithParam(GA_EventName.MouseMenu, ShowCode.TouchCancel);
-              hintCode(ShowCode.TouchCancel, data.codeTouchCancel, event);
-            },
-          });
 
-          if (data.codeButtonClick || data.codeTouchStart || data.codeTouchMove || data.codeTouchEnd || data.codeTouchCancel) {
+          let hasCallback = false;
+          function codeMenu(info: FunctionInfo[], type: ShowCode) {
+            if (info.length) {
+              hasCallback = true;
+            }
+            menus.push({
+              name: `code ${type} [${info.length}]`,
+              visible: !!info.length,
+              tip: info.length === 1 ? info[0].desc : "",
+              callback: (item, event: MouseEvent) => {
+                ga.fireEventWithParam(GA_EventName.MouseMenu, type);
+                hintCode(type, info, event);
+              },
+            });
+          }
+          codeMenu(data.codeButtonClick, ShowCode.ButtonClick);
+          codeMenu(data.codeButtonEvents, ShowCode.ButtonClickEvents);
+          codeMenu(data.codeTouchStart, ShowCode.TouchStart);
+          codeMenu(data.codeTouchMove, ShowCode.TouchMove);
+          codeMenu(data.codeTouchEnd, ShowCode.TouchEnd);
+          codeMenu(data.codeTouchCancel, ShowCode.TouchCancel);
+          if (hasCallback) {
             menus.push({ type: ccui.menu.MenuType.Separator });
           }
         }

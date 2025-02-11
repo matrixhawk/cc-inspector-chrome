@@ -521,6 +521,10 @@ export class EnumData extends Info {
 export interface FunctionInfo {
   name: string;
   desc: string;
+  /**
+   * 这个数据不能用在vue界面，在消息通讯时，会被剔除掉
+   */
+  fn: Function;
 }
 export class TreeData implements ITreeData {
   id: string = "";
@@ -534,6 +538,7 @@ export class TreeData implements ITreeData {
   codeTouchEnd: FunctionInfo[] = [];
   codeTouchCancel: FunctionInfo[] = [];
   codeButtonClick: FunctionInfo[] = [];
+  codeButtonEvents: FunctionInfo[] = [];
   active: boolean = true;
   text: string = "";
   children: TreeData[] = [];
