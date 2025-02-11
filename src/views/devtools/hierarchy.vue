@@ -29,7 +29,7 @@ import { ShowCode } from "../../scripts/inject/types";
 import { bridge } from "./bridge";
 import { Bus, BusMsg } from "./bus";
 import { RotateType } from "./const";
-import { EngineData, TreeData } from "./data";
+import { EngineData, FunctionInfo, TreeData } from "./data";
 import GameInfo from "./game-info.vue";
 import Refresh from "./refresh.vue";
 import { appStore } from "./store";
@@ -275,48 +275,68 @@ export default defineComponent({
       onMenu(event: MouseEvent, data: TreeData) {
         const menus: IUiMenuItem[] = [];
         if (data) {
-          function hintCode(type: ShowCode) {
-            bridge.send(Msg.RequestOpenNodeTouchFuntion, { uuid: data.id, code: type } as RequestOpenNodeTouchFuntionData);
+          function doInspect(type: ShowCode, index: number) {
+            bridge.send(Msg.RequestOpenNodeTouchFuntion, { uuid: data.id, code: type, index } as RequestOpenNodeTouchFuntionData);
             chrome.devtools.inspectedWindow.eval(`DoInspect()`);
           }
+          function hintCode(type: ShowCode, cbArray: FunctionInfo[], event: MouseEvent) {
+            if (cbArray.length === 1) {
+              doInspect(type, 0);
+            } else {
+              const subMenu: IUiMenuItem[] = [];
+              for (let i = 0; i < cbArray.length; i++) {
+                const item = cbArray[i];
+                subMenu.push({
+                  name: item.name,
+                  tip: item.desc,
+                  callback: (item) => {
+                    doInspect(type, i);
+                  },
+                });
+              }
+              nextTick(() => {
+                ccui.menu.showMenuByMouseEvent(event, subMenu);
+              });
+            }
+          }
           menus.push({
-            name: `code button-click [${data.codeButtonClick}]`,
-            visible: !!data.codeButtonClick,
-            callback: (item) => {
+            name: `code button-click [${data.codeButtonClick.length}]`,
+            visible: !!data.codeButtonClick.length,
+            callback: (item, event: MouseEvent) => {
               ga.fireEventWithParam(GA_EventName.MouseMenu, ShowCode.ButtonClick);
-              hintCode(ShowCode.ButtonClick);
+              hintCode(ShowCode.ButtonClick, data.codeButtonClick, event);
             },
           });
           menus.push({
-            name: `code touch-start [${data.codeTouchStart}]`,
-            visible: !!data.codeTouchStart,
-            callback: (item) => {
+            name: `code touch-start [${data.codeTouchStart.length}]`,
+            visible: !!data.codeTouchStart.length,
+            callback: (item, event: MouseEvent) => {
               ga.fireEventWithParam(GA_EventName.MouseMenu, ShowCode.TouchStart);
-              hintCode(ShowCode.TouchStart);
+              hintCode(ShowCode.TouchStart, data.codeTouchStart, event);
             },
           });
           menus.push({
-            name: `code touch-move [${data.codeTouchMove}]`,
-            visible: !!data.codeTouchMove,
-            callback: (item) => {
+            name: `code touch-move [${data.codeTouchMove.length}]`,
+            visible: !!data.codeTouchMove.length,
+            callback: (item, event: MouseEvent) => {
               ga.fireEventWithParam(GA_EventName.MouseMenu, ShowCode.TouchMove);
-              hintCode(ShowCode.TouchMove);
+              hintCode(ShowCode.TouchMove, data.codeTouchMove, event);
             },
           });
           menus.push({
-            name: `code touch-end [${data.codeTouchEnd}]`,
-            visible: !!data.codeTouchEnd,
-            callback: (item) => {
+            name: `code touch-end [${data.codeTouchEnd.length}]`,
+            visible: !!data.codeTouchEnd.length,
+            callback: (item, event: MouseEvent) => {
               ga.fireEventWithParam(GA_EventName.MouseMenu, ShowCode.TouchEnd);
-              hintCode(ShowCode.TouchEnd);
+              hintCode(ShowCode.TouchEnd, data.codeTouchEnd, event);
             },
           });
           menus.push({
-            name: `code touch-cancel [${data.codeTouchCancel}]`,
-            visible: !!data.codeTouchCancel,
-            callback: (item) => {
+            name: `code touch-cancel [${data.codeTouchCancel.length}]`,
+            visible: !!data.codeTouchCancel.length,
+            callback: (item, event: MouseEvent) => {
               ga.fireEventWithParam(GA_EventName.MouseMenu, ShowCode.TouchCancel);
-              hintCode(ShowCode.TouchCancel);
+              hintCode(ShowCode.TouchCancel, data.codeTouchCancel, event);
             },
           });
 

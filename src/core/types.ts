@@ -73,7 +73,7 @@ export interface ResponseUseFrameData {
 export type RequestSetPropertyData = Info;
 export type ResponseSetPropertyData = Info;
 export type RequestLogData = string[];
-export type RequestOpenNodeTouchFuntionData = { uuid: string; code: ShowCode };
+export type RequestOpenNodeTouchFuntionData = { uuid: string; code: ShowCode; index: number };
 export type ResponseErrorData = string;
 export enum Msg {
   None = "None",

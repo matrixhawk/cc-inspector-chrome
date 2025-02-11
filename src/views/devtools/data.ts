@@ -518,7 +518,10 @@ export class EnumData extends Info {
     return this;
   }
 }
-
+export interface FunctionInfo {
+  name: string;
+  desc: string;
+}
 export class TreeData implements ITreeData {
   id: string = "";
   icon: string = "";
@@ -526,11 +529,11 @@ export class TreeData implements ITreeData {
   /**
    * 回调的数量
    */
-  codeTouchStart: number = 0;
-  codeTouchMove: number = 0;
-  codeTouchEnd: number = 0;
-  codeTouchCancel: number = 0;
-  codeButtonClick: number = 0;
+  codeTouchStart: FunctionInfo[] = [];
+  codeTouchMove: FunctionInfo[] = [];
+  codeTouchEnd: FunctionInfo[] = [];
+  codeTouchCancel: FunctionInfo[] = [];
+  codeButtonClick: FunctionInfo[] = [];
   active: boolean = true;
   text: string = "";
   children: TreeData[] = [];

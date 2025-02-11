@@ -1,4 +1,4 @@
-import { TreeData } from "../../views/devtools/data";
+import { FunctionInfo, TreeData } from "../../views/devtools/data";
 import { ShowCode } from "./types";
 declare const cc: any;
 
@@ -29,18 +29,30 @@ export function getCallbacks(node: any, code: ShowCode) {
   if (!funArray || funArray.length === 0) {
     return [];
   }
-  if (funArray.length > 1) {
-    console.warn(`多个事件回调函数${funArray.length}`);
-  }
   return funArray.map((fun) => {
     // @ts-ignore
     return fun.callback;
   });
 }
+export const ANONYMOUS = "anonymous";
+
+function functionInfo(node: any, type: ShowCode): FunctionInfo[] {
+  return getCallbacks(node, type).map((item) => {
+    let desc = item.toString();
+    const max = 50;
+    if (desc.length > max) {
+      // desc = desc.substr(0, max) + "...";
+    }
+    return {
+      name: item.name || ANONYMOUS,
+      desc,
+    } as FunctionInfo;
+  });
+}
 export function calcCodeHint(node: any, data: TreeData) {
-  data.codeTouchStart = getCallbacks(node, ShowCode.TouchStart).length;
-  data.codeTouchMove = getCallbacks(node, ShowCode.TouchMove).length;
-  data.codeTouchEnd = getCallbacks(node, ShowCode.TouchEnd).length;
-  data.codeTouchCancel = getCallbacks(node, ShowCode.TouchCancel).length;
-  data.codeButtonClick = getCallbacks(node, ShowCode.ButtonClick).length;
+  data.codeTouchStart = functionInfo(node, ShowCode.TouchStart);
+  data.codeTouchMove = functionInfo(node, ShowCode.TouchMove);
+  data.codeTouchEnd = functionInfo(node, ShowCode.TouchEnd);
+  data.codeTouchCancel = functionInfo(node, ShowCode.TouchCancel);
+  data.codeButtonClick = functionInfo(node, ShowCode.ButtonClick);
 }
