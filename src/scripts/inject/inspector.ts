@@ -112,7 +112,7 @@ export class Inspector extends InjectEvent {
         if (!node || !node.isValid) {
           return;
         }
-        const funArray = getCallbacks(node, data.code, true);
+        const funArray = getCallbacks(node, data.code, true, this.isCreatorV2());
         if (funArray && funArray.length && data.index < funArray.length) {
           const item = funArray[data.index];
           this.target = item.fn;
@@ -337,7 +337,8 @@ export class Inspector extends InjectEvent {
     data.text = node.name;
     data.icon = this.calcIcon(node);
     data.color = this.calcColor(node);
-    calcCodeHint(node, data);
+    const v2 = this.isCreatorV2();
+    calcCodeHint(node, data, v2);
     // @ts-ignore
     if (node instanceof cc.Scene) {
       // 场景不允许获取active，引擎会报错

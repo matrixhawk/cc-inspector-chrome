@@ -46,18 +46,45 @@ function getButton(node: any, fillFn: boolean): FunctionInfo[] {
   return ret;
 }
 
-export function getCallbacks(node: any, code: ShowCode, fillFn: boolean = false): FunctionInfo[] {
+export function getCallbacks(node: any, code: ShowCode, fillFn: boolean, v2: boolean): FunctionInfo[] {
   if (node instanceof cc.Scene) {
     return [];
   }
   if (code === ShowCode.ButtonClickEvents) {
     return getButton(node, fillFn);
   } else {
-    return getTouch(node, code, fillFn);
+    if (v2) {
+      return getTouchV2(node, code, fillFn);
+    } else {
+      return getTouchV3(node, code, fillFn);
+    }
   }
 }
-
-function getTouch(node: any, code: ShowCode, fillFn: boolean = false): FunctionInfo[] {
+function getTouchV2(node: any, code: ShowCode, fillFn: boolean): FunctionInfo[] {
+  const key = getKey(code);
+  if (!key) {
+    return [];
+  }
+  if (!node._bubblingListeners) {
+    return [];
+  }
+  if (!node._bubblingListeners._callbackTable) {
+    return [];
+  }
+  const tables = node._bubblingListeners._callbackTable[key];
+  if (!tables) {
+    return [];
+  }
+  const infos: Array<any> = tables.callbackInfos;
+  if (!infos || infos.length === 0) {
+    return [];
+  }
+  return infos.map((fun) => {
+    // @ts-ignore
+    return getFn(fun.callback, fillFn);
+  });
+}
+function getTouchV3(node: any, code: ShowCode, fillFn: boolean): FunctionInfo[] {
   const key = getKey(code);
   if (!key) {
     return [];
@@ -97,11 +124,11 @@ function getFn(item: Function, fillFn: boolean): FunctionInfo {
 }
 export const ANONYMOUS = "anonymous";
 
-export function calcCodeHint(node: any, data: TreeData) {
-  data.codeTouchStart = getCallbacks(node, ShowCode.TouchStart);
-  data.codeTouchMove = getCallbacks(node, ShowCode.TouchMove);
-  data.codeTouchEnd = getCallbacks(node, ShowCode.TouchEnd);
-  data.codeTouchCancel = getCallbacks(node, ShowCode.TouchCancel);
-  data.codeButtonClick = getCallbacks(node, ShowCode.ButtonClick);
-  data.codeButtonEvents = getCallbacks(node, ShowCode.ButtonClickEvents);
+export function calcCodeHint(node: any, data: TreeData, v2: boolean) {
+  data.codeTouchStart = getCallbacks(node, ShowCode.TouchStart, false, v2);
+  data.codeTouchMove = getCallbacks(node, ShowCode.TouchMove, false, v2);
+  data.codeTouchEnd = getCallbacks(node, ShowCode.TouchEnd, false, v2);
+  data.codeTouchCancel = getCallbacks(node, ShowCode.TouchCancel, false, v2);
+  data.codeButtonClick = getCallbacks(node, ShowCode.ButtonClick, false, v2);
+  data.codeButtonEvents = getCallbacks(node, ShowCode.ButtonClickEvents, false, v2);
 }
