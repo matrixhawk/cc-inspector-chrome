@@ -14,17 +14,18 @@ class Config {
   async init() {
     try {
       let str: string = "";
-      if (this.isChromeBackgroundEnv()) {
+      if (this.isNormalWebEnv()) {
+        str = localStorage.getItem(this.key);
+      } else if (this.isChromeBackgroundEnv()) {
         const ret = await chrome.storage.local.get(this.key);
         if (ret && ret[this.key]) {
           str = ret[this.key] as string;
         }
-      } else {
-        str = localStorage.getItem(this.key);
       }
       if (str) {
         const ret = JSON.parse(str) as MirrorInfo[];
         if (ret) {
+          this.data = [];
           ret.forEach((el) => {
             this.data.push({ name: el.name, time: el.time });
           });
@@ -37,6 +38,9 @@ class Config {
   private isChromeBackgroundEnv() {
     return typeof chrome !== "undefined" && typeof chrome.storage !== "undefined" && typeof chrome.storage.local !== "undefined";
   }
+  private isNormalWebEnv() {
+    return typeof localStorage !== "undefined";
+  }
   async save(name: string, time: number) {
     const ret = this.data.find((el) => el.name === name);
     if (ret) {
@@ -45,10 +49,11 @@ class Config {
       this.data.push({ name: name, time: time } as MirrorInfo);
     }
     const saveString = JSON.stringify(this.data);
-    if (this.isChromeBackgroundEnv()) {
-      await chrome.storage.local.set({ [this.key]: saveString });
-    } else {
+
+    if (this.isNormalWebEnv()) {
       localStorage.setItem(this.key, saveString);
+    } else if (this.isChromeBackgroundEnv()) {
+      await chrome.storage.local.set({ [this.key]: saveString });
     }
   }
   getTime(url: string) {
