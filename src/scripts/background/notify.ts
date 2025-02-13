@@ -1,6 +1,9 @@
+import { gt } from "semver";
 import PKG from "../../../cc-plugin.config";
 import { ga } from "../../ga";
 import { GA_EventName } from "../../ga/type";
+import { githubMirrorMgr } from "../inject-view/github";
+export const TipUpdate = "tip-update";
 (async () => {
   interface ConfigItem {
     id: string;
@@ -8,14 +11,7 @@ import { GA_EventName } from "../../ga/type";
     closed?: Function;
     title: string;
     message: string;
-    /**
-     * 距离安装时间多久才会弹出来，单位秒
-     */
-    afterInstall: number;
-    /**
-     * 距离上次弹出来多久才会弹出来，单位秒
-     */
-    afterLatestShow: number;
+    check: (a: ConfigItem) => Promise<boolean>;
     buttons?: Array<{ title: string; click?: Function }>;
   }
   function goRate() {
@@ -29,24 +25,64 @@ import { GA_EventName } from "../../ga/type";
       ga.fireEventWithParam(GA_EventName.Rate, "go");
     }
   }
+  const KeyHasRate = "has-rate";
   const config: ConfigItem[] = [
     {
       id: "rate",
       title: "Hi",
       message: "如果不是真爱，你也不会使用这么长时间，求五星好评！",
-      afterInstall: 60 * 60 * 24 * 3, // 安装3天后
-      afterLatestShow: 60 * 60 * 24 * 1, // 一天一次
       click: () => {
         goRate();
       },
       closed: () => {
         console.log("closed");
       },
+      check: async (cfg: ConfigItem) => {
+        const result = await chrome.storage.local.get(KeyHasRate);
+        if (result[KeyHasRate]) {
+          // 已经评价过了
+          return false;
+        }
+        const KeyInstallTime = "install-time";
+        const KeyLatestShowTime = "latest-show-time";
+
+        let res1 = await chrome.storage.local.get(KeyInstallTime);
+        const time1 = res1[KeyInstallTime];
+        if (!time1) {
+          // 首次安装
+          chrome.storage.local.set({ [KeyInstallTime]: new Date().getTime() });
+          return false;
+        }
+
+        const diff = (new Date().getTime() - time1) / 1000;
+        const afterInstall = 60 * 60 * 24 * 3; // 安装3天后
+        if (diff <= afterInstall) {
+          // 安装后一段时间不显示
+          return false;
+        }
+        let canShow = false;
+        const res = await chrome.storage.local.get(KeyLatestShowTime);
+        const time = res[KeyLatestShowTime];
+        if (time) {
+          // 检查距离上次弹出是否超过指定时间
+          const diff = (new Date().getTime() - time) / 1000;
+          const afterLatestShow = 60 * 60 * 24 * 1; // 一天一次
+          canShow = diff > afterLatestShow;
+        } else {
+          // 首次弹出
+          canShow = true;
+        }
+        if (!canShow) {
+          return false;
+        }
+        chrome.storage.local.set({ [KeyLatestShowTime]: new Date().getTime() });
+        return true;
+      },
       buttons: [
         {
           title: "我已评价",
           click: () => {
-            chrome.storage.local.set({ [HasRate]: true });
+            chrome.storage.local.set({ [KeyHasRate]: true });
             ga.fireEventWithParam(GA_EventName.Rate, "has rate");
           },
         },
@@ -59,7 +95,25 @@ import { GA_EventName } from "../../ga/type";
       ],
     },
   ];
-
+  await githubMirrorMgr.init();
+  const data = await githubMirrorMgr.getData("version.json");
+  if (data) {
+    const info = data as { ver: string };
+    const b = gt(info.ver || "0.0.0", PKG.manifest.version);
+    if (info.ver && b) {
+      config.push({
+        id: "update",
+        title: `${PKG.manifest.name}发现新版本${info.ver || ""}`,
+        message: `点击查看`,
+        click: () => {
+          goRate();
+        },
+        check: async () => {
+          return true;
+        },
+      });
+    }
+  }
   chrome.notifications.onClicked.addListener((id) => {
     const ret = config.find((el) => el.id === id);
     if (ret) {
@@ -83,46 +137,17 @@ import { GA_EventName } from "../../ga/type";
     }
     btn.click && btn.click();
   });
-  const InstallTime = "install-time";
-  const LatestShowTime = "latest-show-time";
-  const HasRate = "has-rate";
 
-  let res = await chrome.storage.local.get(InstallTime);
-  const time = res[InstallTime];
-  if (!time) {
-    // 首次安装
-    chrome.storage.local.set({ [InstallTime]: new Date().getTime() });
-    return;
-  }
-  const diff = (new Date().getTime() - time) / 1000;
   for (let i = 0; i < config.length; i++) {
-    const { title, afterInstall, buttons, message, id } = config[i];
-    if (diff > afterInstall) {
-      await createNotification(config[i]);
-    }
+    await createNotification(config[i]);
   }
 
   async function createNotification(config: ConfigItem) {
-    let canShow = false;
-    const res = await chrome.storage.local.get(LatestShowTime);
-    const time = res[LatestShowTime];
-    if (time) {
-      const diff = (new Date().getTime() - time) / 1000;
-      canShow = diff > config.afterLatestShow;
-    } else {
-      // 首次弹出
-      canShow = true;
-    }
-    if (!canShow) {
+    const b = await config.check(config);
+    if (!b) {
       return;
     }
-    const result = await chrome.storage.local.get(HasRate);
-    if (result[HasRate]) {
-      return;
-    }
-
-    chrome.storage.local.set({ [LatestShowTime]: new Date().getTime() });
-    const { title, afterInstall, buttons, message, id } = config;
+    const { title, buttons, message, id } = config;
     chrome.notifications.create(
       id,
       {

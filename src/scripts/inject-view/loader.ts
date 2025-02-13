@@ -125,6 +125,7 @@ export class AdData {
 }
 
 export async function getAdData(): Promise<AdData | null> {
+  await githubMirrorMgr.init();
   const data = await githubMirrorMgr.getData(`ad-${CCPlugin.manifest.version}.json`);
   if (data) {
     const ad = new AdData();

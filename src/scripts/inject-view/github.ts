@@ -11,27 +11,45 @@ export interface MirrorInfo {
 class Config {
   private key = "cc-inspector-ad-config";
   private data: MirrorInfo[] = [];
-  constructor() {
-    const cfg = localStorage.getItem(this.key);
-    if (cfg) {
-      try {
-        const ret = JSON.parse(cfg) as MirrorInfo[];
+  async init() {
+    try {
+      let str: string = "";
+      if (this.isChromeBackgroundEnv()) {
+        const ret = await chrome.storage.local.get(this.key);
+        if (ret && ret[this.key]) {
+          str = ret[this.key] as string;
+        }
+      } else {
+        str = localStorage.getItem(this.key);
+      }
+      if (str) {
+        const ret = JSON.parse(str) as MirrorInfo[];
         if (ret) {
           ret.forEach((el) => {
             this.data.push({ name: el.name, time: el.time });
           });
         }
-      } catch {}
+      }
+    } catch {
+      debugger;
     }
   }
-  save(name: string, time: number) {
+  private isChromeBackgroundEnv() {
+    return typeof chrome !== "undefined" && typeof chrome.storage !== "undefined" && typeof chrome.storage.local !== "undefined";
+  }
+  async save(name: string, time: number) {
     const ret = this.data.find((el) => el.name === name);
     if (ret) {
       ret.time = time;
     } else {
       this.data.push({ name: name, time: time } as MirrorInfo);
     }
-    localStorage.setItem(this.key, JSON.stringify(this.data));
+    const saveString = JSON.stringify(this.data);
+    if (this.isChromeBackgroundEnv()) {
+      await chrome.storage.local.set({ [this.key]: saveString });
+    } else {
+      localStorage.setItem(this.key, saveString);
+    }
   }
   getTime(url: string) {
     const ret = this.data.find((el) => el.name === url);
@@ -54,7 +72,7 @@ export class GithubMirror {
    */
   name: string = "";
   private calcUrl: Function;
-  constructor(name: string, cb) {
+  constructor(name: string, cb: Function) {
     this.name = name;
     this.time = cfg.getTime(name);
     this.calcUrl = cb;
@@ -79,7 +97,7 @@ export class GithubMirror {
   }
   private reqFecth(url: string): Promise<Object | null> {
     return new Promise((resolve, reject) => {
-      console.log(`req ad: ${url}`);
+      // console.log(`req ad: ${url}`);
       fetch(url)
         .then((res) => {
           return res.json();
@@ -96,7 +114,13 @@ export class GithubMirror {
 const cfg = new Config();
 export class GithubMirrorMgr {
   mirrors: GithubMirror[] = [];
-  constructor() {
+  private _init: boolean = false;
+  async init() {
+    if (this._init) {
+      return;
+    }
+    await cfg.init();
+    this._init = true;
     // 使用国内gitub镜像来达到下载远程配置文件的目的
     this.mirrors.push(
       new GithubMirror("github", (owner: string, repo: string, branch: string, file: string) => {
@@ -132,6 +156,9 @@ export class GithubMirrorMgr {
     );
   }
   async getData(file: string): Promise<Object | null> {
+    if (!this._init) {
+      return null;
+    }
     this.mirrors.sort((a, b) => b.time - a.time);
     for (let i = 0; i < this.mirrors.length; i++) {
       const mirror = this.mirrors[i];
@@ -139,13 +166,17 @@ export class GithubMirrorMgr {
       if (data) {
         const time = new Date().getTime();
         mirror.time = time;
-        cfg.save(mirror.name, time);
+        await cfg.save(mirror.name, time);
         return data;
       }
     }
     return null;
   }
   getFileUrl(file: string): string {
+    if (!this._init) {
+      debugger;
+      return null;
+    }
     if (!file) {
       return "";
     }
