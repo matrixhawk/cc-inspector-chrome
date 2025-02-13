@@ -20,17 +20,21 @@ export default defineComponent({
       if (data) {
         data.sortByName();
         console.log(data);
+        const result: ToolItem[] = [];
         data.data.forEach((item) => {
           item.getTryInfos().forEach((info) => {
-            let arr = list.value.find((item) => item.type === info.type);
+            let arr = result.find((item) => item.type === info.type);
             if (!arr) {
               arr = new ToolItem(info.type);
               arr.title = data.keys[info.type] || info.type || "推荐列表";
-              list.value.push(arr);
+              result.push(arr);
             }
             arr.items.push({ name: info.name, url: info.url, store: item.store });
           });
         });
+        // 按照type逆序，主要是为了保证和之前的版本一致
+        result.sort((a, b) => b.type.localeCompare(a.type));
+        list.value = result;
       }
     });
     return {
