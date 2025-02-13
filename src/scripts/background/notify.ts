@@ -95,24 +95,28 @@ export const TipUpdate = "tip-update";
       ],
     },
   ];
-  await githubMirrorMgr.init();
-  const data = await githubMirrorMgr.getData("version.json");
-  if (data) {
-    const info = data as { ver: string };
-    const b = gt(info.ver || "0.0.0", PKG.manifest.version);
-    if (info.ver && b) {
-      config.push({
-        id: "update",
-        title: `${PKG.manifest.name}发现新版本${info.ver || ""}`,
-        message: `点击查看`,
-        click: () => {
-          goRate();
-        },
-        check: async () => {
-          return true;
-        },
-      });
+  try {
+    await githubMirrorMgr.init();
+    const data = await githubMirrorMgr.getData("version.json");
+    if (data) {
+      const info = data as { ver: string };
+      const b = gt(info.ver || "0.0.0", PKG.manifest.version);
+      if (info.ver && b) {
+        config.push({
+          id: "update",
+          title: `${PKG.manifest.name}发现新版本${info.ver || ""}`,
+          message: `点击查看`,
+          click: () => {
+            goRate();
+          },
+          check: async () => {
+            return true;
+          },
+        });
+      }
     }
+  } catch (e) {
+    console.error(e);
   }
   chrome.notifications.onClicked.addListener((id) => {
     const ret = config.find((el) => el.id === id);
