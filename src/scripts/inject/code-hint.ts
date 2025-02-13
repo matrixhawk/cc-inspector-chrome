@@ -27,8 +27,14 @@ function getButton(node: any, fillFn: boolean): FunctionInfo[] {
   const ret: FunctionInfo[] = [];
   for (let i = 0; i < arr.length; i++) {
     const item = arr[i];
+    if (!item.target) {
+      continue;
+    }
     const compType = cc.js._getClassById(item._componentId);
     if (!compType) {
+      continue;
+    }
+    if (!item.target.getComponent) {
       continue;
     }
     const comp = item.target.getComponent(compType);
