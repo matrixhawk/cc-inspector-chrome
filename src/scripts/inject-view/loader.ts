@@ -27,9 +27,13 @@ export class AdItem {
    */
   duration: number = 0;
   /**
-   * 广告的有效性
+   * 广告展示的位置
    */
-  valid: boolean = true;
+  where: "popup" | "list" = "list";
+  /**
+   * 广告是否有效
+   */
+  visible: boolean = true;
   /**
    * 背景图
    */
@@ -53,7 +57,8 @@ export class AdItem {
     this.tip = data.tip || "";
     this.type = data.type || "";
     this.duration = data.duration || 0;
-    this.valid = !!data.valid;
+    this.where = data.where || "popup";
+    this.visible = data.visible === false ? false : true;
     const img = data.img || "";
     this.img = githubMirrorMgr.getFileUrl(img);
     return this;
@@ -110,10 +115,9 @@ export class AdData {
           return;
         }
         const item = new AdItem().parse(el);
-        if (!item.duration) {
-          // console.warn(`add failed, ad.duration is ${item.duration}, ${JSON.stringify(item)}`);
+        if (item.visible) {
+          this.data.push(item);
         }
-        this.data.push(item);
       });
     }
   }
