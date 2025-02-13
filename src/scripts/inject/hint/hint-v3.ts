@@ -122,7 +122,7 @@ export class HintV3 extends HintAdapter {
     return camera;
   }
   private getLayerID() {
-    return cc.Layers.Enum.GIZMOS;
+    return cc.Layers.Enum.UI_2D;
   }
   getRectPoints(node: any): RectPoints | null {
     if (!node.worldPosition) {
