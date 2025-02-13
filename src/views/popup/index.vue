@@ -24,15 +24,7 @@
       <Ad></Ad>
     </div>
     <div v-if="isViewOnlineTools()" class="root">
-      <div>个人开发的web在线游戏工具，无须安装，欢迎自荐，收录更多游戏开发工具。</div>
-      <div style="overflow: auto; display: flex; flex: 1" class="ccui-scrollbar">
-        <ol>
-          <li v-for="(item, index) in onlineTools" :key="index">
-            <a :href="item.store" target="_blank" class="iconfont icon_shop_cart icon"></a>
-            <a :href="item.url" target="_blank" class="link" @click="onClickTry($event, item.url)"> {{ item.name }} </a>
-          </li>
-        </ol>
-      </div>
+      <Tools></Tools>
     </div>
     <div class="foot">
       <div class="rate" @click="onClickRate">
@@ -55,7 +47,7 @@ import { Page } from "../../core/types";
 import { ga } from "../../ga";
 import { GA_EventName } from "../../ga/type";
 import Ad from "../../scripts/inject-view/ad.vue";
-import { getAdData } from "../../scripts/inject-view/loader";
+import Tools from "./tool.vue";
 const { CCInput, CCButton, CCButtonGroup, CCInputNumber, CCSelect, CCCheckBox, CCColor } = ccui.components;
 enum ViewType {
   Support = "support",
@@ -63,14 +55,10 @@ enum ViewType {
   Recommend = "recommend",
   OnlineTools = "onlineTools",
 }
-interface Tools {
-  name: string;
-  url: string;
-  store: string;
-}
+
 export default defineComponent({
   name: "popup",
-  components: { CCInput, CCButton, CCInputNumber, Ad, CCSelect, CCCheckBox, CCColor, CCButtonGroup },
+  components: { CCInput, Tools, CCButton, CCInputNumber, Ad, CCSelect, CCCheckBox, CCColor, CCButtonGroup },
   setup(props, ctx) {
     ga.openView(Page.Popup);
     const title = ref(CCP.manifest.name);
@@ -92,18 +80,6 @@ export default defineComponent({
     }
     onMounted(async () => {
       _initLongConn();
-      const data = await getAdData();
-      if (data) {
-        data.data.forEach((item) => {
-          item.getTryInfos().forEach((info) => {
-            onlineTools.value.push({
-              name: info.name,
-              url: info.url,
-              store: item.store,
-            });
-          });
-        });
-      }
     });
     const items = ref<ButtonGroupItem[]>([
       {
@@ -140,7 +116,6 @@ export default defineComponent({
       },
     ]);
     const viewType = ref<ViewType>(ViewType.Friends);
-    const onlineTools = ref<Tools[]>([]);
     const chooseItem = ref(items.value[0]);
     const cocosStore = ref(PKG.manifest.store);
     const myPlugins = ref("https://store.cocos.com/app/search?name=xu_yanfeng");
@@ -154,10 +129,7 @@ export default defineComponent({
       onClickBuyPlugins() {
         ga.fireEventWithParam(GA_EventName.Popup, myPlugins.value);
       },
-      onClickTry(event: MouseEvent, url: string) {
-        ga.fireEventWithParam(GA_EventName.Popup, url);
-      },
-      onlineTools,
+
       isViewSupport() {
         return viewType.value === ViewType.Support;
       },

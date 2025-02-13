@@ -1,5 +1,6 @@
 import CCPlugin from "../../../cc-plugin.config";
 import { githubMirrorMgr } from "./github";
+
 export class AdItem {
   /**
    * 广告的名字
@@ -9,6 +10,10 @@ export class AdItem {
    * 鼠标悬浮提示
    */
   tip: string = "";
+  /**
+   * 分类，目前支持2类：ai绘图、我的插件
+   */
+  type: string = "";
   /**
    * 插件的试用地址
    */
@@ -29,11 +34,13 @@ export class AdItem {
    * 背景图
    */
   img: string = "";
-  getTryInfos(): Array<{ name: string; url: string }> {
+  getTryInfos(): Array<{ name: string; url: string; type: string }> {
     if (typeof this.try === "string" && this.try) {
-      return [{ name: this.name, url: this.try }];
+      return [{ name: this.name, url: this.try, type: this.type }];
     } else if (Array.isArray(this.try)) {
-      return this.try;
+      return this.try.map((el) => {
+        return { name: el.name, url: el.url, type: this.type };
+      });
     }
     return [];
   }
@@ -44,6 +51,7 @@ export class AdItem {
 
     this.try = data.try || "";
     this.tip = data.tip || "";
+    this.type = data.type || "";
     this.duration = data.duration || 0;
     this.valid = !!data.valid;
     const img = data.img || "";
@@ -80,7 +88,10 @@ export class AdData {
    * 展示的广告数量，-1为所有
    */
   showCount: number = -1;
-
+  /**
+   * 类型对应文本
+   */
+  keys: Record<string, string> = {};
   data: Array<AdItem> = [];
   parse(data: AdData) {
     this.desc = data.desc;
@@ -89,7 +100,7 @@ export class AdData {
     this.scrollDuration = data.scrollDuration || 3;
     this.randomIndex = !!data.randomIndex;
     this.showCount = data.showCount || -1;
-
+    this.keys = data.keys || {};
     if (data.data) {
       if (this.randomIndex) {
         data.data.sort(() => Math.random() - 0.5);
@@ -100,12 +111,16 @@ export class AdData {
         }
         const item = new AdItem().parse(el);
         if (!item.duration) {
-          console.warn(`add failed, ad.duration is ${item.duration}, ${JSON.stringify(item)}`);
-          return;
+          // console.warn(`add failed, ad.duration is ${item.duration}, ${JSON.stringify(item)}`);
         }
         this.data.push(item);
       });
     }
+  }
+  sortByName() {
+    this.data.sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
   }
 }
 
