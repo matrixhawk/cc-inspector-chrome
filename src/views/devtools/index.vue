@@ -75,9 +75,18 @@ export default defineComponent({
       });
       ccui.footbar.registerCmd({
         icon: "qq",
+        title: "加入QQ群，一起吐槽唠嗑",
         cb: () => {
-          window.open("https://jq.qq.com/?_wv=1027&k=5SdPdy2");
+          window.open("http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=Bb-7s7qr2C30Ys8HTkni5wnuyxw6UoDA&authKey=M5yO2j0bTRHo1e8tlTU%2FGMGya1gW03ZhRbApZBkycwnXMxpDzwibWaJtrXZyxXYl&noverify=0&group_code=591101717");
           ga.clickButton(GA_Button.QQ);
+        },
+      });
+      ccui.footbar.registerCmd({
+        icon: "book",
+        title: "插件完整功能介绍(Gif动画)",
+        cb: () => {
+          ga.clickButton(GA_Button.Docs);
+          window.open("https://juejin.cn/post/7463836172559024179");
         },
       });
       ccui.footbar.registerCmd({

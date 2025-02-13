@@ -94,6 +94,7 @@ export enum GA_EventName {
    * 用户主动关闭store广告
    */
   CloseAd = "close_ad",
+  OpenDoc = "open_doc",
   /**
    * 展示广告
    */
@@ -106,6 +107,7 @@ export enum GA_EventName {
 export enum GA_Button {
   Github = "github",
   Issues = "issues",
+  Docs = "docs",
   QQ = "qq",
   /**
    * 当页面不支持cocos时，用户手动点击了刷新

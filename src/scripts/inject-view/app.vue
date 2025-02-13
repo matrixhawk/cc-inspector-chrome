@@ -89,6 +89,16 @@ export default defineComponent({
         },
       },
       {
+        icon: "icon_book",
+        txt: "插件完整功能介绍(Gif动画)",
+        contextmenu: () => {},
+        visible: true,
+        click: () => {
+          sendGaEvent(GA_EventName.OpenDoc);
+          window.open("https://juejin.cn/post/7463836172559024179");
+        },
+      },
+      {
         icon: "icon_do_play",
         click: (event: MouseEvent, item: ListItem) => {
           sendGaEvent(GA_EventName.GamePlayer);
