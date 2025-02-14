@@ -82,6 +82,14 @@ export default defineComponent({
         },
       });
       ccui.footbar.registerCmd({
+        icon: "qqpd",
+        title: "加入QQ频道，一起在线聊天",
+        cb: () => {
+          window.open("https://pd.qq.com/s/oyib8y8f?businessType=9");
+          ga.clickButton(GA_Button.QQ);
+        },
+      });
+      ccui.footbar.registerCmd({
         icon: "book",
         title: "插件完整功能介绍(Gif动画)",
         cb: () => {
