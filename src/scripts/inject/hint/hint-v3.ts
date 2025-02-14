@@ -110,7 +110,8 @@ export class HintV3 extends HintAdapter {
     return node;
   }
   private createCamera() {
-    const node = new cc.Node("Camera");
+    const node = new cc.Node("InspectorCamera");
+    node.layer = this.getLayerID();
     const camera = node.addComponent(cc.Camera);
     camera.priority = Number.MAX_VALUE;
     camera.layer = this.getLayerID();
@@ -122,7 +123,7 @@ export class HintV3 extends HintAdapter {
     return camera;
   }
   private getLayerID() {
-    return cc.Layers.Enum.UI_2D;
+    return cc.Layers.Enum.GIZMOS;
   }
   getRectPoints(node: any): RectPoints | null {
     if (!node.worldPosition) {
