@@ -123,6 +123,7 @@ export class HintV3 extends HintAdapter {
     return camera;
   }
   private getLayerID() {
+    // FIXME: https://forum.cocos.org/t/topic/165550
     return cc.Layers.Enum.GIZMOS;
   }
   getRectPoints(node: any): RectPoints | null {

@@ -1,3 +1,5 @@
+import { help } from "./connect-me";
+
 declare const cc: any;
 
 export function getEnumListConfig() {
@@ -268,7 +270,10 @@ export function getEnumListConfig() {
         {
           key: "clearFlags",
           values() {
-            return cc.Camera.ClearFlag.__enums__;
+            return adaptEnum(
+              cc.Camera.ClearFlags || // TODO: 2x是个掩码，不是枚举
+                cc.Camera.ClearFlag // 3.x是枚举
+            );
           },
         },
         {
@@ -306,4 +311,21 @@ export function getEnumListConfig() {
     },
   ];
   return enumConfig;
+}
+
+function adaptEnum(list: any): Array<{ name: string; value: number }> {
+  const target = list.__enums__;
+  if (!target) {
+    const arr = Object.keys(list).map((key) => {
+      return {
+        name: key,
+        value: list[key],
+      };
+    });
+    return arr;
+  }
+  if (!Array.isArray(target)) {
+    help();
+  }
+  return target;
 }
