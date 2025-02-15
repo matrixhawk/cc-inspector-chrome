@@ -81,7 +81,13 @@ function getTouchV2(node: any, code: ShowCode, fillFn: boolean): FunctionInfo[] 
   if (!tables) {
     return [];
   }
-  const infos: Array<any> = tables.callbackInfos;
+  let infos: Array<any> = tables.callbackInfos;
+  if (Array.isArray(infos)) {
+    // 过滤掉空的
+    infos = infos.filter((fun) => {
+      return !!fun;
+    });
+  }
   if (!infos || infos.length === 0) {
     return [];
   }
@@ -105,7 +111,13 @@ function getTouchV3(node: any, code: ShowCode, fillFn: boolean): FunctionInfo[] 
   if (!tables) {
     return [];
   }
-  const infos: Array<any> = tables.callbackInfos;
+  let infos: Array<any> = tables.callbackInfos;
+  if (Array.isArray(infos)) {
+    // 过滤掉空的
+    infos = infos.filter((fun) => {
+      return !!fun;
+    });
+  }
   if (!infos || infos.length === 0) {
     return [];
   }
