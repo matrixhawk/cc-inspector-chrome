@@ -83,9 +83,9 @@ export default defineComponent({
       });
       ccui.footbar.registerCmd({
         icon: "qqpd",
-        title: "加入QQ频道，一起在线聊天",
+        title: "加入QQ频道，一起在线聊天，认识更多的Cocoser！",
         cb: () => {
-          window.open("https://pd.qq.com/s/oyib8y8f?businessType=9");
+          window.open("https://pd.qq.com/s/fp18mz50l");
           ga.clickButton(GA_Button.QQ);
         },
       });
