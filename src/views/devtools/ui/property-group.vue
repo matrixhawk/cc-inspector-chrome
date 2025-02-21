@@ -8,7 +8,7 @@
       </template>
       <template v-slot:header>
         <div style="flex: 1"></div>
-        <i style="" @click.stop="onLog" class="print iconfont icon_print"></i>
+        <i style="" @click.stop="onLog" class="print iconfont icon_print" title="值会临时保存到window.c"></i>
       </template>
       <div style="padding-left: 6px">
         <UiProp v-for="(item, index) in group.data" :key="index" :name="item.name" :value="item.value"> </UiProp>

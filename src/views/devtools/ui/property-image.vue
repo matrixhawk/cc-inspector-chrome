@@ -4,12 +4,14 @@
       <img :src="data.data" alt="图片" @click="onClickImg" class="img" />
     </div>
     <div class="url" :title="data.desc">{{ data.desc }}</div>
-    <i class="print iconfont icon_print" @click="onShowValueInConsole"></i>
+    <i class="print iconfont icon_print" title="值会临时保存到window.c" @click="onShowValueInConsole"></i>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType, toRaw } from "vue";
+import { Msg, RequestLogData } from "../../../core/types";
+import { bridge } from "../bridge";
 import { ImageData } from "../data";
 
 export default defineComponent({
@@ -30,11 +32,8 @@ export default defineComponent({
       },
       onShowValueInConsole() {
         if (Array.isArray(props.data.path)) {
-          let uuid = props.data.path[0];
-          let key = props.data.path[1]; // todo 暂时只支持一级key
-          if (uuid && key) {
-            chrome.devtools.inspectedWindow.eval(`window.CCInspector.logValue('${uuid}','${key}')`);
-          }
+          let rawPath = toRaw(props.data.path);
+          bridge.send(Msg.RequestLogData, rawPath as RequestLogData);
         }
       },
     };
