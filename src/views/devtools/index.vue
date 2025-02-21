@@ -60,12 +60,19 @@ export default defineComponent({
     };
     timer.name = "devtools";
     onMounted(() => {
-      ccui.footbar.showTipsArray({
-        tips: [
-          "Press space in the hierarchy to quickly control the display and hiding of nodes", //
-          "If you encounter any problems during use, please feel free to contact me",
-        ],
-      });
+      const zh = !!navigator.language.startsWith("zh");
+      const tips: string[] = zh
+        ? [
+            "在层级中按空格快速控制显示和隐藏节点", //
+            "如果遇到任何问题，欢迎联系我",
+            "在游戏界面快速拾取节点（Inspect Game），可以快速在节点树中定位",
+            "打开QQ频道，全球的cocoser，web在线交流",
+          ]
+        : [
+            "Press space in the hierarchy to quickly control the display and hiding of nodes", //
+            "If you encounter any problems during use, please feel free to contact me",
+          ];
+      ccui.footbar.showTipsArray({ tips });
       ccui.footbar.registerCmd({
         icon: "github",
         cb: () => {
