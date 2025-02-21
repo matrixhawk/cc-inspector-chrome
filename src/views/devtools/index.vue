@@ -13,7 +13,7 @@
     <Find v-if="!isShowDebug"></Find>
     <CCDialog></CCDialog>
     <CCMenu></CCMenu>
-    <CCFootBar :version="version"></CCFootBar>
+    <CCFootBar :version="version" :hint-key="hint"></CCFootBar>
   </div>
 </template>
 
@@ -176,7 +176,9 @@ export default defineComponent({
     }
     const elLeft = ref<HTMLDivElement>();
     const version = ref(PluginConfig.manifest.version);
+    const hint = ref(`${PluginConfig.manifest.name}-devtool`);
     return {
+      hint,
       version,
       defaultProps,
       frameID,
