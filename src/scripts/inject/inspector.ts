@@ -37,6 +37,14 @@ export class Inspector extends InjectEvent {
         this.updateTreeInfo();
         break;
       }
+      case Msg.AddOpactiy: {
+        const id = pluginEvent.data as string;
+        const node = this.inspectorGameMemoryStorage[id];
+        if (node && node.isValid) {
+          const comp = cc.Ui;
+        }
+        break;
+      }
       case Msg.VisibleFPS: {
         const b = pluginEvent.data as boolean;
         if (b) {
@@ -358,7 +366,7 @@ export class Inspector extends InjectEvent {
 
   _isCocosGame() {
     // @ts-ignore 检测是否包含cc变量
-    return typeof cc !== "undefined";
+    return typeof cc !== "undefined" && cc && typeof cc.ENGINE_VERSION !== "undefined";
   }
 
   getAllPropertyDescriptors(obj: Object): string[] {
@@ -1023,14 +1031,6 @@ export class Inspector extends InjectEvent {
       this.sendMsgToContent(Msg.ResponseNodeInfo, data as ResponseNodeInfoData);
     }
   }
-
-  logValue(uuid: string, key: string) {
-    let nodeOrComp = this.inspectorGameMemoryStorage[uuid];
-    if (nodeOrComp) {
-      console.log(nodeOrComp[key]);
-    }
-  }
-
   _isReadonly(base: Object, key: string | number): boolean {
     let ret = Object.getOwnPropertyDescriptor(base, key);
     if (ret) {

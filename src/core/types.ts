@@ -103,6 +103,7 @@ export enum Msg {
    * 获取页面ID
    */
   GetTabID = "GetTabID",
+  AddOpactiy = "add-opacity",
   /**
    * 用户主动选中的节点
    */

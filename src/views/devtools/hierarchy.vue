@@ -368,6 +368,16 @@ export default defineComponent({
           },
         });
         menus.push({ type: ccui.menu.MenuType.Separator });
+        if (engineVersion.value.startsWith("3.x") && false) {
+          menus.push({
+            name: "add UIOpacity",
+            callback(item) {
+              ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
+              bridge.send(Msg.AddOpactiy, data.id);
+            },
+          });
+          menus.push({ type: ccui.menu.MenuType.Separator });
+        }
         menus.push({
           name: "game info",
           callback(item) {
