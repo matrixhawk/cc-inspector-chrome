@@ -396,6 +396,17 @@ export class Inspector extends InjectEvent {
   isExcludeProperty(node: any, key: string) {
     const mapArray = [
       {
+        type: cc.Mask,
+        keys: [
+          "color",
+          "customMaterial",
+          "material",
+          "materials",
+          "sharedMaterial",
+          "sharedMaterials", //
+        ],
+      },
+      {
         type: cc.UITransformComponent || cc.UITransform,
         keys: ["priority"],
       },
