@@ -41,7 +41,12 @@ export default defineComponent({
   setup() {
     const funcShowPlace = (data: EngineData) => {
       console.log(data);
-      _expand(data.engineNode);
+      const uuid = data.engineNode;
+      nextTick(() => {
+        if (elTree.value) {
+          elTree.value.handExpand(uuid, { highlight: true, scroll: true } as HandExpandOptions);
+        }
+      });
     };
     const funcEnableSchedule = (b: boolean) => {
       if (b) {
@@ -113,11 +118,6 @@ export default defineComponent({
       bridge.off(Msg.InspectNode, onInspectNode);
       timer.clean();
     });
-    function _expand(uuid: string) {
-      if (elTree.value) {
-        elTree.value.handExpand(uuid, { highlight: true });
-      }
-    }
     function updateTree() {
       console.log("update tree info");
       const id = toRaw(frameID.value);
