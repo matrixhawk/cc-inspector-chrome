@@ -3,6 +3,8 @@ import PKG from "../../../cc-plugin.config";
 import { ga } from "../../ga";
 import { GA_EventName } from "../../ga/type";
 import { githubMirrorMgr } from "../inject-view/github";
+import { getAdData, NotifyButton } from "../inject-view/loader";
+
 export const TipUpdate = "tip-update";
 (async () => {
   interface ConfigItem {
@@ -11,7 +13,11 @@ export const TipUpdate = "tip-update";
     closed?: Function;
     title: string;
     message: string;
-    check: (a: ConfigItem) => Promise<boolean>;
+    /**
+     * 检查是否可以创建通知
+     * @returns 返回true，则会创建通知
+     */
+    check: (item: ConfigItem) => Promise<boolean>;
     buttons?: Array<{ title: string; click?: Function }>;
   }
   function goRate() {
@@ -97,6 +103,7 @@ export const TipUpdate = "tip-update";
   ];
   try {
     await githubMirrorMgr.init();
+    // 版本检查
     const data = await githubMirrorMgr.getData("version.json");
     if (data) {
       const info = data as { ver: string };
@@ -114,6 +121,60 @@ export const TipUpdate = "tip-update";
           },
         });
       }
+    }
+    // 广告分析
+    const adData = await getAdData();
+    if (adData && adData.notify.length) {
+      adData.notify.forEach((el) => {
+        const KeyIKnow = `i-know-${el.id}`;
+        config.push({
+          id: el.id,
+          title: el.title,
+          message: el.msg,
+          buttons: el.buttons.map((btn) => {
+            const map = {};
+            map[NotifyButton.IKnow] = "我知道了";
+            map[NotifyButton.Go] = "前往";
+            return {
+              title: map[btn],
+              click: () => {
+                if (btn === NotifyButton.Go) {
+                  chrome.tabs.create({ url: el.url });
+                } else if (btn === NotifyButton.IKnow) {
+                  chrome.storage.local.set({ [`${KeyIKnow}`]: true });
+                }
+              },
+            };
+          }),
+          click: () => {
+            chrome.tabs.create({ url: el.url });
+          },
+          check: async () => {
+            // 检查是否已经过期
+            const now = new Date().getTime();
+            if (el.deadTime && now > new Date(el.deadTime).getTime()) {
+              return false;
+            }
+            // 检查是否已经取消了
+            const result = await chrome.storage.local.get(KeyIKnow);
+            if (result[KeyIKnow]) {
+              return false;
+            }
+            // 距离上次是否已经过去了指定的时间间隔
+            const KeyLatestShowTime = `latest-show-${el.id}`;
+            const res = await chrome.storage.local.get(KeyLatestShowTime);
+            const time = res[KeyLatestShowTime];
+            if (time) {
+              const diff = (new Date().getTime() - time) / 1000 / 60; // 过去了多少分钟
+              if (diff <= el.duration) {
+                return false;
+              }
+            }
+            chrome.storage.local.set({ [KeyLatestShowTime]: new Date().getTime() });
+            return true;
+          },
+        });
+      });
     }
   } catch (e) {
     console.error(e);

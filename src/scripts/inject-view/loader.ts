@@ -71,6 +71,64 @@ export class AdItem {
     }
   }
 }
+export enum NotifyButton {
+  /**
+   * 用户点击我知道后，就不再显示了
+   */
+  IKnow = "IKnow",
+  /**
+   * 前往支持
+   */
+  Go = "Go",
+}
+export class Notify {
+  /**通知的id，用来做点击区分的 */
+  id: string;
+  /**
+   * 通知的标题
+   */
+  title: string;
+  /**
+   * 通知的消息
+   */
+  msg: string;
+  /**
+   * 点击跳转的url
+   */
+  url: string;
+  /**
+   * 截止日期，到截止日期后就不再显示了
+   * @example 2025/02/24 14:00:00
+   * @example 2025/02/24
+   */
+  deadTime: string;
+  /**
+   * 显示的间隔时间，单位分钟
+   */
+  duration: number = 0;
+  /**
+   * 按钮的文本
+   */
+  buttons: NotifyButton[] = [];
+  parse(data: Notify) {
+    this.id = data.id || data.url;
+    this.title = data.title;
+    this.msg = data.msg;
+    this.url = data.url;
+    this.deadTime = data.deadTime || Date.now().toString();
+    this.duration = data.duration || 0;
+    this.buttons = [];
+    if (data.buttons) {
+      data.buttons.forEach((btn) => {
+        [NotifyButton.IKnow, NotifyButton.Go].forEach((btnName) => {
+          if (btn === btnName) {
+            this.buttons.push(btnName);
+          }
+        });
+      });
+    }
+  }
+}
 export class AdData {
   desc: string = "";
   /**
@@ -98,6 +156,10 @@ export class AdData {
    */
   keys: Record<string, string> = {};
   data: Array<AdItem> = [];
+  /**
+   * 通知的数据
+   */
+  notify: Notify[] = [];
   parse(data: AdData) {
     this.desc = data.desc;
     this.valid = !!data.valid;
@@ -118,6 +180,13 @@ export class AdData {
         if (item.visible) {
           this.data.push(item);
         }
+      });
+    }
+    if (data.notify) {
+      this.notify = data.notify.map((el) => {
+        const notify = new Notify();
+        notify.parse(el);
+        return notify;
       });
     }
   }
