@@ -122,7 +122,11 @@ export enum Msg {
   ResponseUpdateFrames = "response-update-frames",
   RequestUseFrame = "request-use-frame",
   ResponseUseFrame = "response-use-frame",
-
+  /**
+   * 测试从background层主动断开devtools的链接
+   */
+  RequestDisconnectDevtools = "request-disconnect-devtools",
+  DevtoolConnectError = "devtool-connect-error",
   RequestLogData = "request-log-data",
   RequestLogCustom = "request-log-custom",
   ReqWriteClipboard = "request-write-clipboard",

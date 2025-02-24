@@ -546,6 +546,19 @@ export class TreeData implements ITreeData {
     this.id = id;
     this.text = text;
   }
+  test(text: string) {
+    this.id = this.text = text;
+    this.color = "#ffffffff";
+    this.icon = "icon_node";
+    this.active = true;
+    this.children = [];
+    return this;
+  }
+  testaddChild(text: string) {
+    const child = new TreeData().test(text);
+    this.children.push(child);
+    return child;
+  }
 }
 
 export class Property {

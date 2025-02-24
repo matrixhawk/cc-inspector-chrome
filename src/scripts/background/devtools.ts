@@ -1,4 +1,4 @@
-import { debugLog, Msg, Page, PluginEvent, RequestUseFrameData, ResponseSupportData } from "../../core/types";
+import { debugLog, Msg, Page, PluginEvent, RequestUseFrameData } from "../../core/types";
 import { Terminal } from "../terminal";
 import { TabInfo } from "./tabInfo";
 
@@ -34,10 +34,12 @@ export class Devtools {
       }
     });
     port.onDisconnect.addListener((port: chrome.runtime.Port) => {
-      debugLog && console.log(...this.terminal.disconnect(""));
-      if (this.onDisconnect) {
-        this.onDisconnect(port);
+      const ret = ["localhost", "127.0.0.1"].find((el) => port.sender.url.includes(el));
+      if (ret) {
+        debugger;
       }
+      debugLog && console.log(...this.terminal.disconnect(""));
+      this.onDisconnect(port);
     });
   }
   public onDisconnect(port: chrome.runtime.Port) {
@@ -47,6 +49,11 @@ export class Devtools {
     if (data.msg === Msg.RequestUseFrame) {
       // 因为devtool是定时器驱动，这里改变了content，后续就会将数据派发到对应的content中去
       this.tabInfo.useFrame((data.data as RequestUseFrameData).id);
+    } else if (data.msg === Msg.RequestDisconnectDevtools) {
+      if (this.port) {
+        this.port.disconnect();
+        this.tabInfo.devtool = null;
+      }
     } else {
       // 从devtools过来的消息统一派发到目标content中
       if (data.check(Page.Devtools, Page.Background)) {

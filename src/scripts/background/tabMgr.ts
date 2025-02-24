@@ -1,6 +1,10 @@
 import { TabInfo } from "./tabInfo";
 
 export class TabMgr {
+  constructor() {
+    debugger;
+    this.tabArray = [];
+  }
   /**
    * chrome打开的所有标签页面
    */

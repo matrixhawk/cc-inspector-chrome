@@ -1,8 +1,8 @@
-import { debugLog, Page, PluginEvent } from "../../core/types";
+import { debugLog, Msg, Page, PluginEvent } from "../../core/types";
 import { getDevToolsInspectorId } from "../../core/util";
 import { Terminal } from "../terminal";
-import { tabMgr } from "./tabMgr";
 import "./notify";
+import { tabMgr } from "./tabMgr";
 const terminal = new Terminal(Page.Background);
 debugLog && console.log(...terminal.init());
 
@@ -16,11 +16,15 @@ chrome.runtime.onConnect.addListener((port: chrome.runtime.Port) => {
     tabMgr.addTab(tab, port);
   } else if (port.name.startsWith(Page.Devtools)) {
     const id = getDevToolsInspectorId(port.name);
+    console.log(`devtools tab id is ${id}`);
     const tab = tabMgr.findTab(id);
     if (tab) {
       tab.addDevtools(port);
     } else {
-      debugger;
+      // 没有发现与之对应的调试content，主动断开链接
+      const event = new PluginEvent(Page.Background, Page.Devtools, Msg.DevtoolConnectError, "missing content");
+      port.postMessage(event);
+      port.disconnect();
     }
   }
 });

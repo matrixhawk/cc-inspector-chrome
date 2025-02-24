@@ -16,6 +16,13 @@ class Bridge implements TestClient {
   private terminal = new Terminal(Page.Devtools);
 
   private _inited = false;
+  public disconnect() {
+    if (this.connect) {
+      this.connect.disconnect();
+      this.connect = null;
+      debugger;
+    }
+  }
   private init() {
     if (this._inited) {
       return;
@@ -25,9 +32,10 @@ class Bridge implements TestClient {
       // 调试的标签ID
       const id = chrome.devtools.inspectedWindow.tabId;
       this.connect = chrome.runtime.connect({ name: `${Page.Devtools}-${id}` });
-      this.connect.onDisconnect.addListener(() => {
+      this.connect.onDisconnect.addListener((port: chrome.runtime.Port) => {
         debugLog && console.log(...this.terminal.disconnect(""));
         this.connect = null;
+        debugger;
       });
 
       this.connect.onMessage.addListener((event, sender: chrome.runtime.Port) => {

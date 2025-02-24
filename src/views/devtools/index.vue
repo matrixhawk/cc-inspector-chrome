@@ -136,6 +136,10 @@ export default defineComponent({
       let data: Array<TreeData> = event.data;
       isShowDebug.value = true;
     });
+    bridge.on(Msg.DevtoolConnectError, (event: PluginEvent) => {
+      const msg = event.data;
+      ccui.footbar.showError(`Devtools connect error:\n${msg}`);
+    });
     bridge.on(Msg.ResponseSupport, (event: PluginEvent) => {
       let data: ResponseSupportData = event.data;
       const isCocosGame: boolean = data.support;
