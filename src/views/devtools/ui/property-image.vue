@@ -4,7 +4,7 @@
       <img :src="data.data" alt="图片" @click="onClickImg" class="img" />
     </div>
     <div class="url" :title="data.desc">{{ data.desc }}</div>
-    <i class="print iconfont icon_print" title="值会临时保存到window.c" @click="onShowValueInConsole"></i>
+    <i class="print iconfont icon_print" title="值会临时保存到window.temp" @click="onShowValueInConsole"></i>
   </div>
 </template>
 

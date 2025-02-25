@@ -111,8 +111,16 @@ export class Inspector extends InjectEvent {
         const value = getValue(this.inspectorGameMemoryStorage, data);
         // 直接写console.log会被tree shaking
         const logFunction = console.log;
-        logFunction(value);
-        window["c"] = value;
+        for (let i = 0; ; i++) {
+          const key = `temp${i}`;
+          if (typeof window[key] === "undefined") {
+            window[key] = value;
+            // logFunction(key);
+            // logFunction(window[key]);
+            logFunction(key, window[key]);
+            break;
+          }
+        }
         break;
       }
       case Msg.RequestOpenNodeTouchFuntion: {
