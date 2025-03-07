@@ -1,7 +1,7 @@
 // content.js 和原始界面共享DOM，具有操作dom的能力
 // 但是不共享js,要想访问页面js,只能通过注入的方式
 import { ChromeConst } from "cc-plugin/src/chrome/const";
-import { debugLog, Msg, Page, PluginEvent } from "../../core/types";
+import { debugLog, Page, PluginEvent } from "../../core/types";
 import { ga } from "../../ga";
 import { GA_EventName } from "../../ga/type";
 import { DocumentEvent, GoogleAnalyticsData } from "../const";
@@ -65,21 +65,26 @@ document.addEventListener(DocumentEvent.Inject2Content, (event: CustomEvent) => 
   }
 });
 // #region 和background通讯
-let connect: chrome.runtime.Port = chrome.runtime.connect({ name: Page.Content });
-connect.onDisconnect.addListener(() => {
-  debugLog && console.log(...terminal.disconnect(""));
-  connect = null;
-});
-connect.onMessage.addListener((data: PluginEvent, sender: chrome.runtime.Port) => {
-  const event = PluginEvent.create(data);
-  if (event.valid && event.check(Page.Background, Page.Content)) {
-    debugLog && console.log(...terminal.chunkMessage(event.toChunk()));
-    event.reset(Page.Content, Page.Inject);
-    const e = new CustomEvent(DocumentEvent.Content2Inject, { detail: event });
-    debugLog && console.log(...terminal.chunkSend(event.toChunk()));
-    document.dispatchEvent(e);
-  } else {
-    throw new Error(`invalid data: ${data}`);
-  }
-});
+let connect: chrome.runtime.Port = null;
+function doConnect() {
+  connect = chrome.runtime.connect({ name: Page.Content });
+  connect.onDisconnect.addListener(() => {
+    debugLog && console.log(...terminal.disconnect(""));
+    connect = null;
+    doConnect();
+  });
+  connect.onMessage.addListener((data: PluginEvent, sender: chrome.runtime.Port) => {
+    const event = PluginEvent.create(data);
+    if (event.valid && event.check(Page.Background, Page.Content)) {
+      debugLog && console.log(...terminal.chunkMessage(event.toChunk()));
+      event.reset(Page.Content, Page.Inject);
+      const e = new CustomEvent(DocumentEvent.Content2Inject, { detail: event });
+      debugLog && console.log(...terminal.chunkSend(event.toChunk()));
+      document.dispatchEvent(e);
+    } else {
+      throw new Error(`invalid data: ${data}`);
+    }
+  });
+}
+doConnect();
 injectScript(ChromeConst.script.inject);

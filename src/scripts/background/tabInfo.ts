@@ -20,6 +20,11 @@ export class TabInfo {
     let portContent: Content = new Content(tab, port, this);
     this.contentArray.push(portContent);
     this.updateFrames();
+    // 之前持有的链接会断开，content会重新发起链接，重新连上之后，如果只有一个人链接，需要设置using状态，否则devtools找不到content
+    if (this.contentArray.length === 1) {
+      const id = this.contentArray[0].frameID;
+      this.useFrame(id);
+    }
   }
   public removePort(item: Content) {
     let index = this.contentArray.findIndex((el) => el === item);
