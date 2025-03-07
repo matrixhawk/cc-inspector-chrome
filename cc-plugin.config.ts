@@ -9,7 +9,7 @@ function i18n(key: string) {
 
 const manifest: CocosPluginManifest = {
   name: pkgName,
-  version: "2.1.10",
+  version: "2.1.12",
   description: "Debug games made with CocosCreator and display node trees and node properties",
   store: "https://store.cocos.com/app/detail/2002",
   author: "xu_yanfeng",
