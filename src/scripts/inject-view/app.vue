@@ -2,7 +2,7 @@
   <div class="ad" ref="rootEl" v-show="!picking" @contextmenu.prevent="onContextMenuRoot" @mouseleave="onMouseLeaveRoot" @mouseenter="onMouseEnterCocosLogo">
     <div class="title">
       <div class="btns" v-show="showBtns">
-        <div v-for="(item, index) in listArray" :key="index" class="list" @click="item.click($event, item)" :title="item.txt" v-show="item.visible">
+        <div v-for="(item, index) in listArray" :key="index" class="list" @click="item.click($event, item)" :title="getTitle(item)" v-show="item.visible">
           <i class="iconfont icon" :class="item.icon" @contextmenu.prevent.stop="item.contextmenu"></i>
         </div>
       </div>
@@ -20,18 +20,19 @@ import { storeToRefs } from "pinia";
 import { defineComponent, onMounted, ref, toRaw } from "vue";
 import { GA_EventName } from "../../ga/type";
 import { DocumentEvent } from "../const";
-import { PickShortKey } from "../inject/hint";
+import {} from "../inject/hint";
 import { inspectTarget } from "../inject/inspect-list";
 import Ad from "./ad.vue";
 import Banner from "./banner.vue";
 import Memory from "./memory.vue";
+import Shortkeys from "./shortkeys.vue";
 import { appStore } from "./store";
 import { sendGaEvent } from "./util";
 declare const cc: any;
 const { CCDialog, CCMenu } = ccui.components;
 interface ListItem {
   icon: string;
-  txt: string;
+  txt: string | Function;
   visible: boolean;
   /**
    * 点击回调
@@ -57,7 +58,7 @@ export default defineComponent({
     const rnd = randomSupport();
     const { config } = storeToRefs(appStore());
     function doInspector() {
-      unregisterPickShortKey();
+      unregisterShortKey();
       sendGaEvent(GA_EventName.GameInspector);
       if (config.value.autoHide) {
         showBtns.value = false;
@@ -89,6 +90,21 @@ export default defineComponent({
         },
       },
       {
+        icon: "icon_settings",
+        txt: "Settings",
+        visible: true,
+        contextmenu: () => {},
+        click: () => {
+          ccui.dialog.showDialog({
+            title: "Settings",
+            comp: Shortkeys,
+            width: 400,
+            height: 150,
+            closeCB: () => {},
+          });
+        },
+      },
+      {
         icon: "icon_book",
         txt: "插件完整功能介绍(Gif动画)",
         contextmenu: () => {},
@@ -107,13 +123,17 @@ export default defineComponent({
           }
         },
         visible: true,
-        txt: "game play",
+        txt: () => {
+          return `game resume (${config.value.shortKeyGamePauseResume})`;
+        },
         contextmenu: () => {},
       },
       {
         icon: "icon_do_pause",
         visible: true,
-        txt: "game pause",
+        txt: () => {
+          return `game pause (${config.value.shortKeyGamePauseResume})`;
+        },
         click: () => {
           sendGaEvent(GA_EventName.GamePause);
           if (typeof cc !== "undefined") {
@@ -125,7 +145,9 @@ export default defineComponent({
       {
         icon: "icon_do_step",
         visible: true,
-        txt: "game step",
+        txt: () => {
+          return `game step (${config.value.shortKeyGameStep})`;
+        },
         click: () => {
           sendGaEvent(GA_EventName.GameStep);
           if (typeof cc !== "undefined") {
@@ -136,7 +158,9 @@ export default defineComponent({
       },
       {
         icon: "icon_target",
-        txt: "Inspect Game (esc)",
+        txt: () => {
+          return `Inspect Game (${config.value.shortKeyPick})`;
+        },
         visible: true,
         click: () => {
           doInspector();
@@ -197,7 +221,7 @@ export default defineComponent({
     ]);
     document.addEventListener(DocumentEvent.GameInspectorEnd, () => {
       picking.value = false;
-      registerPickShortKey();
+      registerShortKey();
     });
     function testInspector() {
       const cursor = document.body.style.cursor;
@@ -245,20 +269,38 @@ export default defineComponent({
 
     const picking = ref(false);
 
-    const pickShortFunc = (e: KeyboardEvent) => {
-      if (e.key === PickShortKey && picking.value === false) {
-        doInspector();
+    const keydownFunc = (e: KeyboardEvent) => {
+      const { shortKeyPick, shortKeyGameStep, shortKeyGamePauseResume } = config.value;
+      switch (e.code) {
+        case shortKeyPick: {
+          if (picking.value === false) {
+            doInspector();
+          }
+          break;
+        }
+        case shortKeyGameStep: {
+          cc.game.step();
+          break;
+        }
+        case shortKeyGamePauseResume: {
+          if (cc.game.isPaused()) {
+            cc.game.resume();
+          } else {
+            cc.game.pause();
+          }
+          break;
+        }
       }
     };
-    function registerPickShortKey() {
+    function registerShortKey() {
       if (picking.value === false) {
-        document.addEventListener("keydown", pickShortFunc, true);
+        document.addEventListener("keydown", keydownFunc, true);
       }
     }
-    function unregisterPickShortKey() {
-      document.removeEventListener("keydown", pickShortFunc, true);
+    function unregisterShortKey() {
+      document.removeEventListener("keydown", keydownFunc, true);
     }
-    registerPickShortKey();
+    registerShortKey();
 
     const rootEl = ref<HTMLDivElement>(null);
     const showBtns = ref(true);
@@ -272,6 +314,13 @@ export default defineComponent({
       listArray,
       rootEl,
       picking,
+      getTitle(item: ListItem) {
+        if (typeof item.txt === "function") {
+          return item.txt();
+        } else {
+          return item.txt;
+        }
+      },
       onMouseEnterCocosLogo() {
         clearTimeout(autoHideTimer);
         showBtns.value = true;

@@ -11,8 +11,6 @@ import { HintV2 } from "./hint-v2";
 import { HintV3 } from "./hint-v3";
 declare const cc: any;
 
-export const PickShortKey = "Escape";
-
 /**
  * 只负责管理hint的流程
  */
@@ -69,7 +67,8 @@ export class Hint {
         this.updateHitMoveThrottle(event, el);
       };
       const keydown = (event: KeyboardEvent) => {
-        if (event.key === PickShortKey) {
+        const { shortKeyPick } = toRaw(appStore().config);
+        if (event.code === shortKeyPick) {
           pickEnd();
           this.pickCancel();
         }
