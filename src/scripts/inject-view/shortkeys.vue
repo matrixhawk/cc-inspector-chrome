@@ -19,6 +19,7 @@ export default defineComponent({
     const { config } = storeToRefs(appStore());
     const keyOptions = ref<Array<Option>>([
       { label: "None", value: "None" },
+      { label: "Backquote(`)", value: "Backquote" },
       { label: "Space", value: "Space" },
       { label: "Escape", value: "Escape" },
       { label: "F1", value: "F1" },
