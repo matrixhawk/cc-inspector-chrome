@@ -12,12 +12,15 @@
     <CCDialog></CCDialog>
     <CCMenu></CCMenu>
   </div>
+  <div class="game-tip" v-if="showGameTip">
+    <div class="text" title="" @click="onClickTip">游戏暂停中</div>
+  </div>
 </template>
 <script lang="ts">
 import ccui from "@xuyanfeng/cc-ui";
 import { IUiMenuItem } from "@xuyanfeng/cc-ui/types/cc-menu/const";
 import { storeToRefs } from "pinia";
-import { defineComponent, onMounted, ref, toRaw } from "vue";
+import { defineComponent, onMounted, onUnmounted, ref, toRaw } from "vue";
 import { GA_EventName } from "../../ga/type";
 import { DocumentEvent } from "../const";
 import {} from "../inject/hint";
@@ -255,7 +258,17 @@ export default defineComponent({
       config.value.pos = top;
       appStore().save();
     }
+    let tipTimer = null;
+    onUnmounted(() => {
+      if (tipTimer) {
+        clearInterval(tipTimer);
+        tipTimer = null;
+      }
+    });
     onMounted(async () => {
+      tipTimer = setInterval(() => {
+        showGameTip.value = !!cc.game.isPaused();
+      }, 1000);
       recoverAssistantTop();
       window.addEventListener("resize", () => {
         const root = toRaw(rootEl.value) as HTMLDivElement;
@@ -288,10 +301,13 @@ export default defineComponent({
           } else {
             cc.game.pause();
           }
+          showGameTip.value = !!cc.game.isPaused();
           break;
         }
       }
     };
+    /**是否显示游戏暂停的提示 */
+    const showGameTip = ref(false);
     function registerShortKey() {
       if (picking.value === false) {
         document.addEventListener("keydown", keydownFunc, true);
@@ -310,10 +326,14 @@ export default defineComponent({
     let autoHideTimer = null;
     let isDraging = false;
     return {
+      showGameTip,
       showBtns,
       listArray,
       rootEl,
       picking,
+      onClickTip() {
+        showGameTip.value = false;
+      },
       getTitle(item: ListItem) {
         if (typeof item.txt === "function") {
           return item.txt();
@@ -411,6 +431,46 @@ export default defineComponent({
   100% {
     color: #f00;
     transform: rotate(0) translateX(0px);
+  }
+}
+@keyframes colorChange {
+  0% {
+    background-color: red;
+    color: white;
+  }
+  40% {
+    background-color: rgb(0, 0, 255);
+    color: yellow;
+  }
+  60% {
+    background-color: rgb(180, 31, 255);
+    color: rgb(0, 255, 64);
+  }
+  100% {
+    background-color: rgb(0, 248, 91);
+    color: rgb(255, 0, 0);
+  }
+}
+.game-tip {
+  position: absolute;
+  pointer-events: none;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  .text {
+    background-color: red;
+    border-radius: 4px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    padding: 0 10px;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    animation: colorChange 3s infinite;
   }
 }
 .ad {
