@@ -2,7 +2,6 @@ import { TabInfo } from "./tabInfo";
 
 export class TabMgr {
   constructor() {
-    debugger;
     this.tabArray = [];
   }
   /**
