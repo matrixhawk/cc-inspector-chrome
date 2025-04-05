@@ -305,13 +305,28 @@ export default defineComponent({
           break;
         }
         case shortKeyGameFresh: {
+          let router = "";
+          let isCreator2X = false;
+          if (typeof cc !== "undefined" && cc && typeof cc.ENGINE_VERSION !== "undefined") {
+            if (cc.ENGINE_VERSION.startsWith("3.")) {
+              isCreator2X = false;
+              router = "asset-db/refresh";
+            } else {
+              isCreator2X = true;
+              router = "update-db";
+            }
+          }
           const url = new URL(window.location.href);
           const port = Number(url.port) || 7456;
-          fetch(`http://localhost:${port}/asset-db/refresh`)
+          fetch(`http://localhost:${port}/${router}`)
             .then((res) => {
               res.text().then((a: string) => {
-                if (a === "success") {
-                  window.location.reload();
+                window.location.reload();
+                if (isCreator2X === false && a === "success") {
+                  // 3.x
+                }
+                if (isCreator2X === true && a === "Changes submitted") {
+                  // 2.x
                 }
               });
             })
