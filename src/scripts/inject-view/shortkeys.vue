@@ -3,6 +3,7 @@
     <CCProp name="Node Pick"> <CCSelect @change="onChangePick" :value="config.shortKeyPick" :data="keyOptions"></CCSelect> </CCProp>
     <CCProp name="Game Pause/Resume"> <CCSelect @change="onChangeGamePauseResume" :value="config.shortKeyGamePauseResume" :data="keyOptions"></CCSelect> </CCProp>
     <CCProp name="Game Step"> <CCSelect @change="onChangeGameStep" :value="config.shortKeyGameStep" :data="keyOptions"></CCSelect> </CCProp>
+    <CCProp name="Game Fresh"> <CCSelect @change="onChangeGameFresh" :value="config.shortKeyGameFresh" :data="keyOptions"></CCSelect> </CCProp>
   </div>
 </template>
 <script lang="ts">
@@ -45,6 +46,10 @@ export default defineComponent({
       },
       onChangeGameStep(v: string) {
         config.value.shortKeyGameStep = v;
+        appStore().save();
+      },
+      onChangeGameFresh(v: string) {
+        config.value.shortKeyGameFresh = v;
         appStore().save();
       },
       onChangeGamePauseResume(v: string) {

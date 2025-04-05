@@ -283,7 +283,7 @@ export default defineComponent({
     const picking = ref(false);
 
     const keydownFunc = (e: KeyboardEvent) => {
-      const { shortKeyPick, shortKeyGameStep, shortKeyGamePauseResume } = config.value;
+      const { shortKeyPick, shortKeyGameFresh, shortKeyGameStep, shortKeyGamePauseResume } = config.value;
       switch (e.code) {
         case shortKeyPick: {
           if (picking.value === false) {
@@ -302,6 +302,20 @@ export default defineComponent({
             cc.game.pause();
           }
           showGameTip.value = !!cc.game.isPaused();
+          break;
+        }
+        case shortKeyGameFresh: {
+          const url = new URL(window.location.href);
+          const port = Number(url.port) || 7456;
+          fetch(`http://localhost:${port}/asset-db/refresh`)
+            .then((res) => {
+              res.text().then((a: string) => {
+                if (a === "success") {
+                  window.location.reload();
+                }
+              });
+            })
+            .then((data) => {});
           break;
         }
       }

@@ -18,6 +18,7 @@ export class ConfigData {
   shortKeyPick: string = "Escape";
   shortKeyGameStep: string = "F8";
   shortKeyGamePauseResume: string = "Space";
+  shortKeyGameFresh: string = "F1";
 }
 
 export const appStore = defineStore("app", () => {
@@ -34,6 +35,7 @@ export const appStore = defineStore("app", () => {
       config.value.shortKeyPick = data.shortKeyPick;
       config.value.shortKeyGameStep = data.shortKeyGameStep;
       config.value.shortKeyGamePauseResume = data.shortKeyGamePauseResume;
+      config.value.shortKeyGameFresh = data.shortKeyGameFresh;
     },
     save() {
       const cfg = toRaw(config.value);
