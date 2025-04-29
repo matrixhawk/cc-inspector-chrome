@@ -343,7 +343,7 @@ export class Inspector extends InjectEvent {
   }
   private calcColor(node: any) {
     if (node._prefab) {
-      return "#00ff00ff";
+      return "#01ff01ff";
     } else {
       return "";
     }
