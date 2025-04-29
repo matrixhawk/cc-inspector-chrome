@@ -530,6 +530,8 @@ export class TreeData implements ITreeData {
   id: string = "";
   icon: string = "";
   color: string = "";
+  subfixIcon?: string;
+  subfixIconTip?: string;
   /**
    * 回调的数量
    */

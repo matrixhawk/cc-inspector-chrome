@@ -348,6 +348,20 @@ export class Inspector extends InjectEvent {
       return "";
     }
   }
+  private getUserScripts(node: any): string[] {
+    const ret: string[] = [];
+    const comps = node._components;
+    if (comps) {
+      for (let i = 0; i < comps.length; i++) {
+        const comp = comps[i];
+        const compName = this.getCompName(comp);
+        if (!compName.startsWith("cc")) {
+          ret.push(compName);
+        }
+      }
+    }
+    return ret;
+  }
   // 收集节点信息
   getNodeChildren(node: any, data: TreeData) {
     data.id = node.uuid;
@@ -361,6 +375,11 @@ export class Inspector extends InjectEvent {
       // 场景不允许获取active，引擎会报错
     } else {
       data.active = !!node.active && !!node.activeInHierarchy;
+      const scripts = this.getUserScripts(node);
+      if (scripts.length) {
+        data.subfixIcon = "icon_ts_text";
+        data.subfixIconTip = scripts.join("\n");
+      }
     }
     this.inspectorGameMemoryStorage[node.uuid] = node;
     let nodeChildren = node.children;
