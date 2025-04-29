@@ -592,16 +592,27 @@ export class Inspector extends InjectEvent {
     }
     return null;
   }
+  /**保存原来的warn函数*/
+  private originWarn = null;
   private warnSilent(v: boolean) {
     if (typeof cc !== undefined && typeof cc.warn === "function") {
       if (v) {
+        this.originWarn = cc.warn;
         cc.warn = () => {};
       } else {
-        cc.warn = console.warn.bind(console);
+        // document.cookie.match(/(^|;)\s*debug\s*=\s*(\d+)/)
+        // 0 是none， 2.x值来自 cookie
+        // 2.x: cc.debug._resetDebugSetting(0)
+        // 3.x: cc.debug._resetDebugSetting(0)
+        cc.warn = this.originWarn;
+        // eval("console.warn.bind(console)"); // 这种方式可能有性能问题
       }
     }
   }
   private isDisabledX(node: any, item: Info) {
+    if (cc.Scene && node instanceof cc.Scene) {
+      return true;
+    }
     const widget = node.getComponent(cc.Widget);
     if (widget && widget.enabled) {
       if (widget.isAlignLeft) {
@@ -617,6 +628,9 @@ export class Inspector extends InjectEvent {
     return false;
   }
   private isDisabledY(node: any, item: Info) {
+    if (cc.Scene && node instanceof cc.Scene) {
+      return true;
+    }
     const widget = node.getComponent(cc.Widget);
     if (widget && widget.enabled) {
       if (widget.isAlignTop) {
