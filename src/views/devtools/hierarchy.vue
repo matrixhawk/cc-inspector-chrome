@@ -116,10 +116,10 @@ export default defineComponent({
       Bus.off(BusMsg.ShowPlace, funcShowPlace);
       Bus.off(BusMsg.EnableSchedule, funcEnableSchedule);
       bridge.off(Msg.InspectNode, onInspectNode);
-      timer.clean();
+      timer.destroy();
     });
     function updateTree() {
-      console.log("update tree info");
+      // console.log("update tree info");
       const id = toRaw(frameID.value);
       bridge.send(Msg.RequstTreeInfo, { frameID: id } as RequestTreeInfoData);
     }

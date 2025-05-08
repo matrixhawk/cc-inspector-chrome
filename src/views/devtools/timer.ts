@@ -18,12 +18,18 @@ export class Timer {
       this.onWork && this.onWork();
     }
   }
-  clean() {
+  destroy(): boolean {
     if (this.timer === null) {
-      return;
+      return false;
+    } else {
+      clearInterval(this.timer);
+      this.timer = null;
+      return true;
     }
-    clearInterval(this.timer);
-    this.timer = null;
-    this.onClean && this.onClean();
+  }
+  clean() {
+    if (this.destroy()) {
+      this.onClean && this.onClean();
+    }
   }
 }

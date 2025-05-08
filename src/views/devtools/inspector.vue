@@ -84,7 +84,7 @@ export default defineComponent({
       Bus.off(BusMsg.ChangeContent, changeContent);
       Bus.off(BusMsg.SelectNode, funSelectNode);
       Bus.off(BusMsg.EnableSchedule, funcEnableSchedule);
-      timer.clean();
+      timer.destroy();
     });
     bridge.on(Msg.ResponseSupport, (event: PluginEvent) => {
       let data: ResponseSupportData = event.data;
