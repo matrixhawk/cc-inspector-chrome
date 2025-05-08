@@ -18,7 +18,7 @@ export class ConfigData {
   shortKeyPick: string = "Escape";
   shortKeyGameStep: string = "F8";
   shortKeyGamePauseResume: string = "Space";
-  shortKeyGameFresh: string = "F1";
+  shortKeyGameFresh: string = "Backquote";
 }
 
 export const appStore = defineStore("app", () => {
