@@ -44,7 +44,8 @@ export class Content {
     port.onDisconnect.addListener((port: chrome.runtime.Port) => {
       const ret = ["localhost", "127.0.0.1"].find((el) => port.sender.url.includes(el));
       if (ret) {
-        debugger;
+        console.log("local port disconnect");
+        // debugger;
       }
       debugLog && console.log(...this.terminal.disconnect(""));
       this.onDisconnect(port);

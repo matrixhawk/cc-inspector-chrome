@@ -32,7 +32,7 @@ export default defineComponent({
   setup() {
     function updateNodeInfo() {
       if (selectedUUID) {
-        console.log(`update node info: ${selectedUUID}`);
+        // console.log(`update node info: ${selectedUUID}`);
         bridge.send(Msg.RequestNodeInfo, { uuid: selectedUUID } as RequestNodeInfoData);
       } else {
         treeItemData.value = null;
