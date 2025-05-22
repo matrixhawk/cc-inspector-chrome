@@ -6,7 +6,7 @@
           <i class="iconfont icon" :class="item.icon" @contextmenu.prevent.stop="item.contextmenu"></i>
         </div>
       </div>
-      <i class="iconfont icon_cocos cocos" @mousedown="onMouseDown" @click="onCocosLogoClick"></i>
+      <i ref="elIcon" class="iconfont icon_cocos cocos" @mousedown="onMouseDown" @click="onCocosLogoClick"></i>
     </div>
     <!-- <Memory></Memory> -->
     <CCDialog></CCDialog>
@@ -265,6 +265,7 @@ export default defineComponent({
         tipTimer = null;
       }
     });
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     onMounted(async () => {
       tipTimer = setInterval(() => {
         showGameTip.value = !!cc.game.isPaused();
@@ -277,9 +278,66 @@ export default defineComponent({
         }
         updateAssistantTop(root.offsetTop);
       });
+      onDocEventOnMobile();
+      onDocEventOnPc();
       return;
     });
+    function onDocEventOnMobile() {
+      const root = toRaw(rootEl.value) as HTMLDivElement;
+      root.addEventListener("touchstart", (event: TouchEvent) => {
+        // event.preventDefault();
+        // event.stopPropagation();
+        // @ts-ignore
+        const root = toRaw(rootEl.value) as HTMLDivElement | null;
+        if (!root) {
+          return;
+        }
+        const startY = event.changedTouches[0].pageY;
+        const startTop = root.offsetTop;
+        function onTouchMove(e: TouchEvent) {
+          isDraging = true;
+          const dy = e.changedTouches[0].pageY - startY;
+          const top = startTop + dy;
+          updateAssistantTop(top);
+        }
 
+        function onTouchEnd(e: TouchEvent) {
+          isDraging = false;
+          document.removeEventListener("touchmove", onTouchMove, true);
+          document.removeEventListener("touchend", onTouchEnd, true);
+        }
+        document.addEventListener("touchmove", onTouchMove, true);
+        document.addEventListener("touchend", onTouchEnd, true);
+      });
+    }
+    function onDocEventOnPc() {
+      const root = toRaw(rootEl.value) as HTMLDivElement;
+      root.addEventListener("mousedown", (event: MouseEvent) => {
+        // event.preventDefault();
+        // event.stopPropagation();
+        // @ts-ignore
+        const root = toRaw(rootEl.value) as HTMLDivElement | null;
+        if (!root) {
+          return;
+        }
+        const startY = event.pageY;
+        const startTop = root.offsetTop;
+        function onMouseMove(e: MouseEvent) {
+          isDraging = true;
+          const dy = e.pageY - startY;
+          const top = startTop + dy;
+          updateAssistantTop(top);
+        }
+
+        function onMouseUp(e: MouseEvent) {
+          isDraging = false;
+          document.removeEventListener("mousemove", onMouseMove, true);
+          document.removeEventListener("mouseup", onMouseUp, true);
+        }
+        document.addEventListener("mousemove", onMouseMove, true);
+        document.addEventListener("mouseup", onMouseUp, true);
+      });
+    }
     const picking = ref(false);
 
     const keydownFunc = (e: KeyboardEvent) => {
@@ -354,7 +412,9 @@ export default defineComponent({
     }
     let autoHideTimer = null;
     let isDraging = false;
+    const elIcon = ref<HTMLDivElement>(null);
     return {
+      elIcon,
       showGameTip,
       showBtns,
       listArray,
@@ -406,29 +466,7 @@ export default defineComponent({
           showBtns.value = false;
         }, 500);
       },
-      onMouseDown(event: MouseEvent) {
-        // @ts-ignore
-        const root = toRaw(rootEl.value) as HTMLDivElement | null;
-        if (!root) {
-          return;
-        }
-        const startY = event.pageY;
-        const startTop = root.offsetTop;
-        function onMouseMove(e: MouseEvent) {
-          isDraging = true;
-          const dy = e.pageY - startY;
-          const top = startTop + dy;
-          updateAssistantTop(top);
-        }
-
-        function onMouseUp(e: MouseEvent) {
-          isDraging = false;
-          document.removeEventListener("mousemove", onMouseMove, true);
-          document.removeEventListener("mouseup", onMouseUp, true);
-        }
-        document.addEventListener("mousemove", onMouseMove, true);
-        document.addEventListener("mouseup", onMouseUp, true);
-      },
+      onMouseDown(event: MouseEvent) {},
     };
   },
 });
