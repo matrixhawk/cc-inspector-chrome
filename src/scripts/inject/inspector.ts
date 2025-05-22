@@ -1,6 +1,6 @@
 // eval 注入脚本的代码,变量尽量使用var,后来发现在import之后,let会自动变为var
 import { uniq } from "lodash";
-import { Msg, PluginEvent, RequestLogData, RequestNodeInfoData, RequestOpenNodeTouchFuntionData, RequestSetPropertyData, ResponseGameInfoData, ResponseNodeInfoData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
+import { Msg, PluginEvent, RequestLogData, RequestNodeInfoData, RequestOpenNodeTouchFuntionData, RequestOpenScriptData, RequestSetPropertyData, ResponseGameInfoData, ResponseNodeInfoData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
 import { CompType, getNodeIcon } from "../../views/devtools/comp";
 import { ArrayData, BoolData, ColorData, DataType, EngineData, EnumData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectCircleData, ObjectData, Property, StringData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../../views/devtools/data";
 import { calcCodeHint, getCallbacks } from "./code-hint";
@@ -119,6 +119,25 @@ export class Inspector extends InjectEvent {
             // logFunction(window[key]);
             logFunction(key, window[key]);
             break;
+          }
+        }
+        break;
+      }
+      case Msg.RequestOpenScript: {
+        const data: RequestOpenScriptData = pluginEvent.data;
+        const node = this.inspectorGameMemoryStorage[data.uuid];
+        if (!node || !node.isValid) {
+          return;
+        }
+        const comps = node._components;
+        if (comps) {
+          for (let i = 0; i < comps.length; i++) {
+            const comp = comps[i];
+            const compName = this.getCompName(comp);
+            if (compName === data.script) {
+              this.target = comp.constructor;
+              break;
+            }
           }
         }
         break;

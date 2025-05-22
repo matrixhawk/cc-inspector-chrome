@@ -192,6 +192,11 @@ export function getSimpleProperties(typeName: string): string[] {
     "isAlignBottom",
   ];
   config[CompType.Label] = [
+    "color",
+    "isBold",
+    "isItalic",
+    "isUnderline",
+    "spaceX",
     "string", //
     "horizontalAlign",
     "verticalAlign",

@@ -74,6 +74,12 @@ export type RequestSetPropertyData = Info;
 export type ResponseSetPropertyData = Info;
 export type RequestLogData = string[];
 export type RequestOpenNodeTouchFuntionData = { uuid: string; code: ShowCode; index: number };
+export type RequestOpenScriptData = {
+  /**节点的UUID */
+  uuid: string;
+  /**节点的脚本名字 */
+  script: string;
+};
 export type ResponseErrorData = string;
 export enum Msg {
   None = "None",
@@ -147,6 +153,7 @@ export enum Msg {
    * 请求在source面板打开节点的touch函数
    */
   RequestOpenNodeTouchFuntion = "request-open-node-touch-funtion",
+  RequestOpenScript = "request-open-script",
 }
 
 export class PluginEvent {

@@ -11,7 +11,7 @@
           <i class="matchCase iconfont icon_font_size" @click.stop="onChangeCase" title="match case" :style="{ color: matchCase ? 'red' : '' }"></i>
         </slot>
       </CCInput>
-      <CCTree :show-icon="config.showTreeIcon" @do-search="doSearch" :search="true" @node-menu="onMenu" @contextmenu.prevent.stop="onMenu" style="flex: 1" ref="elTree" :expand-keys="expandedKeys" :default-expand-all="false" :value="treeData" @node-expand="onNodeExpand" @node-collapse="onNodeCollapse" @node-click="handleNodeClick" @node-unclick="handleNodeUnclick" @node-enter="handleNodeEnter" @node-leave="handleNodeLeave"></CCTree>
+      <CCTree :show-icon="config.showTreeIcon" @do-search="doSearch" :search="true" @node-menu="onMenu" @click-subfix="onClickSubfix" @contextmenu.prevent.stop="onMenu" style="flex: 1" ref="elTree" :expand-keys="expandedKeys" :default-expand-all="false" :value="treeData" @node-expand="onNodeExpand" @node-collapse="onNodeCollapse" @node-click="handleNodeClick" @node-unclick="handleNodeUnclick" @node-enter="handleNodeEnter" @node-leave="handleNodeLeave"></CCTree>
     </CCDock>
   </div>
 </template>
@@ -22,7 +22,7 @@ import { HandExpandOptions } from "@xuyanfeng/cc-ui/types/cc-tree/const";
 import Mousetrap, { MousetrapInstance } from "mousetrap";
 import { storeToRefs } from "pinia";
 import { defineComponent, nextTick, onMounted, onUnmounted, ref, toRaw, watch } from "vue";
-import { Msg, PluginEvent, RequestOpenNodeTouchFuntionData, RequestTreeInfoData, RequestUseFrameData, ResponseSetPropertyData, ResponseSupportData } from "../../core/types";
+import { Msg, PluginEvent, RequestOpenNodeTouchFuntionData, RequestOpenScriptData, RequestTreeInfoData, RequestUseFrameData, ResponseSetPropertyData, ResponseSupportData } from "../../core/types";
 import { ga } from "../../ga";
 import { GA_EventName } from "../../ga/type";
 import { ShowCode } from "../../scripts/inject/types";
@@ -34,6 +34,7 @@ import GameInfo from "./game-info.vue";
 import Refresh from "./refresh.vue";
 import { appStore } from "./store";
 import { Timer } from "./timer";
+import { execInspect } from "./util";
 const { CCTree, CCFootBar, CCDock, CCDialog, CCInput, CCButton, CCInputNumber, CCSelect, CCButtonGroup, CCCheckBox, CCColor, CCDivider } = ccui.components;
 export default defineComponent({
   name: "hierarchy",
@@ -272,14 +273,37 @@ export default defineComponent({
           }
         }
       },
+      onClickSubfix(event: MouseEvent, data: TreeData) {
+        function inspectScript(scriptName: string) {
+          bridge.send(Msg.RequestOpenScript, { uuid: data.id, script: scriptName } as RequestOpenScriptData);
+          execInspect();
+        }
+        if (data.subfixIconTip) {
+          const multiple = data.subfixIconTip.split("\n");
+          if (multiple.length >= 2) {
+            const menus: IUiMenuItem[] = [];
+            for (let i = 0; i < multiple.length; i++) {
+              const item = multiple[i];
+              menus.push({
+                name: item,
+                callback: (item) => {
+                  console.log(item.name);
+                  inspectScript(item.name);
+                },
+              });
+            }
+            ccui.menu.showMenuByMouseEvent(event, menus);
+          } else {
+            inspectScript(multiple[0]);
+          }
+        }
+      },
       onMenu(event: MouseEvent, data: TreeData) {
         const menus: IUiMenuItem[] = [];
         if (data) {
           function doInspect(type: ShowCode, index: number) {
             bridge.send(Msg.RequestOpenNodeTouchFuntion, { uuid: data.id, code: type, index } as RequestOpenNodeTouchFuntionData);
-            setTimeout(() => {
-              chrome.devtools.inspectedWindow.eval(`DoInspect()`);
-            }, 5);
+            execInspect();
           }
           function hintCode(type: ShowCode, cbArray: FunctionInfo[], event: MouseEvent) {
             if (cbArray.length === 1) {
