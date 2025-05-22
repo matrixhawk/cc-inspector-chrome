@@ -279,7 +279,8 @@ export default defineComponent({
           execInspect();
         }
         if (data.subfixIconTip) {
-          const multiple = data.subfixIconTip.split("\n");
+          const arr = data.subfixIconTip.split("\n");
+          const multiple = [...new Set(arr)];
           if (multiple.length >= 2) {
             const menus: IUiMenuItem[] = [];
             for (let i = 0; i < multiple.length; i++) {
