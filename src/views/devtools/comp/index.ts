@@ -168,6 +168,7 @@ export function getSimpleProperties(typeName: string): string[] {
     "opacity",
     "skew",
     "group",
+    "angle",
     //----------
     "worldPosition",
     "worldScale",
