@@ -75,7 +75,7 @@ export type ResponseSetPropertyData = Info;
 export type RequestLogData = string[];
 export type RequestOpenNodeTouchFuntionData = { uuid: string; code: ShowCode; index: number };
 export type RequestOpenScriptData = {
-  /**节点的UUID */
+  /**节点或者组件的UUID */
   uuid: string;
   /**节点的脚本名字 */
   script: string;

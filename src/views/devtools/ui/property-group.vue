@@ -8,6 +8,7 @@
       </template>
       <template v-slot:header>
         <div style="flex: 1"></div>
+        <i v-if="!['cc.Node', 'cc.Scene'].find((el) => el === group.name)" @click.stop="onOpenCode" class="print iconfont icon_ts_text" title="在Source面板中打开对应的源代码"></i>
         <i style="" @click.stop="onLog" class="print iconfont icon_print" title="值会临时保存到window.temp"></i>
       </template>
       <div style="padding-left: 6px">
@@ -20,7 +21,7 @@
 <script lang="ts">
 import ccui from "@xuyanfeng/cc-ui";
 import { defineComponent, onMounted, onUnmounted, PropType, ref, toRaw, watch } from "vue";
-import { Msg, RequestLogData, RequestSetPropertyData } from "../../../core/types";
+import { Msg, RequestLogData, RequestOpenScriptData, RequestSetPropertyData } from "../../../core/types";
 import { bridge } from "../bridge";
 import { Bus, BusMsg } from "../bus";
 import { BoolData, Group, Info, Property } from "../data";
@@ -28,6 +29,7 @@ import UiProp from "./ui-prop.vue";
 import { VisibleProp } from "../comp";
 import { ga } from "../../../ga";
 import { GA_EventName } from "../../../ga/type";
+import { execInspect } from "../util";
 const { CCInput, CCSection, CCButton, CCInputNumber, CCSelect, CCCheckBox, CCColor } = ccui.components;
 export default defineComponent({
   name: "property-group",
@@ -84,6 +86,11 @@ export default defineComponent({
         const raw = toRaw(props);
         const data = [raw.group.id];
         bridge.send(Msg.RequestLogData, data as RequestLogData);
+      },
+      onOpenCode() {
+        const raw = toRaw(props.group);
+        bridge.send(Msg.RequestOpenScript, { uuid: raw.id, script: raw.name } as RequestOpenScriptData);
+        execInspect();
       },
     };
   },

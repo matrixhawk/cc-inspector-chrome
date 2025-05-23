@@ -125,21 +125,26 @@ export class Inspector extends InjectEvent {
       }
       case Msg.RequestOpenScript: {
         const data: RequestOpenScriptData = pluginEvent.data;
-        const node = this.inspectorGameMemoryStorage[data.uuid];
-        if (!node || !node.isValid) {
+        const nodeOrComp = this.inspectorGameMemoryStorage[data.uuid];
+        if (!nodeOrComp || !nodeOrComp.isValid) {
           return;
         }
-        const comps = node._components;
-        if (comps) {
-          for (let i = 0; i < comps.length; i++) {
-            const comp = comps[i];
-            const compName = this.getCompName(comp);
-            if (compName === data.script) {
-              this.target = comp.constructor;
-              break;
+        if (nodeOrComp instanceof cc.Node) {
+          const comps = nodeOrComp._components;
+          if (comps) {
+            for (let i = 0; i < comps.length; i++) {
+              const comp = comps[i];
+              const compName = this.getCompName(comp);
+              if (compName === data.script) {
+                this.target = comp.constructor;
+                break;
+              }
             }
           }
+        } else if (true || nodeOrComp instanceof cc.Component) {
+          this.target = nodeOrComp.constructor;
         }
+
         break;
       }
       case Msg.RequestOpenNodeTouchFuntion: {
