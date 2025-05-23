@@ -27,6 +27,8 @@ export enum CompType {
   ToggleContainer = "cc.ToggleContainer",
   Toggle = "cc.Toggle",
   Button = "cc.Button",
+  AudioSource = "cc.AudioSource",
+  Opacity = "cc.UIOpacity",
   BlockInputEvents = "cc.BlockInputEvents",
   Scene = "cc.Scene",
   Animation = "cc.Animation",
@@ -310,8 +312,13 @@ export function getNodeIcon(comp: CompType): string {
   map[CompType.ParticleSystem2D] = "icon_effect";
   map[CompType.Layout] = "icon_layout";
   map[CompType.Graphics] = "icon_graphics";
+  map[CompType.Opacity] = "icon_opacity";
+  map[CompType.BlockInputEvents] = "icon_block";
+  map[CompType.RichText] = "icon_rich_text";
+  map[CompType.AudioSource] = "icon_audio";
   let ret = map[comp];
   if (!ret) {
+    debugger;
     console.log(`get node icon fail: ${comp}, please check.`);
     ret = map[CompType.Node];
   }

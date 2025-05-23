@@ -318,7 +318,7 @@ export class Inspector extends InjectEvent {
       for (let i = 0; i < components.length; i++) {
         const component = components[i];
         const name = this.getCompName(component);
-        if (name) {
+        if (name.startsWith("cc")) {
           names.push(name);
         }
       }
@@ -361,6 +361,7 @@ export class Inspector extends InjectEvent {
       CompType.Toggle,
       CompType.ToggleGroup,
       CompType.ToggleContainer,
+      CompType.AudioSource,
       //
       CompType.ParticleSystem,
       CompType.ParticleSystem2D,
@@ -372,6 +373,7 @@ export class Inspector extends InjectEvent {
       CompType.BlockInputEvents,
       CompType.Layout,
       CompType.Widget,
+      CompType.Opacity,
       // 兜底
       CompType.Node,
     ];
