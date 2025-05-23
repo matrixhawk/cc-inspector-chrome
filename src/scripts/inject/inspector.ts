@@ -314,22 +314,90 @@ export class Inspector extends InjectEvent {
 
     const components = node._components;
     if (components) {
-      const types: CompType[] = [];
-      // widget组件的优先级低于其他渲染组件
+      const names: string[] = [];
       for (let i = 0; i < components.length; i++) {
         const component = components[i];
-        const type = this.checkComponent(component);
-        if (type) {
-          types.push(type);
+        const name = this.getCompName(component);
+        if (name) {
+          names.push(name);
         }
       }
-      if (types.length) {
-        //按照字母的顺序排序，目前是符合预期
-        types.sort();
-        return getNodeIcon(types[0]);
+      if (names.length) {
+        const t = this.bestName(names);
+        if (t) {
+          return getNodeIcon(t);
+        }
       }
     }
     return getNodeIcon(CompType.Node);
+  }
+  /**挑选出最合适的组件图标依据的类型 */
+  private bestName(names: string[]): CompType | null {
+    if (names.length === 1 && names[0] === CompType.UITransform) {
+      return CompType.Node;
+    }
+    const typePriority: CompType[] = [
+      // 越靠前，优先级越搞
+      CompType.Camera,
+      CompType.Canvas,
+      CompType.Scene,
+      // 动画组件
+      CompType.Animation,
+      // 基础组件
+      CompType.Button,
+      CompType.Spirte,
+      CompType.Label,
+      CompType.RichText,
+      CompType.Prefab,
+      // UI组件
+      CompType.EditBox,
+      CompType.ScrollView,
+      CompType.Mask,
+      CompType.TiledTile,
+      CompType.Graphics,
+      CompType.ProgressBar,
+      CompType.Slider,
+      CompType.PageView,
+      CompType.Toggle,
+      CompType.ToggleGroup,
+      CompType.ToggleContainer,
+      //
+      CompType.ParticleSystem,
+      CompType.ParticleSystem2D,
+      CompType.Light,
+      CompType.VideoPlayer,
+      CompType.Webview,
+      CompType.MeshRenderer,
+      // UI组件
+      CompType.BlockInputEvents,
+      CompType.Layout,
+      CompType.Widget,
+      // 兜底
+      CompType.Node,
+    ];
+    for (const key in CompType) {
+      const type = CompType[key];
+      if (type === CompType.UITransform) {
+        continue;
+      }
+      const b = typePriority.find((el) => el === type);
+      if (!b) {
+        console.log(`${type} is not in typePriority`);
+        debugger;
+      }
+    }
+    for (let i = 0; i < typePriority.length; i++) {
+      const name = typePriority[i];
+      if (names.indexOf(name) !== -1) {
+        return name;
+      }
+    }
+    if (names.length) {
+      // 没有从手动排序中找到，就用第一个
+      names.sort();
+      return names[0] as CompType;
+    }
+    return null;
   }
   private checkComponent(comp: any): CompType | null {
     const map = {};
@@ -348,12 +416,16 @@ export class Inspector extends InjectEvent {
     map[CompType.ProgressBar] = [cc.ProgressBar];
     map[CompType.Layout] = [cc.Layout];
     map[CompType.Graphics] = [cc.Graphics];
+    map[CompType.ParticleSystem] = [cc.ParticleSystem, cc.ParticleSystemComponent];
+    // widget组件的优先级低于其他渲染组件
     map[CompType.Widget] = [cc.Widget];
     for (let key in map) {
       const item = map[key];
-      const ret = item.find((el: any) => {
-        return el && comp instanceof el;
-      });
+      const ret = item
+        .filter((el) => !!el)
+        .find((el: any) => {
+          return el && comp instanceof el;
+        });
       if (ret) {
         return key as CompType;
       }

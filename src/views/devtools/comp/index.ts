@@ -12,6 +12,7 @@ export enum CompType {
   ScrollView = "cc.ScrollView",
   UITransform = "cc.UITransform",
   ParticleSystem = "cc.ParticleSystem",
+  ParticleSystem2D = "cc.ParticleSystem2D",
   EditBox = "cc.EditBox",
   TiledTile = "cc.TiledTile",
   Light = "cc.Light",
@@ -305,7 +306,14 @@ export function getNodeIcon(comp: CompType): string {
   map[CompType.Mask] = "icon_mask";
   map[CompType.Widget] = "icon_widget";
   map[CompType.ProgressBar] = "icon_progress";
+  map[CompType.ParticleSystem] = "icon_effect";
+  map[CompType.ParticleSystem2D] = "icon_effect";
   map[CompType.Layout] = "icon_layout";
   map[CompType.Graphics] = "icon_graphics";
-  return map[comp] || "";
+  let ret = map[comp];
+  if (!ret) {
+    console.log(`get node icon fail: ${comp}, please check.`);
+    ret = map[CompType.Node];
+  }
+  return ret;
 }
