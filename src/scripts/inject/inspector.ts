@@ -1,6 +1,6 @@
 // eval 注入脚本的代码,变量尽量使用var,后来发现在import之后,let会自动变为var
 import { uniq } from "lodash";
-import { Msg, PluginEvent, RequestLogData, RequestNodeInfoData, RequestOpenNodeTouchFuntionData, RequestOpenScriptData, RequestSetPropertyData, ResponseGameInfoData, ResponseNodeInfoData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
+import { BreakOnType, Msg, PluginEvent, RequestBreakOnData, RequestLogData, RequestNodeInfoData, RequestOpenNodeTouchFuntionData, RequestOpenScriptData, RequestSetPropertyData, ResponseGameInfoData, ResponseNodeInfoData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
 import { CompType, getNodeIcon } from "../../views/devtools/comp";
 import { ArrayData, BoolData, ColorData, DataType, EngineData, EnumData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectCircleData, ObjectData, Property, StringData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../../views/devtools/data";
 import { calcCodeHint, getCallbacks } from "./code-hint";
@@ -12,6 +12,7 @@ import { inspectTarget } from "./inspect-list";
 import { getValue, trySetValueWithConfig } from "./setValue";
 import { BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOptions } from "./types";
 import { isHasProperty } from "./util";
+import { addBreak, cleanBreak } from "./break";
 
 declare const cc: any;
 export class Inspector extends InjectEvent {
@@ -223,6 +224,39 @@ export class Inspector extends InjectEvent {
           node.destroy();
         }
         break;
+      }
+      case Msg.RequestBreakClean: {
+        cleanBreak();
+        break;
+      }
+      case Msg.RequestBreakOn: {
+        const data: RequestBreakOnData = pluginEvent.data;
+        const node = this.inspectorGameMemoryStorage[data.uuid];
+        if (node && node.isValid && node instanceof cc.Node) {
+          const map = {};
+          map[BreakOnType.ActiveChanged] = cc.Node?.EventType?.ACTIVE_CHANGED;
+          map[BreakOnType.SizeChanged] = cc.Node?.EventType?.SIZE_CHANGED;
+          map[BreakOnType.TransformChanged] = cc.Node?.EventType?.TRANSFORM_CHANGED;
+          map[BreakOnType.ColorChanged] = cc.Node?.EventType?.COLOR_CHANGED;
+          map[BreakOnType.LayerChanged] = cc.Node?.EventType?.LAYER_CHANGED;
+          map[BreakOnType.SiblingOrderChanged] = cc.Node?.EventType?.SIBLING_ORDER_CHANGED || cc.Node?.EventType?.CHILDREN_ORDER_CHANGED;
+          map[BreakOnType.Destroyed] = cc.Node?.EventType?.NODE_DESTROYED;
+          map[BreakOnType.ParentChanged] = cc.Node?.EventType?.PARENT_CHANGED;
+          map[BreakOnType.ChildAdded] = cc.Node?.EventType?.CHILD_ADDED;
+          map[BreakOnType.ChildRemoved] = cc.Node?.EventType?.CHILD_REMOVED;
+          map[BreakOnType.CompAdded] = cc.Node?.EventType?.COMPONENT_ADDED;
+          map[BreakOnType.CompRemoved] = cc.Node?.EventType?.COMPONENT_REMOVED;
+          const key = map[data.type];
+          if (key) {
+            const fn = () => {
+              eval("console.log(key);debugger;");
+            };
+            node.on(key, fn);
+            addBreak(node, key, fn);
+          } else {
+            console.log(`not adapt event: ${data.type}`);
+          }
+        }
       }
     }
   }

@@ -81,6 +81,7 @@ export type RequestOpenScriptData = {
   script: string;
 };
 export type ResponseErrorData = string;
+export type RequestBreakOnData = { uuid: string; type: BreakOnType };
 export enum Msg {
   None = "None",
   /**
@@ -154,8 +155,23 @@ export enum Msg {
    */
   RequestOpenNodeTouchFuntion = "request-open-node-touch-funtion",
   RequestOpenScript = "request-open-script",
+  RequestBreakOn = "request-break-on",
+  RequestBreakClean = "request-break-clean",
 }
-
+export enum BreakOnType {
+  SizeChanged = "size changed",
+  TransformChanged = "transform changed",
+  ColorChanged = "color changed",
+  LayerChanged = "layer changed",
+  SiblingOrderChanged = "sibling order changed",
+  ActiveChanged = "active changed",
+  Destroyed = "destroyed",
+  ParentChanged = "parent changed",
+  ChildAdded = "child added",
+  ChildRemoved = "child removed",
+  CompAdded = "component added",
+  CompRemoved = "component removed",
+}
 export class PluginEvent {
   public static FLAG = "cc-inspector";
   /**

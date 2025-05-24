@@ -22,7 +22,7 @@ import { HandExpandOptions } from "@xuyanfeng/cc-ui/types/cc-tree/const";
 import Mousetrap, { MousetrapInstance } from "mousetrap";
 import { storeToRefs } from "pinia";
 import { defineComponent, nextTick, onMounted, onUnmounted, ref, toRaw, watch } from "vue";
-import { Msg, PluginEvent, RequestOpenNodeTouchFuntionData, RequestOpenScriptData, RequestTreeInfoData, RequestUseFrameData, ResponseSetPropertyData, ResponseSupportData } from "../../core/types";
+import { BreakOnType, Msg, PluginEvent, RequestBreakOnData, RequestOpenNodeTouchFuntionData, RequestOpenScriptData, RequestTreeInfoData, RequestUseFrameData, ResponseSetPropertyData, ResponseSupportData } from "../../core/types";
 import { ga } from "../../ga";
 import { GA_EventName } from "../../ga/type";
 import { ShowCode } from "../../scripts/inject/types";
@@ -484,6 +484,35 @@ export default defineComponent({
             },
           });
         }
+        // 断点功能
+        menus.push({ type: ccui.menu.MenuType.Separator });
+        if (data) {
+          const breakMenus: IUiMenuItem[] = [];
+          for (let key in BreakOnType) {
+            const v = BreakOnType[key];
+            breakMenus.push({
+              name: `${v}`,
+              enabled: true,
+              callback: (item) => {
+                ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
+                bridge.send(Msg.RequestBreakOn, { uuid: data.id, type: v } as RequestBreakOnData);
+              },
+            });
+          }
+          menus.push({
+            name: "break on",
+            enabled: true,
+            items: breakMenus,
+          });
+        }
+        menus.push({
+          name: "break clean",
+          enabled: true,
+          callback: (item) => {
+            ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
+            bridge.send(Msg.RequestBreakClean);
+          },
+        });
         ccui.menu.showMenuByMouseEvent(event, menus);
       },
       onChangeCase() {

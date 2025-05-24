@@ -131,7 +131,7 @@ export class Hint {
           },
         } as IUiMenuItem;
       });
-      ccui.menu.showMenuByMouseEvent(event, menu, 0.8);
+      ccui.menu.showMenuByMouseEvent(event, menu, { opacity: 0.8 });
     }
   }
   private sendInspectNodeMsg(node: any) {
