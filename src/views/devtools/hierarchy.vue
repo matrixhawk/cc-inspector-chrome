@@ -355,6 +355,7 @@ export default defineComponent({
 
         menus.push({
           name: "update hierarchy",
+          icon: "tree",
           enabled: true,
           callback: (item) => {
             ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
@@ -364,6 +365,7 @@ export default defineComponent({
         menus.push({ type: ccui.menu.MenuType.Separator });
         menus.push({
           name: "fresh auto",
+          icon: "refresh_one",
           callback: (item) => {
             ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
             timer.create(true);
@@ -371,6 +373,7 @@ export default defineComponent({
         });
         menus.push({
           name: "fresh manual",
+          icon: "refresh_one",
           callback: (item) => {
             ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
             timer.clean();
@@ -379,6 +382,7 @@ export default defineComponent({
         menus.push({ type: ccui.menu.MenuType.Separator });
         menus.push({
           name: "fps show",
+          icon: "fps",
           callback: (item) => {
             ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
             bridge.send(Msg.VisibleFPS, true);
@@ -387,6 +391,7 @@ export default defineComponent({
 
         menus.push({
           name: "fps hide",
+          icon: "fps",
           callback: (item) => {
             ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
             bridge.send(Msg.VisibleFPS, false);
@@ -446,6 +451,7 @@ export default defineComponent({
           menus.push({ type: ccui.menu.MenuType.Separator });
           menus.push({
             name: "copy name",
+            icon: "print",
             enabled: true,
             callback(item) {
               ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
@@ -469,6 +475,7 @@ export default defineComponent({
           menus.push({
             name: "visible",
             shortKey: "space",
+            icon: "view_on",
             enabled: true,
             callback: (item) => {
               ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
@@ -477,6 +484,7 @@ export default defineComponent({
           });
           menus.push({
             name: "destroy",
+            icon: "trash",
             enabled: true,
             callback: (item) => {
               ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
@@ -515,12 +523,14 @@ export default defineComponent({
           }
           menus.push({
             name: "break on",
+            icon: "circle",
             enabled: true,
             items: breakMenus,
           });
         }
         menus.push({
           name: "break clean",
+          icon: "break_off",
           enabled: true,
           callback: (item) => {
             ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);

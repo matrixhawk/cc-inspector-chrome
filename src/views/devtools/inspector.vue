@@ -120,6 +120,7 @@ export default defineComponent({
         const menus: IUiMenuItem[] = [];
         menus.push({
           name: "update node info",
+          icon: "node",
           callback: (item) => {
             updateNodeInfo();
             ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
@@ -128,6 +129,7 @@ export default defineComponent({
         menus.push({ type: ccui.menu.MenuType.Separator });
         menus.push({
           name: "fresh auto",
+          icon: "refresh_one",
           callback: (item) => {
             timer.create(true);
             ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
@@ -135,6 +137,7 @@ export default defineComponent({
         });
         menus.push({
           name: "fresh manual",
+          icon: "refresh_one",
           callback: (item) => {
             timer.clean();
             ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
@@ -143,6 +146,7 @@ export default defineComponent({
         menus.push({ type: ccui.menu.MenuType.Separator });
         menus.push({
           name: simpleProperties ? "show more properties" : "show simple properties",
+          icon: simpleProperties ? "many" : "one",
           callback: (item) => {
             simpleProperties = !simpleProperties;
             ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
