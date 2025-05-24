@@ -488,10 +488,24 @@ export default defineComponent({
         menus.push({ type: ccui.menu.MenuType.Separator });
         if (data) {
           const breakMenus: IUiMenuItem[] = [];
+          const iconMap = {};
+          iconMap[BreakOnType.ActiveChanged] = "view_on";
+          iconMap[BreakOnType.ChildRemoved] = "node";
+          iconMap[BreakOnType.ChildAdded] = "node";
+          iconMap[BreakOnType.CompAdded] = "component";
+          iconMap[BreakOnType.CompRemoved] = "component";
+          iconMap[BreakOnType.ColorChanged] = "color";
+          iconMap[BreakOnType.Destroyed] = "trash";
+          iconMap[BreakOnType.LayerChanged] = "layer";
+          iconMap[BreakOnType.ParentChanged] = "parent";
+          iconMap[BreakOnType.SiblingOrderChanged] = "order";
+          iconMap[BreakOnType.SizeChanged] = "size";
+          iconMap[BreakOnType.TransformChanged] = "widget";
           for (let key in BreakOnType) {
             const v = BreakOnType[key];
             breakMenus.push({
               name: `${v}`,
+              icon: iconMap[v] || "",
               enabled: true,
               callback: (item) => {
                 ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
