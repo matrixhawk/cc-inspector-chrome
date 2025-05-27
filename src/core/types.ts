@@ -157,6 +157,7 @@ export enum Msg {
   RequestOpenScript = "request-open-script",
   RequestBreakOn = "request-break-on",
   RequestBreakClean = "request-break-clean",
+  RequestOpenInCocos = "request-open-in-cocos",
 }
 export enum BreakOnType {
   SizeChanged = "size changed",

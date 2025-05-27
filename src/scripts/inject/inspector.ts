@@ -3,16 +3,17 @@ import { uniq } from "lodash";
 import { BreakOnType, Msg, PluginEvent, RequestBreakOnData, RequestLogData, RequestNodeInfoData, RequestOpenNodeTouchFuntionData, RequestOpenScriptData, RequestSetPropertyData, ResponseGameInfoData, ResponseNodeInfoData, ResponseSetPropertyData, ResponseSupportData, ResponseTreeInfoData } from "../../core/types";
 import { CompType, getNodeIcon } from "../../views/devtools/comp";
 import { ArrayData, BoolData, ColorData, DataType, EngineData, EnumData, Group, ImageData, Info, InvalidData, NodeInfoData, NumberData, ObjectCircleData, ObjectData, Property, StringData, TreeData, Vec2Data, Vec3Data, Vec4Data } from "../../views/devtools/data";
+import { addBreak, cleanBreak } from "./break";
 import { calcCodeHint, getCallbacks } from "./code-hint";
 import { getEnumListConfig } from "./enumConfig";
 import { InjectEvent } from "./event";
+import { everything } from "./everything";
 import { Hint } from "./hint";
 import { injectView } from "./inject-view";
 import { inspectTarget } from "./inspect-list";
 import { getValue, trySetValueWithConfig } from "./setValue";
 import { BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOptions } from "./types";
 import { isHasProperty } from "./util";
-import { addBreak, cleanBreak } from "./break";
 
 declare const cc: any;
 export class Inspector extends InjectEvent {
@@ -255,6 +256,23 @@ export class Inspector extends InjectEvent {
             addBreak(node, key, fn);
           } else {
             console.log(`not adapt event: ${data.type}`);
+          }
+        }
+        break;
+      }
+      case Msg.RequestOpenInCocos: {
+        const uuid: string = pluginEvent.data;
+        const node = this.inspectorGameMemoryStorage[uuid];
+        if (node && node.isValid) {
+          console.log(node.uuid, node);
+          let prefabUUID = "";
+          if (node instanceof cc.Scene) {
+            prefabUUID = node.uuid;
+          } else {
+            prefabUUID = node._prefab?.asset?._uuid;
+          }
+          if (prefabUUID) {
+            everything.open(prefabUUID);
           }
         }
       }

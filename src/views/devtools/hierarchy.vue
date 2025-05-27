@@ -301,6 +301,18 @@ export default defineComponent({
       },
       onMenu(event: MouseEvent, data: TreeData) {
         const menus: IUiMenuItem[] = [];
+        // 现在只有prefab才会有颜色，暂时可以这么判断
+        if (data && data.color) {
+          menus.push({
+            name: "open",
+            icon: "cocos",
+            callback: (item) => {
+              ga.fireEventWithParam(GA_EventName.MouseMenu, item.name);
+              bridge.send(Msg.RequestOpenInCocos, data.id);
+            },
+          });
+          menus.push({ type: ccui.menu.MenuType.Separator });
+        }
         if (data) {
           function doInspect(type: ShowCode, index: number) {
             bridge.send(Msg.RequestOpenNodeTouchFuntion, { uuid: data.id, code: type, index } as RequestOpenNodeTouchFuntionData);
