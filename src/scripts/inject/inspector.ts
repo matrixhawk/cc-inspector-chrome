@@ -285,6 +285,7 @@ export class Inspector extends InjectEvent {
   init() {
     console.log(...this.terminal.init());
     this.watchIsCocosGame();
+    everything.init(this);
   }
 
   private watchIsCocosGame() {

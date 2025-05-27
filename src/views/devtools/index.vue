@@ -29,6 +29,7 @@ import { GA_Button } from "../../ga/type";
 import { bridge } from "./bridge";
 import { Bus, BusMsg } from "./bus";
 import { FrameDetails, NodeInfoData, TreeData } from "./data";
+import Everything from "./everything.vue";
 import Find from "./find.vue";
 import Hierarchy from "./hierarchy.vue";
 import Inspector from "./inspector.vue";
@@ -38,6 +39,7 @@ import { Timer } from "./timer";
 import Properties from "./ui/propertys.vue";
 import SettingsVue from "./ui/settings.vue";
 import { checkSupport } from "./util";
+import { DialogOptions, DialogUrlData } from "@xuyanfeng/cc-ui/types/cc-dialog/const";
 const { CCTree, CCFootBar, CCMenu, CCDialog, CCInput, CCButton, CCInputNumber, CCSelect, CCButtonGroup, CCCheckBox, CCColor, CCDivider } = ccui.components;
 interface FrameInfo {
   label: string;
@@ -135,6 +137,23 @@ export default defineComponent({
     bridge.on(Msg.ResponseTreeInfo, (event: PluginEvent) => {
       let data: Array<TreeData> = event.data;
       isShowDebug.value = true;
+    });
+    bridge.on(Msg.ResponseBuyEverything, (event: PluginEvent) => {
+      // ccui.dialog.showDialog({
+      //   comp: Everything,
+      //   title: "提示",
+      // });
+      const data = new ccui.dialog.DialogUrlData();
+      data.label = "该功能需要{everything}插件支持，请在creator中安装插件后重试。";
+      data.jump = 0;
+      data.url = "https://store.cocos.com/app/detail/7391";
+      const opts: DialogOptions = {
+        data,
+        title: "提示",
+        width: 180,
+        height: 100,
+      };
+      ccui.dialog.showDialog(opts);
     });
     bridge.on(Msg.DevtoolConnectError, (event: PluginEvent) => {
       const msg = event.data;

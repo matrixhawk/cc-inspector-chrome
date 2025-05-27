@@ -1,7 +1,13 @@
+import { Msg } from "../../core/types";
+import { Inspector } from "./inspector";
+
 // 和everything插件交互
 export class Everything {
   // 支持多开creator，遍历everything插件的server
-
+  private inspector: Inspector | null = null;
+  init(inspector: Inspector) {
+    this.inspector = inspector;
+  }
   test() {
     const port = 2505;
     fetch(`http://localhost:${port}/test`)
@@ -22,7 +28,7 @@ export class Everything {
         console.log(e);
       })
       .catch((e) => {
-        console.log(e);
+        this.inspector.sendMsgToContent(Msg.ResponseBuyEverything, {});
       });
   }
 }

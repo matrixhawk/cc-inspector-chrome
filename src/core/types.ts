@@ -102,6 +102,7 @@ export enum Msg {
 
   ResponseMemoryInfo = "response-memory-info",
   VisibleFPS = "visible-fps",
+  ResponseBuyEverything = "ResponseBuyEverything",
   /**
    * 当前页面信息
    */
