@@ -34,7 +34,10 @@ export interface BuildVecOptions {
   value: Object;
   data: Vec3Data | Vec2Data;
 }
-
+export interface NodeChildrenOptions {
+  /**遍历到prefab的index，主要是为了着色 */
+  index: number;
+}
 export interface BuildImageOptions {
   path: string[];
   ctor: Function;

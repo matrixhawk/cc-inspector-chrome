@@ -12,7 +12,7 @@ import { Hint } from "./hint";
 import { injectView } from "./inject-view";
 import { inspectTarget } from "./inspect-list";
 import { getValue, trySetValueWithConfig } from "./setValue";
-import { BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOptions } from "./types";
+import { BuildArrayOptions, BuildImageOptions, BuildObjectOptions, BuildVecOptions, NodeChildrenOptions } from "./types";
 import { isHasProperty } from "./util";
 
 declare const cc: any;
@@ -265,18 +265,22 @@ export class Inspector extends InjectEvent {
         const node = this.inspectorGameMemoryStorage[uuid];
         if (node && node.isValid) {
           console.log(node.uuid, node);
-          let prefabUUID = "";
-          if (node instanceof cc.Scene) {
-            prefabUUID = node.uuid;
-          } else {
-            prefabUUID = node._prefab?.asset?._uuid;
-          }
+          const prefabUUID = this.getNodePrefabUUID(node);
           if (prefabUUID) {
             everything.open(prefabUUID);
           }
         }
       }
     }
+  }
+  private getNodePrefabUUID(node: any) {
+    let prefabUUID = "";
+    if (node instanceof cc.Scene) {
+      prefabUUID = node.uuid;
+    } else {
+      prefabUUID = node._prefab?.asset?._uuid;
+    }
+    return prefabUUID;
   }
   init() {
     console.log(...this.terminal.init());
@@ -351,7 +355,8 @@ export class Inspector extends InjectEvent {
       let scene = cc.director.getScene();
       if (scene) {
         let treeData = new TreeData();
-        this.getNodeChildren(scene, treeData);
+        const opts: NodeChildrenOptions = { index: 0 };
+        this.getNodeChildren(scene, treeData, opts);
         notify && this.sendMsgToContent(Msg.ResponseTreeInfo, treeData as ResponseTreeInfoData);
       } else {
         let treeData = new TreeData();
@@ -491,7 +496,7 @@ export class Inspector extends InjectEvent {
     }
     return null;
   }
-  private calcColor(node: any) {
+  private calcColor(node: any, opts: NodeChildrenOptions) {
     if (node._prefab) {
       return "#01ff01ff";
     } else {
@@ -513,11 +518,11 @@ export class Inspector extends InjectEvent {
     return ret;
   }
   // 收集节点信息
-  getNodeChildren(node: any, data: TreeData) {
+  getNodeChildren(node: any, data: TreeData, opts: NodeChildrenOptions) {
     data.id = node.uuid;
     data.text = node.name;
     data.icon = this.calcIcon(node);
-    data.color = this.calcColor(node);
+    data.color = this.calcColor(node, opts);
     const v2 = this.isCreatorV2();
     calcCodeHint(node, data, v2);
     // @ts-ignore
@@ -536,7 +541,7 @@ export class Inspector extends InjectEvent {
     for (let i = 0; i < nodeChildren.length; i++) {
       let childItem = nodeChildren[i];
       let treeData = new TreeData();
-      this.getNodeChildren(childItem, treeData);
+      this.getNodeChildren(childItem, treeData, opts);
       data.children.push(treeData);
     }
   }
